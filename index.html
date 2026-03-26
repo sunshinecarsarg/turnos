@@ -671,7 +671,25 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<script>
+<script type="module">
+// ==========================================
+// FIREBASE CONFIG
+// ==========================================
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, onSnapshot, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+var firebaseConfig = {
+  apiKey: "AIzaSyAMo2RBmU9MnBRK1qn2d3HSt6FmtPKRTkI",
+  authDomain: "sunshinecars-turnos.firebaseapp.com",
+  projectId: "sunshinecars-turnos",
+  storageBucket: "sunshinecars-turnos.firebasestorage.app",
+  messagingSenderId: "872590106918",
+  appId: "1:872590106918:web:4e467d9eda3df4381961e7"
+};
+
+var fbApp = initializeApp(firebaseConfig);
+var db = getFirestore(fbApp);
+
 // ==========================================
 // CONFIG
 // ==========================================
@@ -773,24 +791,51 @@ var CAL = { y: new Date().getFullYear(), m: new Date().getMonth() };
 var FILTER = 'todos';
 
 // ==========================================
-// STORAGE
+// STORAGE - Firestore
 // ==========================================
+var _turnos = [];  // local cache
+var _unsubscribe = null;
+
+function startListening() {
+  if (_unsubscribe) return;
+  var q = query(collection(db, 'turnos'), orderBy('createdAt', 'desc'));
+  _unsubscribe = onSnapshot(q, function(snapshot) {
+    _turnos = [];
+    snapshot.forEach(function(d) {
+      _turnos.push(Object.assign({ _docId: d.id }, d.data()));
+    });
+    // Refresh admin if open
+    var admin = document.getElementById('view-admin');
+    if (admin && admin.classList.contains('active')) renderAdmin();
+  });
+}
+
 function loadTurnos() {
-  try { return JSON.parse(localStorage.getItem('sc_t') || '[]'); } catch(e) { return []; }
+  return _turnos.slice();
 }
-function saveTurnos(arr) {
-  try { localStorage.setItem('sc_t', JSON.stringify(arr)); } catch(e) {}
-}
+
 function addTurno(t) {
-  var arr = loadTurnos();
-  arr.push(t);
-  saveTurnos(arr);
+  // Optimistic local add
+  _turnos.unshift(t);
+  addDoc(collection(db, 'turnos'), t).catch(function(e) {
+    console.error('Firestore addDoc error:', e);
+    toast('Error al guardar turno');
+  });
 }
+
 function updateTurno(id, changes) {
-  var arr = loadTurnos().map(function(t) {
+  // Update local cache
+  _turnos = _turnos.map(function(t) {
     return t.id === id ? Object.assign({}, t, changes) : t;
   });
-  saveTurnos(arr);
+  // Find doc and update in Firestore
+  var t = _turnos.find(function(x) { return x.id === id; });
+  if (t && t._docId) {
+    var ref = doc(db, 'turnos', t._docId);
+    updateDoc(ref, changes).catch(function(e) {
+      console.error('Firestore updateDoc error:', e);
+    });
+  }
 }
 
 // ==========================================
@@ -802,7 +847,7 @@ function showView(name) {
     views[i].classList.remove('active');
   }
   document.getElementById('view-' + name).classList.add('active');
-  if (name === 'admin') renderAdmin();
+  if (name === 'admin') { startListening(); renderAdmin(); }
 }
 
 // ==========================================
@@ -1334,6 +1379,7 @@ function toast(msg) {
 // ==========================================
 // INIT
 // ==========================================
+startListening();
 renderSvcs();
 renderCal();
 </script>
