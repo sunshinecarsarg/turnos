@@ -29,6 +29,31 @@ nav {
   background:rgba(10,10,10,.92); backdrop-filter:blur(14px);
   border-bottom:1px solid rgba(204,0,126,.15);
 }
+.nav-desktop { display:flex; gap:.6rem; align-items:center; }
+.nav-hamburger {
+  display:none; background:none; border:1px solid rgba(204,0,126,.4);
+  color:var(--m); font-size:1.2rem; width:36px; height:36px;
+  border-radius:6px; cursor:pointer; align-items:center; justify-content:center;
+}
+.nav-mobile-menu {
+  display:none; position:fixed; top:60px; left:0; right:0; z-index:199;
+  background:rgba(10,10,10,.97); backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(204,0,126,.15);
+  flex-direction:column; padding:.5rem 0;
+}
+.nav-mobile-menu button {
+  background:none; border:none; color:rgba(255,255,255,.8);
+  padding:1rem 5%; text-align:left; font-family:'Outfit',sans-serif;
+  font-size:.95rem; font-weight:500; cursor:pointer; transition:background .2s;
+  width:100%;
+}
+.nav-mobile-menu button:hover { background:rgba(204,0,126,.08); color:var(--m); }
+.nav-mobile-menu.open { display:flex; }
+@media(max-width:768px) {
+  .nav-desktop { display:none; }
+  .nav-hamburger { display:flex; }
+  .logo { font-size:1.2rem; }
+}
 .logo {
   font-family:'Bebas Neue',cursive; font-size:1.5rem; letter-spacing:2px;
   background:linear-gradient(90deg,#fff,var(--m)); -webkit-background-clip:text;
@@ -427,15 +452,28 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
 <body>
 
 <nav>
-  <a href="#" class="logo" onclick="showView('booking');return false;">SunshineCars Detail</a>
-  <div style="display:flex;gap:.6rem;align-items:center;">
+  <a href="#" class="logo" onclick="showView('booking');return false;">SunshineCars</a>
+  <!-- Desktop nav -->
+  <div class="nav-desktop">
     <button class="nav-btn" onclick="showView('reviews')" style="border-color:rgba(100,180,255,.4);color:#64b4ff;">&#128240; Reviews</button>
-    <button class="nav-btn" onclick="showView('resenas')" style="border-color:rgba(255,193,7,.4);color:#ffc107;">&#11088; Reseñas</button>
+    <button class="nav-btn" onclick="showView('resenas')" style="border-color:rgba(255,193,7,.4);color:#ffc107;">&#11088; Resenas</button>
     <button class="nav-btn" onclick="showView('galeria')" style="border-color:rgba(204,0,126,.3);color:rgba(255,255,255,.7);">&#127757; Galeria</button>
     <button class="nav-btn" onclick="showView('tienda')" style="border-color:rgba(204,0,126,.5);color:var(--m);">&#128722; Tienda</button>
     <button class="nav-btn" onclick="showView('admin-login')">Admin</button>
   </div>
+  <!-- Mobile hamburger -->
+  <button class="nav-hamburger" onclick="toggleMobileMenu()" id="nav-hamburger">&#9776;</button>
 </nav>
+
+<!-- Mobile menu -->
+<div class="nav-mobile-menu" id="nav-mobile-menu">
+  <button onclick="showView('booking');closeMobileMenu();">&#127968; Reservar turno</button>
+  <button onclick="showView('reviews');closeMobileMenu();">&#128240; Reviews</button>
+  <button onclick="showView('resenas');closeMobileMenu();">&#11088; Resenas</button>
+  <button onclick="showView('galeria');closeMobileMenu();">&#127757; Galeria</button>
+  <button onclick="showView('tienda');closeMobileMenu();">&#128722; Tienda</button>
+  <button onclick="showView('admin-login');closeMobileMenu();">&#128272; Admin</button>
+</div>
 
 <!-- ======== BOOKING ======== -->
 <div id="view-booking" class="view active">
@@ -3532,6 +3570,26 @@ function syncResenas() {
 }
 
 // ==========================================
+// ==========================================
+// MOBILE MENU
+// ==========================================
+function toggleMobileMenu() {
+  var menu = document.getElementById('nav-mobile-menu');
+  menu.classList.toggle('open');
+}
+function closeMobileMenu() {
+  document.getElementById('nav-mobile-menu').classList.remove('open');
+}
+
+// Close menu when clicking outside
+document.addEventListener('click', function(e) {
+  var menu = document.getElementById('nav-mobile-menu');
+  var hamburger = document.getElementById('nav-hamburger');
+  if (menu && hamburger && !menu.contains(e.target) && !hamburger.contains(e.target)) {
+    menu.classList.remove('open');
+  }
+});
+
 // INIT
 // ==========================================
 startListening();
