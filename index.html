@@ -1772,14 +1772,21 @@ function updateTurno(id, changes) {
 // ==========================================
 // VIEWS
 // ==========================================
+var isAdminLogged = false;
+
 function showView(name) {
   var views = document.querySelectorAll('.view');
   for (var i = 0; i < views.length; i++) {
     views[i].classList.remove('active');
   }
   document.getElementById('view-' + name).classList.add('active');
-  if (name === 'admin') { startListening(); renderAdmin(); setTimeout(checkRecBadge, 800); rvAdminActive = true; galAdminActive = true; tiendaAdminActive = true; }
-  if (name !== 'admin') { rvAdminActive = false; galAdminActive = false; tiendaAdminActive = false; }
+  if (name === 'admin') {
+    startListening(); renderAdmin(); setTimeout(checkRecBadge, 800);
+    isAdminLogged = true;
+  }
+  rvAdminActive = isAdminLogged;
+  galAdminActive = isAdminLogged;
+  tiendaAdminActive = isAdminLogged;
   if (name === 'tienda') { renderTienda(); }
   if (name === 'galeria') { renderGaleria(); }
   if (name === 'resenas') { syncResenas(); renderResenas(); }
