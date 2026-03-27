@@ -2559,22 +2559,6 @@ function deleteGalItem(e, btn) {
 
 
 // ==========================================
-// GALERIA
-// ==========================================
-function renderGaleria() {
-  var grid = document.getElementById('gal-grid');
-  if (!grid) return;
-  var html = '';
-  for (var i = 0; i < GALERIA.length; i++) {
-    var item = GALERIA[i];
-    html += '<div class="gal-item" onclick="openGalLb(' + i + ')">';
-    html += '<span class="gal-badge">SunshineCars</span>';
-    html += '<img src="' + item.src + '" alt="' + item.label + '" loading="lazy">';
-    html += '<div class="gal-overlay"><div class="gal-label">' + item.label + '</div></div>';
-    html += '</div>';
-  }
-  grid.innerHTML = html;
-}
 
 var galLbIdx = 0;
 
