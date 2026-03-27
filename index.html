@@ -2418,6 +2418,41 @@ function toast(msg) {
 var galImgData = null;
 var galAdminActive = false;
 
+// ==========================================
+// COMPRESS IMAGE - max 700KB base64 for Firestore
+// ==========================================
+function compressImage(file, callback) {
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    var img = new Image();
+    img.onload = function() {
+      var canvas = document.createElement('canvas');
+      var MAX = 800;
+      var w = img.width, h = img.height;
+      if (w > h) {
+        if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+      } else {
+        if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; }
+      }
+      canvas.width = w;
+      canvas.height = h;
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      // Try quality 0.7 first, if still too big reduce more
+      var data = canvas.toDataURL('image/jpeg', 0.7);
+      if (data.length > 700000) {
+        data = canvas.toDataURL('image/jpeg', 0.5);
+      }
+      if (data.length > 700000) {
+        data = canvas.toDataURL('image/jpeg', 0.35);
+      }
+      callback(data);
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 function galDrop(e) {
   e.preventDefault();
   if (e.dataTransfer.files[0]) galFile(e.dataTransfer.files[0]);
@@ -2425,15 +2460,12 @@ function galDrop(e) {
 
 function galFile(f) {
   if (!f || !f.type.startsWith('image/')) return;
-  if (f.size > 5*1024*1024) { toast('Foto mayor a 5MB'); return; }
-  var r = new FileReader();
-  r.onload = function(ev) {
-    galImgData = ev.target.result;
+  if (f.size > 10*1024*1024) { toast('Foto mayor a 10MB'); return; }
+  compressImage(f, function(data) {
+    galImgData = data;
     var prev = document.getElementById('gal-preview');
-    prev.src = galImgData;
-    prev.style.display = 'block';
-  };
-  r.readAsDataURL(f);
+    prev.src = data; prev.style.display = 'block';
+  });
 }
 
 function publishGaleria() {
@@ -2590,14 +2622,12 @@ function prodDrop(e) {
 
 function prodFile(f) {
   if (!f || !f.type.startsWith('image/')) return;
-  if (f.size > 5*1024*1024) { toast('Foto mayor a 5MB'); return; }
-  var r = new FileReader();
-  r.onload = function(ev) {
-    prodImgData = ev.target.result;
+  if (f.size > 10*1024*1024) { toast('Foto mayor a 10MB'); return; }
+  compressImage(f, function(data) {
+    prodImgData = data;
     var prev = document.getElementById('prod-preview');
-    prev.src = prodImgData; prev.style.display = 'block';
-  };
-  r.readAsDataURL(f);
+    prev.src = data; prev.style.display = 'block';
+  });
 }
 
 function publishProducto() {
@@ -3232,15 +3262,12 @@ function rvDrop(e) {
 
 function rvFile(f) {
   if (!f || !f.type.startsWith('image/')) return;
-  if (f.size > 5*1024*1024) { toast('Foto mayor a 5MB'); return; }
-  var r = new FileReader();
-  r.onload = function(ev) {
-    rvImgData = ev.target.result;
+  if (f.size > 10*1024*1024) { toast('Foto mayor a 10MB'); return; }
+  compressImage(f, function(data) {
+    rvImgData = data;
     var prev = document.getElementById('rv-preview');
-    prev.src = rvImgData;
-    prev.style.display = 'block';
-  };
-  r.readAsDataURL(f);
+    prev.src = data; prev.style.display = 'block';
+  });
 }
 
 function publishReview() {
