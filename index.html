@@ -1329,6 +1329,7 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
   gap:0; background:var(--g1);
   border:1px solid rgba(100,180,255,.12); border-radius:12px;
   overflow:hidden; transition:border-color .3s, box-shadow .3s; cursor:pointer;
+  position:relative;
 }
 .rv-card:hover { border-color:rgba(100,180,255,.3); box-shadow:0 8px 30px rgba(100,180,255,.08); }
 .rv-img {
@@ -3534,6 +3535,7 @@ function renderReviewsList(reviews) {
       imgHtml +
       '<div class="rv-body">' +
         '<span class="rv-cat">Review</span>' +
+        (isAdminLogged ? '<button class="abtn no" style="position:absolute;top:.8rem;right:.8rem;font-size:.7rem;" data-id="' + rv.id + '" onclick="deleteReviewEl(this)">Eliminar</button>' : '') +
         '<div class="rv-stars">' + (starsMap[rv.stars]||'') + '</div>' +
         '<div class="rv-title">' + rv.titulo + '</div>' +
         '<div class="rv-text collapsed" id="rvt-' + rv.id + '">' + rv.texto + '</div>' +
@@ -3542,6 +3544,15 @@ function renderReviewsList(reviews) {
       '</div>' +
     '</div>';
   }).join('');
+}
+
+function deleteReviewEl(btn) {
+  var id = btn.getAttribute('data-id');
+  if (!confirm('Eliminar esta review?')) return;
+  db.collection('reviews_autos').doc(id).delete().then(function() {
+    toast('Review eliminada');
+    loadAndRenderReviews();
+  }).catch(function(e){ console.error(e); toast('Error al eliminar'); });
 }
 
 function rvToggleEl(btn) {
