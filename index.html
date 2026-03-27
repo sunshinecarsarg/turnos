@@ -2427,7 +2427,7 @@ function compressImage(file, callback) {
     var img = new Image();
     img.onload = function() {
       var canvas = document.createElement('canvas');
-      var MAX = 800;
+      var MAX = 600;
       var w = img.width, h = img.height;
       if (w > h) {
         if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
@@ -2438,13 +2438,11 @@ function compressImage(file, callback) {
       canvas.height = h;
       var ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, w, h);
-      // Try quality 0.7 first, if still too big reduce more
-      var data = canvas.toDataURL('image/jpeg', 0.7);
-      if (data.length > 700000) {
-        data = canvas.toDataURL('image/jpeg', 0.5);
-      }
-      if (data.length > 700000) {
-        data = canvas.toDataURL('image/jpeg', 0.35);
+      var quality = 0.6;
+      var data = canvas.toDataURL('image/jpeg', quality);
+      while (data.length > 600000 && quality > 0.1) {
+        quality -= 0.1;
+        data = canvas.toDataURL('image/jpeg', quality);
       }
       callback(data);
     };
