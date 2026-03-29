@@ -2017,7 +2017,7 @@ function showView(name) {
   if (name === 'reviews') {
     loadAndRenderReviews();
     var form = document.getElementById('rv-admin-form');
-    if (form) form.style.display = rvAdminActive ? 'block' : 'none';
+    if (form) form.style.display = isAdminLogged ? 'block' : 'none';
   }
 }
 
@@ -2678,7 +2678,14 @@ function doLogin() {
     document.getElementById('login-err').style.display = 'block';
   }
 }
-function doLogout() { showView('booking'); }
+function doLogout() {
+  isAdminLogged = false;
+  rvAdminActive = false;
+  galAdminActive = false;
+  tiendaAdminActive = false;
+  svcsAdminActive = false;
+  showView('booking');
+}
 
 function renderAdmin() {
   var turnos = loadTurnos();
@@ -2832,27 +2839,36 @@ var galAdminActive = false;
 // ==========================================
 // COMPRESS IMAGE - max 700KB base64 for Firestore
 // ==========================================
+// Standard compression (for galeria, tienda, services - single image per doc)
 function compressImage(file, callback) {
+  compressImageCustom(file, 900, 700000, callback);
+}
+
+// High quality compression (for reviews - multiple images, need balance)
+function compressImageHQ(file, callback) {
+  compressImageCustom(file, 1200, 700000, callback);
+}
+
+function compressImageCustom(file, maxPx, maxBytes, callback) {
   var reader = new FileReader();
   reader.onload = function(ev) {
     var img = new Image();
     img.onload = function() {
       var canvas = document.createElement('canvas');
-      var MAX = 600;
       var w = img.width, h = img.height;
       if (w > h) {
-        if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+        if (w > maxPx) { h = Math.round(h * maxPx / w); w = maxPx; }
       } else {
-        if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; }
+        if (h > maxPx) { w = Math.round(w * maxPx / h); h = maxPx; }
       }
       canvas.width = w;
       canvas.height = h;
       var ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, w, h);
-      var quality = 0.6;
+      var quality = 0.82;
       var data = canvas.toDataURL('image/jpeg', quality);
-      while (data.length > 600000 && quality > 0.1) {
-        quality -= 0.1;
+      while (data.length > maxBytes && quality > 0.15) {
+        quality -= 0.08;
         data = canvas.toDataURL('image/jpeg', quality);
       }
       callback(data);
@@ -3089,7 +3105,7 @@ function editRvAddFiles(files) {
   editRvImgsChanged = true;
   for (var fi = 0; fi < files.length; fi++) {
     (function(f) {
-      compressImage(f, function(d){
+      compressImageHQ(f, function(d){
         editRvImgs.push(d);
         editRvRenderGrid();
       });
@@ -3955,7 +3971,7 @@ function rvAddFiles(files) {
   for (var fi = 0; fi < files.length; fi++) {
     (function(f) {
       if (!f.type.startsWith('image/')) return;
-      compressImage(f, function(data) {
+      compressImageHQ(f, function(data) {
         rvImgData.push(data);
         rvRenderFotoGrid();
         toast('Foto agregada (' + rvImgData.length + ')');
