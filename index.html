@@ -812,9 +812,7 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
     <!-- Admin form (solo visible si admin logueado) -->
     <div class="rv-admin-form" id="rv-admin-form" style="display:none;">
       <div class="rv-admin-title">&#128221; Nueva publicacion</div>
-      <div class="rv-upload" id="rv-upload-zone" ondragover="event.preventDefault();this.style.borderColor='#64b4ff'" ondragleave="this.style.borderColor=''" ondrop="rvDrop(event)">
-        <input type="file" id="rv-file" accept="image/*" onchange="rvFile(this.files[0])">
-        <div style="font-size:2rem;margin-bottom:.4rem;">&#128444;</div>
+      
         <div style="font-size:.85rem;color:var(--muted);"><strong style="color:#fff;">Click o arrastra</strong> una foto del auto</div>
         <img id="rv-preview" class="rv-upload-preview" src="" alt="">
       </div>
@@ -1772,10 +1770,22 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
 <div class="modal-overlay" id="edit-rv-overlay" onclick="closeEditRv()">
   <div class="modal-box" onclick="event.stopPropagation()">
     <div class="modal-title" style="color:#64b4ff;">&#9998; Editar review</div>
-    <div style="position:relative;border:2px dashed rgba(100,180,255,.3);border-radius:8px;padding:1rem;text-align:center;cursor:pointer;margin-bottom:1rem;overflow:hidden;">
-      <input type="file" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;" onchange="editRvFilePick(this.files[0])">
-      <div style="font-size:.82rem;color:var(--muted);">Click para cambiar foto <span style="color:rgba(255,255,255,.4)">(opcional)</span></div>
-      <img id="edit-rv-preview" style="max-height:100px;border-radius:6px;margin-top:.5rem;display:none;" src="" alt="">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:1rem;">
+      <div style="position:relative;border:2px dashed rgba(100,180,255,.3);border-radius:8px;padding:.8rem;text-align:center;cursor:pointer;overflow:hidden;">
+        <input type="file" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;" onchange="editRvFilePickN(this.files[0],0)">
+        <div style="font-size:.72rem;color:var(--muted);">Foto 1</div>
+        <img id="edit-rv-preview-0" style="max-height:60px;border-radius:4px;margin-top:.3rem;display:none;width:100%;object-fit:cover;" src="" alt="">
+      </div>
+      <div style="position:relative;border:2px dashed rgba(100,180,255,.3);border-radius:8px;padding:.8rem;text-align:center;cursor:pointer;overflow:hidden;">
+        <input type="file" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;" onchange="editRvFilePickN(this.files[0],1)">
+        <div style="font-size:.72rem;color:var(--muted);">Foto 2</div>
+        <img id="edit-rv-preview-1" style="max-height:60px;border-radius:4px;margin-top:.3rem;display:none;width:100%;object-fit:cover;" src="" alt="">
+      </div>
+      <div style="position:relative;border:2px dashed rgba(100,180,255,.3);border-radius:8px;padding:.8rem;text-align:center;cursor:pointer;overflow:hidden;">
+        <input type="file" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;" onchange="editRvFilePickN(this.files[0],2)">
+        <div style="font-size:.72rem;color:var(--muted);">Foto 3</div>
+        <img id="edit-rv-preview-2" style="max-height:60px;border-radius:4px;margin-top:.3rem;display:none;width:100%;object-fit:cover;" src="" alt="">
+      </div>
     </div>
     <div class="fi" style="margin-bottom:.8rem;"><label class="flabel">Titulo *</label><input type="text" class="finput" id="edit-rv-titulo"></div>
     <div style="margin-bottom:.8rem;">
@@ -3065,7 +3075,7 @@ function saveEditProd() {
 }
 
 // ══ EDIT REVIEW ══
-var editRvId = null, editRvNewImg = null, editRvStars = 0;
+var editRvId = null, editRvNewImgs = [null,null,null], editRvStars = 0;
 function editRvSetStar(n) {
   editRvStars = n;
   var btns = document.getElementById('edit-rv-stars-row').querySelectorAll('.rv-star-sel');
@@ -3077,14 +3087,26 @@ function editReviewElFn(id) {
   if (!rv) { toast('Error al cargar review'); return; }
   document.getElementById('edit-rv-titulo').value = rv.titulo || '';
   document.getElementById('edit-rv-texto').value = rv.texto || '';
-  document.getElementById('edit-rv-preview').style.display = 'none';
+  editRvNewImgs = [null, null, null];
+  var existingImgs = [rv.img, rv.img2, rv.img3];
+  for (var ei = 0; ei < 3; ei++) {
+    var ep = document.getElementById('edit-rv-preview-' + ei);
+    if (ep) {
+      if (existingImgs[ei]) { ep.src = existingImgs[ei]; ep.style.display = 'block'; }
+      else ep.style.display = 'none';
+    }
+  }
   editRvSetStar(rv.stars || 0);
   document.getElementById('edit-rv-overlay').classList.add('open');
 }
-function closeEditRv() { document.getElementById('edit-rv-overlay').classList.remove('open'); editRvId = null; editRvNewImg = null; }
-function editRvFilePick(f) {
+function closeEditRv() { document.getElementById('edit-rv-overlay').classList.remove('open'); editRvId = null; editRvNewImgs = [null,null,null]; }
+function editRvFilePickN(f, n) {
   if (!f) return;
-  compressImage(f, function(d){ editRvNewImg = d; var p=document.getElementById('edit-rv-preview'); p.src=d; p.style.display='block'; });
+  compressImage(f, function(d){
+    editRvNewImgs[n] = d;
+    var p = document.getElementById('edit-rv-preview-' + n);
+    if (p) { p.src = d; p.style.display = 'block'; }
+  });
 }
 function saveEditRv() {
   if (!editRvId) return;
@@ -3092,7 +3114,9 @@ function saveEditRv() {
   var texto = document.getElementById('edit-rv-texto').value.trim();
   if (!titulo || !texto) { toast('Completa titulo y texto'); return; }
   var updates = { titulo: titulo, texto: texto, stars: editRvStars };
-  if (editRvNewImg) updates.img = editRvNewImg;
+  if (editRvNewImgs[0]) updates.img = editRvNewImgs[0];
+  if (editRvNewImgs[1]) updates.img2 = editRvNewImgs[1];
+  if (editRvNewImgs[2]) updates.img3 = editRvNewImgs[2];
   db.collection('reviews_autos').doc(editRvId).update(updates).then(function(){
     toast('Review actualizada!'); closeEditRv(); loadAndRenderReviews();
   }).catch(function(e){ console.error(e); toast('Error al guardar'); });
@@ -3905,7 +3929,7 @@ function renderBars(elId, data, max, color) {
 // REVIEWS AUTOS
 // ==========================================
 var rvStars = 0;
-var rvImgData = null;
+var rvImgData = [null, null, null];
 var rvAdminActive = false;
 
 function rvSetStar(n) {
@@ -3914,18 +3938,14 @@ function rvSetStar(n) {
   for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('on', i < n);
 }
 
-function rvDrop(e) {
-  e.preventDefault();
-  if (e.dataTransfer.files[0]) rvFile(e.dataTransfer.files[0]);
-}
-
-function rvFile(f) {
+function rvFileN(f, n) {
   if (!f || !f.type.startsWith('image/')) return;
   if (f.size > 10*1024*1024) { toast('Foto mayor a 10MB'); return; }
   compressImage(f, function(data) {
-    rvImgData = data;
-    var prev = document.getElementById('rv-preview');
-    prev.src = data; prev.style.display = 'block';
+    rvImgData[n] = data;
+    var prev = document.getElementById('rv-preview-' + n);
+    if (prev) { prev.src = data; prev.style.display = 'block'; }
+    toast('Foto ' + (n+1) + ' lista');
   });
 }
 
@@ -3936,12 +3956,15 @@ function publishReview() {
   if (!texto) { toast('Ingresa el texto'); return; }
   if (!rvStars) { toast('Selecciona una calificacion'); return; }
 
+  var imgs = rvImgData.filter(function(i){ return i !== null; });
   var review = {
     id: 'RV' + Date.now(),
     titulo: titulo,
     texto: texto,
     stars: rvStars,
-    img: rvImgData || null,
+    img: imgs[0] || null,
+    img2: imgs[1] || null,
+    img3: imgs[2] || null,
     fecha: new Date().toLocaleDateString('es-AR', {day:'numeric',month:'long',year:'numeric'}),
     createdAt: new Date().toISOString()
   };
@@ -3952,8 +3975,11 @@ function publishReview() {
     // Reset form
     document.getElementById('rv-titulo').value = '';
     document.getElementById('rv-texto').value = '';
-    document.getElementById('rv-preview').style.display = 'none';
-    rvStars = 0; rvImgData = null;
+    for (var ri = 0; ri < 3; ri++) {
+      var rp = document.getElementById('rv-preview-' + ri);
+      if (rp) rp.style.display = 'none';
+    }
+    rvStars = 0; rvImgData = [null, null, null];
     rvSetStar(0);
     loadAndRenderReviews();
   }).catch(function(e) {
@@ -3986,9 +4012,20 @@ function renderReviewsList(reviews) {
   var starsMap = {1:'&#11088;',2:'&#11088;&#11088;',3:'&#11088;&#11088;&#11088;',4:'&#11088;&#11088;&#11088;&#11088;',5:'&#11088;&#11088;&#11088;&#11088;&#11088;'};
 
   list.innerHTML = reviews.map(function(rv) {
-    var imgHtml = rv.img
-      ? '<img class="rv-img" src="' + rv.img + '" alt="' + rv.titulo + '">'
-      : '<div class="rv-img-placeholder">&#128663;</div>';
+    var imgs = [rv.img, rv.img2, rv.img3].filter(Boolean);
+    var imgHtml;
+    if (imgs.length === 0) {
+      imgHtml = '<div class="rv-img-placeholder">&#128663;</div>';
+    } else if (imgs.length === 1) {
+      imgHtml = '<img class="rv-img" src="' + imgs[0] + '" alt="' + rv.titulo + '">';
+    } else {
+      // Multiple images - show as mini gallery
+      imgHtml = '<div style="display:grid;grid-template-rows:repeat(' + imgs.length + ',1fr);height:100%;gap:2px;">';
+      for (var ii = 0; ii < imgs.length; ii++) {
+        imgHtml += '<img src="' + imgs[ii] + '" style="width:100%;height:100%;object-fit:cover;" alt="">';
+      }
+      imgHtml += '</div>';
+    }
 
     return '<div class="rv-card">' +
       imgHtml +
