@@ -4074,7 +4074,7 @@ function renderReviewsList(reviews) {
         (isAdminLogged ? '<div style="position:absolute;top:.8rem;right:.8rem;display:flex;gap:.3rem;"><button class="abtn" style="font-size:.65rem;background:rgba(100,180,255,.15);color:#64b4ff;border:1px solid rgba(100,180,255,.3);" data-id="' + rv._docId + '" onclick="editReviewEl(this)">Editar</button><button class="abtn no" style="font-size:.65rem;" data-id="' + rv._docId + '" onclick="deleteReviewEl(this)">Eliminar</button></div>' : '') +
         '<div class="rv-stars">' + (starsMap[rv.stars]||'') + '</div>' +
         '<div class="rv-title">' + rv.titulo + '</div>' +
-        '<div class="rv-text collapsed" id="rvt-' + rv.id + '">' + rv.texto + '</div>' +
+        '<div class="rv-text collapsed" id="rvt-' + rv.id + '">' + (rv.texto||'').replace(/\n/g,'<br>') + '</div>' +
         '<button class="rv-read-more" data-id="' + rv.id + '" onclick="rvToggleEl(this)">Leer mas</button>' +
         '<div class="rv-date">' + rv.fecha + '</div>' +
       '</div>' +
