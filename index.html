@@ -3046,15 +3046,13 @@ function editRvSetStar(n) {
 }
 function editReviewElFn(id) {
   editRvId = id; editRvNewImg = null;
-  db.collection('reviews_autos').doc(id).get().then(function(d){
-    if (!d.exists) return;
-    var rv = d.data();
-    document.getElementById('edit-rv-titulo').value = rv.titulo || '';
-    document.getElementById('edit-rv-texto').value = rv.texto || '';
-    document.getElementById('edit-rv-preview').style.display = 'none';
-    editRvSetStar(rv.stars || 0);
-    document.getElementById('edit-rv-overlay').classList.add('open');
-  });
+  var rv = currentReviews.find(function(r){ return r.id === id; });
+  if (!rv) { toast('Error al cargar review'); return; }
+  document.getElementById('edit-rv-titulo').value = rv.titulo || '';
+  document.getElementById('edit-rv-texto').value = rv.texto || '';
+  document.getElementById('edit-rv-preview').style.display = 'none';
+  editRvSetStar(rv.stars || 0);
+  document.getElementById('edit-rv-overlay').classList.add('open');
 }
 function closeEditRv() { document.getElementById('edit-rv-overlay').classList.remove('open'); editRvId = null; editRvNewImg = null; }
 function editRvFilePick(f) {
@@ -3855,11 +3853,12 @@ function publishReview() {
   });
 }
 
+var currentReviews = [];
 function loadAndRenderReviews() {
   db.collection('reviews_autos').orderBy('createdAt','desc').get().then(function(snap) {
-    var reviews = [];
-    snap.forEach(function(d) { reviews.push(Object.assign({id:d.id}, d.data())); });
-    renderReviewsList(reviews);
+    currentReviews = [];
+    snap.forEach(function(d) { currentReviews.push(Object.assign({id:d.id}, d.data())); });
+    renderReviewsList(currentReviews);
   }).catch(function(e) {
     console.error(e);
     renderReviewsList([]);
