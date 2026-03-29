@@ -1120,18 +1120,25 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
       <div style="font-size:2rem;margin-bottom:.5rem;">&#128272;</div>
       <h2 class="login-title">Panel Admin</h2>
       <p class="login-sub">SunshineCars Detail</p>
-      <div class="login-err" id="login-err">Contrasena incorrecta</div>
+      <div class="login-err" id="login-err">Email o contrasena incorrectos</div>
+      <div class="fi" style="text-align:left;margin-bottom:.8rem;">
+        <label class="flabel">Email</label>
+        <input type="email" class="finput" id="f-email"
+          placeholder="admin@email.com"
+          onkeydown="if(event.key==='Enter')doLogin()"
+          autocomplete="email" value="sunshinecars.arg@gmail.com">
+      </div>
       <div class="fi" style="text-align:left;margin-bottom:1rem;">
         <label class="flabel">Contrasena</label>
         <div style="position:relative;">
-            <input type="password" class="finput" id="f-pass"
-              placeholder="Contrasena"
-              onkeydown="if(event.key==='Enter')doLogin()"
-              autocomplete="new-password"
-              autocorrect="off" autocapitalize="off" spellcheck="false"
-              style="padding-right:3rem;">
-            <button type="button" onclick="togglePass()" style="position:absolute;right:.8rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;" id="pass-eye">&#128065;</button>
-          </div>
+          <input type="password" class="finput" id="f-pass"
+            placeholder="Contrasena"
+            onkeydown="if(event.key==='Enter')doLogin()"
+            autocomplete="current-password"
+            autocorrect="off" autocapitalize="off" spellcheck="false"
+            style="padding-right:3rem;">
+          <button type="button" onclick="togglePass()" style="position:absolute;right:.8rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;" id="pass-eye">&#128065;</button>
+        </div>
       </div>
       <button class="btn" onclick="doLogin()">Ingresar</button>
       <br>
@@ -1936,6 +1943,7 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script>
 // ==========================================
 // FIREBASE CONFIG
@@ -1956,7 +1964,7 @@ var db = firebase.firestore();
 // CONFIG
 // ==========================================
 var WA_NUM = '5491173665464';
-var ADMIN_PASS = 'melmax199xD2';
+// Admin auth via Firebase Authentication
 var SLOTS = ['08:00', '11:30', '15:00'];
 var SLOTS_SAB = ['15:30'];       // sabado: solo 15:30
 var SLOTS_DOM = ['08:00'];       // domingo: solo 08:00 (High Shine)
@@ -2712,21 +2720,47 @@ function togglePass() {
 }
 
 function doLogin() {
-  if (document.getElementById('f-pass').value === ADMIN_PASS) {
-    document.getElementById('login-err').style.display = 'none';
-    document.getElementById('f-pass').value = '';
-    showView('admin');
-  } else {
-    document.getElementById('login-err').style.display = 'block';
+  var email = document.getElementById('f-email').value.trim();
+  var pass = document.getElementById('f-pass').value;
+  var errEl = document.getElementById('login-err');
+  var btn = document.querySelector('.login-box .btn');
+
+  if (!email || !pass) {
+    errEl.style.display = 'block';
+    errEl.textContent = 'Ingresa email y contrasena';
+    return;
   }
+
+  if (btn) { btn.textContent = 'Ingresando...'; btn.disabled = true; }
+
+  firebase.auth().signInWithEmailAndPassword(email, pass)
+    .then(function() {
+      errEl.style.display = 'none';
+      document.getElementById('f-pass').value = '';
+      if (btn) { btn.textContent = 'Ingresar'; btn.disabled = false; }
+      showView('admin');
+    })
+    .catch(function(e) {
+      console.error('Login error:', e);
+      errEl.style.display = 'block';
+      errEl.textContent = 'Email o contrasena incorrectos';
+      if (btn) { btn.textContent = 'Ingresar'; btn.disabled = false; }
+    });
 }
+
+
 function doLogout() {
-  isAdminLogged = false;
-  rvAdminActive = false;
-  galAdminActive = false;
-  tiendaAdminActive = false;
-  svcsAdminActive = false;
-  showView('booking');
+  firebase.auth().signOut().then(function() {
+    isAdminLogged = false;
+    rvAdminActive = false;
+    galAdminActive = false;
+    tiendaAdminActive = false;
+    svcsAdminActive = false;
+    showView('booking');
+  }).catch(function() {
+    isAdminLogged = false;
+    showView('booking');
+  });
 }
 
 function renderAdmin() {
@@ -4529,6 +4563,15 @@ document.addEventListener('click', function(e) {
 // INIT
 // ==========================================
 startListening();
+// Check if already logged in
+firebase.auth().onAuthStateChanged(function(user) {
+  if (user) {
+    isAdminLogged = true;
+  } else {
+    isAdminLogged = false;
+  }
+});
+
 loadSVCS(function(){ renderSvcs(); renderCal(); });
 loadVtvCard();
 </script>
