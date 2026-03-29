@@ -894,9 +894,13 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
         <button class="star-btn" onclick="setStar(5)">&#11088;</button>
       </div>
       <div class="wr-name-row">
-        <input type="text" class="finput" id="wr-nombre" placeholder="Tu nombre" style="flex:1;">
+        <input type="text" class="finput" id="wr-nombre" placeholder="Tu nombre (podes usar apodo o iniciales)">
       </div>
       <textarea class="wr-textarea" id="wr-texto" placeholder="Contanos como fue tu experiencia con SunshineCars Detail..."></textarea>
+      <div style="margin-bottom:1rem;">
+        <label class="flabel" style="display:block;margin-bottom:.5rem;">Recomendacion privada al equipo <span style="color:var(--muted);font-weight:400;">(opcional, solo lo lee el admin)</span></label>
+        <textarea class="wr-textarea" id="wr-recomendacion" placeholder="Sugerencias, mejoras, o cualquier comentario privado..." style="height:70px;border-color:rgba(255,255,255,.1);"></textarea>
+      </div>
       <button class="btn" onclick="submitResena()">Publicar resena</button>
     </div>
 
@@ -1104,6 +1108,7 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
         <h1 class="admin-title">TURNOS <span>SUNSHINE</span></h1>
       </div>
       <div style="display:flex;gap:.8rem;align-items:center;">
+        <button class="fbtn" onclick="toggleRecomendaciones()" style="border-color:rgba(100,180,255,.4);color:#64b4ff;">&#128172; Recomendaciones</button>
         <button class="fbtn" id="rec-toggle-btn" onclick="toggleRecordatorios()" style="border-color:rgba(0,200,117,.4);color:#00c875;position:relative;">
           Recordatorios
           <span id="rec-badge" style="
@@ -1119,6 +1124,17 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
       </div>
     </div>
     <div class="stats-row" id="stats-row"></div>
+
+    <!-- RECOMENDACIONES PRIVADAS -->
+    <div id="recomendaciones-panel" style="display:none;margin-bottom:1.5rem;">
+      <div style="border:1px solid rgba(100,180,255,.2);background:rgba(100,180,255,.04);border-radius:8px;overflow:hidden;">
+        <div style="padding:1rem 1.5rem;border-bottom:1px solid rgba(100,180,255,.1);background:rgba(100,180,255,.06);">
+          <div style="font-family:'Bebas Neue',cursive;font-size:1.2rem;letter-spacing:2px;color:#64b4ff;">RECOMENDACIONES PRIVADAS</div>
+          <div style="font-size:.75rem;color:rgba(255,255,255,.4);">Comentarios privados de clientes verificados</div>
+        </div>
+        <div id="recom-list" style="padding:1rem 1.5rem;"></div>
+      </div>
+    </div>
 
     <!-- RECORDATORIOS PANEL -->
     <div id="rec-panel" style="display:none;margin-bottom:2rem;">
@@ -1657,6 +1673,136 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
 @media(max-width:480px){ .cart-panel { max-width:100%; } }
 </style></style>
 
+<!-- EDIT GALERIA MODAL -->
+<div class="modal-overlay" id="edit-gal-overlay" onclick="closeEditGal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title" style="color:var(--m);">&#9998; Editar foto de galeria</div>
+    <div style="position:relative;border:2px dashed rgba(204,0,126,.3);border-radius:8px;padding:1rem;text-align:center;cursor:pointer;margin-bottom:1rem;overflow:hidden;">
+      <input type="file" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;" onchange="editGalFilePick(this.files[0])">
+      <div style="font-size:.82rem;color:var(--muted);">Click para cambiar foto <span style="color:rgba(255,255,255,.4)">(opcional)</span></div>
+      <img id="edit-gal-preview" style="max-height:100px;border-radius:6px;margin-top:.5rem;display:none;" src="" alt="">
+    </div>
+    <div class="fi" style="margin-bottom:.8rem;">
+      <label class="flabel">Titulo *</label>
+      <input type="text" class="finput" id="edit-gal-titulo">
+    </div>
+    <div class="fi" style="margin-bottom:1rem;">
+      <label class="flabel">Descripcion</label>
+      <input type="text" class="finput" id="edit-gal-desc">
+    </div>
+    <div class="modal-footer">
+      <button class="btn2" onclick="closeEditGal()">Cancelar</button>
+      <button class="btn" onclick="saveEditGal()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT TIENDA MODAL -->
+<div class="modal-overlay" id="edit-prod-overlay" onclick="closeEditProd()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title" style="color:var(--m);">&#9998; Editar producto</div>
+    <div style="position:relative;border:2px dashed rgba(204,0,126,.3);border-radius:8px;padding:1rem;text-align:center;cursor:pointer;margin-bottom:1rem;overflow:hidden;">
+      <input type="file" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;" onchange="editProdFilePick(this.files[0])">
+      <div style="font-size:.82rem;color:var(--muted);">Click para cambiar foto <span style="color:rgba(255,255,255,.4)">(opcional)</span></div>
+      <img id="edit-prod-preview" style="max-height:100px;border-radius:6px;margin-top:.5rem;display:none;" src="" alt="">
+    </div>
+    <div class="fg">
+      <div class="fi"><label class="flabel">Nombre *</label><input type="text" class="finput" id="edit-prod-nombre"></div>
+      <div class="fi"><label class="flabel">Precio *</label><input type="number" class="finput" id="edit-prod-precio"></div>
+      <div class="fi full"><label class="flabel">Descripcion *</label><input type="text" class="finput" id="edit-prod-desc"></div>
+      <div class="fi full"><label class="flabel">Info de envio</label><input type="text" class="finput" id="edit-prod-envio"></div>
+      <div class="fi full"><label class="flabel">Nota especial</label><input type="text" class="finput" id="edit-prod-nota"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn2" onclick="closeEditProd()">Cancelar</button>
+      <button class="btn" onclick="saveEditProd()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT REVIEW MODAL -->
+<div class="modal-overlay" id="edit-rv-overlay" onclick="closeEditRv()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title" style="color:#64b4ff;">&#9998; Editar review</div>
+    <div style="position:relative;border:2px dashed rgba(100,180,255,.3);border-radius:8px;padding:1rem;text-align:center;cursor:pointer;margin-bottom:1rem;overflow:hidden;">
+      <input type="file" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;" onchange="editRvFilePick(this.files[0])">
+      <div style="font-size:.82rem;color:var(--muted);">Click para cambiar foto <span style="color:rgba(255,255,255,.4)">(opcional)</span></div>
+      <img id="edit-rv-preview" style="max-height:100px;border-radius:6px;margin-top:.5rem;display:none;" src="" alt="">
+    </div>
+    <div class="fi" style="margin-bottom:.8rem;"><label class="flabel">Titulo *</label><input type="text" class="finput" id="edit-rv-titulo"></div>
+    <div style="margin-bottom:.8rem;">
+      <label class="flabel" style="display:block;margin-bottom:.5rem;">Calificacion</label>
+      <div style="display:flex;gap:.4rem;" id="edit-rv-stars-row">
+        <button class="rv-star-sel" onclick="editRvSetStar(1)">&#11088;</button>
+        <button class="rv-star-sel" onclick="editRvSetStar(2)">&#11088;</button>
+        <button class="rv-star-sel" onclick="editRvSetStar(3)">&#11088;</button>
+        <button class="rv-star-sel" onclick="editRvSetStar(4)">&#11088;</button>
+        <button class="rv-star-sel" onclick="editRvSetStar(5)">&#11088;</button>
+      </div>
+    </div>
+    <div style="margin-bottom:1rem;"><label class="flabel" style="display:block;margin-bottom:.5rem;">Texto *</label>
+      <textarea class="wr-textarea" id="edit-rv-texto" style="height:120px;"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn2" onclick="closeEditRv()">Cancelar</button>
+      <button class="btn" onclick="saveEditRv()" style="background:linear-gradient(135deg,#3a8fff,#1a6fd4);">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT SERVICIO MODAL -->
+<div class="modal-overlay" id="edit-svc-overlay" onclick="closeEditSvc()">
+  <div class="modal-box" onclick="event.stopPropagation()" style="max-width:560px;">
+    <div class="modal-title" style="color:#64b4ff;">&#9998; Editar servicio</div>
+    <div class="modal-sub" id="edit-svc-sub"></div>
+
+    <!-- Foto -->
+    <div style="position:relative;border:2px dashed rgba(100,180,255,.3);border-radius:8px;padding:1rem;text-align:center;cursor:pointer;margin-bottom:1rem;overflow:hidden;background:rgba(100,180,255,.03);">
+      <input type="file" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;" onchange="editSvcFilePick(this.files[0])">
+      <div style="font-size:.82rem;color:var(--muted);">Click para cambiar foto de fondo <span style="color:rgba(255,255,255,.4)">(dejar vacio para mantener la actual)</span></div>
+      <img id="edit-svc-preview" style="max-height:80px;border-radius:4px;margin-top:.5rem;display:none;" src="" alt="">
+    </div>
+
+    <div class="fg">
+      <div class="fi">
+        <label class="flabel">Nombre *</label>
+        <input type="text" class="finput" id="edit-sv-nombre">
+      </div>
+      <div class="fi">
+        <label class="flabel">Precio Sedan *</label>
+        <input type="number" class="finput" id="edit-sv-sedan">
+      </div>
+      <div class="fi">
+        <label class="flabel">Precio SUV</label>
+        <input type="number" class="finput" id="edit-sv-suv">
+      </div>
+      <div class="fi">
+        <label class="flabel">Descripcion *</label>
+        <input type="text" class="finput" id="edit-sv-desc">
+      </div>
+      <div class="fi full">
+        <label class="flabel">Tags (separados por coma)</label>
+        <input type="text" class="finput" id="edit-sv-tags">
+      </div>
+    </div>
+    <div style="display:flex;gap:2rem;margin:1rem 0;">
+      <label style="display:flex;align-items:center;gap:.5rem;font-size:.85rem;cursor:pointer;">
+        <input type="checkbox" id="edit-sv-allday"> Todo el dia
+      </label>
+      <label style="display:flex;align-items:center;gap:.5rem;font-size:.85rem;cursor:pointer;">
+        <input type="checkbox" id="edit-sv-lavado"> Cuenta como lavado
+      </label>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn2" onclick="closeEditSvc()">Cancelar</button>
+      <button class="btn" onclick="saveEditSvc()" style="background:linear-gradient(135deg,#3a8fff,#1a6fd4);">
+        Guardar cambios
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- REAGENDAR MODAL -->
 <div class="modal-overlay" id="reagendar-overlay" onclick="closeReagendar()">
   <div class="modal-box" onclick="event.stopPropagation()">
@@ -2063,6 +2209,79 @@ function renderSvcs() {
   }
 
   document.getElementById('svc-grid').innerHTML = html;
+}
+
+var editSvcId = null;
+var editSvcNewImg = null;
+
+function editSvcEl(btn) {
+  var id = btn.getAttribute('data-id');
+  var svc = SVCS.find(function(s){ return s.id === id; });
+  if (!svc) return;
+  editSvcId = id;
+  editSvcNewImg = null;
+
+  // Fill form
+  document.getElementById('edit-svc-sub').textContent = 'Editando: ' + svc.name;
+  document.getElementById('edit-sv-nombre').value = svc.name || '';
+  document.getElementById('edit-sv-sedan').value = svc.raw || '';
+  document.getElementById('edit-sv-suv').value = svc.rawSuv || '';
+  document.getElementById('edit-sv-desc').value = svc.desc || '';
+  document.getElementById('edit-sv-tags').value = svc.tags ? svc.tags.join(', ') : '';
+  document.getElementById('edit-sv-allday').checked = !!svc.allDay;
+  document.getElementById('edit-sv-lavado').checked = !!svc.isLavado;
+  document.getElementById('edit-svc-preview').style.display = 'none';
+
+  document.getElementById('edit-svc-overlay').classList.add('open');
+}
+
+function closeEditSvc() {
+  document.getElementById('edit-svc-overlay').classList.remove('open');
+  editSvcId = null;
+  editSvcNewImg = null;
+}
+
+function editSvcFilePick(f) {
+  if (!f || !f.type.startsWith('image/')) return;
+  compressImage(f, function(data) {
+    editSvcNewImg = data;
+    var prev = document.getElementById('edit-svc-preview');
+    prev.src = data; prev.style.display = 'block';
+    toast('Foto lista');
+  });
+}
+
+function saveEditSvc() {
+  if (!editSvcId) return;
+  var nombre = document.getElementById('edit-sv-nombre').value.trim();
+  var rawSedan = parseInt(document.getElementById('edit-sv-sedan').value) || 0;
+  var rawSuv = parseInt(document.getElementById('edit-sv-suv').value) || rawSedan;
+  var desc = document.getElementById('edit-sv-desc').value.trim();
+  var tags = document.getElementById('edit-sv-tags').value.trim();
+
+  if (!nombre) { toast('Ingresa el nombre'); return; }
+  if (!rawSedan) { toast('Ingresa el precio Sedan'); return; }
+  if (!desc) { toast('Ingresa la descripcion'); return; }
+
+  var updates = {
+    name: nombre,
+    raw: rawSedan,
+    rawSuv: rawSuv,
+    price: 'Desde $' + rawSedan.toLocaleString('es-AR'),
+    desc: desc,
+    tags: tags ? tags.split(',').map(function(t){ return t.trim(); }) : [],
+    allDay: document.getElementById('edit-sv-allday').checked,
+    isLavado: document.getElementById('edit-sv-lavado').checked
+  };
+
+  // Only update image if a new one was picked
+  if (editSvcNewImg) updates.img = editSvcNewImg;
+
+  db.collection('servicios').doc(editSvcId).update(updates).then(function() {
+    toast('Servicio actualizado!');
+    closeEditSvc();
+    loadSVCS(function(){ renderSvcs(); renderSvcsAdminList(); });
+  }).catch(function(e){ console.error(e); toast('Error al guardar'); });
 }
 
 function deleteSvcEl(btn) { deleteSvc(btn.getAttribute('data-id')); }
@@ -2694,7 +2913,8 @@ function renderGaleriaItems(items) {
     if (item.desc) html += '<div style="font-size:.75rem;color:rgba(255,255,255,.6);margin-top:.2rem;">' + item.desc + '</div>';
     html += '</div>';
     if (galAdminActive) {
-      html += '<button class="abtn no" data-id="' + item.id + '" onclick="deleteGalItem(event,this)" style="font-size:.65rem;padding:.2rem .5rem;margin-left:.5rem;">Eliminar</button>';
+      html += '<button class="abtn" data-id="' + item.id + '" onclick="editGalItem(event,this)" style="font-size:.65rem;padding:.2rem .5rem;margin-left:.3rem;background:rgba(100,180,255,.15);color:#64b4ff;border:1px solid rgba(100,180,255,.3);">Editar</button>';
+      html += '<button class="abtn no" data-id="' + item.id + '" onclick="deleteGalItem(event,this)" style="font-size:.65rem;padding:.2rem .5rem;margin-left:.3rem;">Eliminar</button>';
     }
     html += '</div>';
     html += '</div>';
@@ -2746,6 +2966,111 @@ function updateGalLbF() {
   document.getElementById('lb-img').src = item.img;
   var counter = document.getElementById('lb-counter');
   if (counter) counter.innerHTML = (galLbIdx+1) + ' / ' + galCurrentItems.length + '<br>' + item.titulo + (item.desc ? ' &mdash; ' + item.desc : '');
+}
+
+// ══ EDIT GALERIA ══
+var editGalId = null, editGalNewImg = null;
+function editGalItem(e, btn) {
+  e.stopPropagation();
+  var id = btn.getAttribute('data-id');
+  var item = galCurrentItems.find(function(i){ return i.id === id; });
+  if (!item) return;
+  editGalId = id; editGalNewImg = null;
+  document.getElementById('edit-gal-titulo').value = item.titulo || '';
+  document.getElementById('edit-gal-desc').value = item.desc || '';
+  document.getElementById('edit-gal-preview').style.display = 'none';
+  document.getElementById('edit-gal-overlay').classList.add('open');
+}
+function closeEditGal() { document.getElementById('edit-gal-overlay').classList.remove('open'); editGalId = null; editGalNewImg = null; }
+function editGalFilePick(f) {
+  if (!f) return;
+  compressImage(f, function(d){ editGalNewImg = d; var p=document.getElementById('edit-gal-preview'); p.src=d; p.style.display='block'; });
+}
+function saveEditGal() {
+  if (!editGalId) return;
+  var titulo = document.getElementById('edit-gal-titulo').value.trim();
+  if (!titulo) { toast('Ingresa un titulo'); return; }
+  var updates = { titulo: titulo, desc: document.getElementById('edit-gal-desc').value.trim() };
+  if (editGalNewImg) updates.img = editGalNewImg;
+  db.collection('galeria').doc(editGalId).update(updates).then(function(){
+    toast('Foto actualizada!'); closeEditGal(); loadAndRenderGaleria();
+  }).catch(function(e){ console.error(e); toast('Error al guardar'); });
+}
+
+// ══ EDIT TIENDA ══
+var editProdId = null, editProdNewImg = null, editProdItems = [];
+function editProdEl(btn) {
+  var id = btn.getAttribute('data-id');
+  editProdId = id; editProdNewImg = null;
+  // Re-fetch from Firestore
+  db.collection('productos').doc(id).get().then(function(d){
+    if (!d.exists) return;
+    var p = d.data();
+    document.getElementById('edit-prod-nombre').value = p.nombre || '';
+    document.getElementById('edit-prod-precio').value = p.precio || '';
+    document.getElementById('edit-prod-desc').value = p.desc || '';
+    document.getElementById('edit-prod-envio').value = p.envio || '';
+    document.getElementById('edit-prod-nota').value = p.nota || '';
+    document.getElementById('edit-prod-preview').style.display = 'none';
+    document.getElementById('edit-prod-overlay').classList.add('open');
+  });
+}
+function closeEditProd() { document.getElementById('edit-prod-overlay').classList.remove('open'); editProdId = null; editProdNewImg = null; }
+function editProdFilePick(f) {
+  if (!f) return;
+  compressImage(f, function(d){ editProdNewImg = d; var p=document.getElementById('edit-prod-preview'); p.src=d; p.style.display='block'; });
+}
+function saveEditProd() {
+  if (!editProdId) return;
+  var nombre = document.getElementById('edit-prod-nombre').value.trim();
+  var precio = parseInt(document.getElementById('edit-prod-precio').value) || 0;
+  if (!nombre || !precio) { toast('Completa nombre y precio'); return; }
+  var updates = {
+    nombre: nombre, precio: precio,
+    desc: document.getElementById('edit-prod-desc').value.trim(),
+    envio: document.getElementById('edit-prod-envio').value.trim(),
+    nota: document.getElementById('edit-prod-nota').value.trim()
+  };
+  if (editProdNewImg) updates.img = editProdNewImg;
+  db.collection('productos').doc(editProdId).update(updates).then(function(){
+    toast('Producto actualizado!'); closeEditProd(); loadAndRenderTienda();
+  }).catch(function(e){ console.error(e); toast('Error al guardar'); });
+}
+
+// ══ EDIT REVIEW ══
+var editRvId = null, editRvNewImg = null, editRvStars = 0;
+function editRvSetStar(n) {
+  editRvStars = n;
+  var btns = document.getElementById('edit-rv-stars-row').querySelectorAll('.rv-star-sel');
+  for (var i=0; i<btns.length; i++) btns[i].classList.toggle('on', i<n);
+}
+function editReviewElFn(id) {
+  editRvId = id; editRvNewImg = null;
+  db.collection('reviews_autos').doc(id).get().then(function(d){
+    if (!d.exists) return;
+    var rv = d.data();
+    document.getElementById('edit-rv-titulo').value = rv.titulo || '';
+    document.getElementById('edit-rv-texto').value = rv.texto || '';
+    document.getElementById('edit-rv-preview').style.display = 'none';
+    editRvSetStar(rv.stars || 0);
+    document.getElementById('edit-rv-overlay').classList.add('open');
+  });
+}
+function closeEditRv() { document.getElementById('edit-rv-overlay').classList.remove('open'); editRvId = null; editRvNewImg = null; }
+function editRvFilePick(f) {
+  if (!f) return;
+  compressImage(f, function(d){ editRvNewImg = d; var p=document.getElementById('edit-rv-preview'); p.src=d; p.style.display='block'; });
+}
+function saveEditRv() {
+  if (!editRvId) return;
+  var titulo = document.getElementById('edit-rv-titulo').value.trim();
+  var texto = document.getElementById('edit-rv-texto').value.trim();
+  if (!titulo || !texto) { toast('Completa titulo y texto'); return; }
+  var updates = { titulo: titulo, texto: texto, stars: editRvStars };
+  if (editRvNewImg) updates.img = editRvNewImg;
+  db.collection('reviews_autos').doc(editRvId).update(updates).then(function(){
+    toast('Review actualizada!'); closeEditRv(); loadAndRenderReviews();
+  }).catch(function(e){ console.error(e); toast('Error al guardar'); });
 }
 
 function deleteGalItem(e, btn) {
@@ -2867,6 +3192,7 @@ function renderTiendaItems(prods) {
     html += '</div>';
     if (tiendaAdminActive) {
       html += '<div style="padding:.6rem 1rem;border-top:1px solid rgba(255,255,255,.05);display:flex;gap:.5rem;">';
+      html += '<button class="abtn" style="font-size:.7rem;background:rgba(100,180,255,.1);color:#64b4ff;border:1px solid rgba(100,180,255,.2);" data-id="' + p.id + '" onclick="editProdEl(this)">Editar</button>';
       html += '<button class="abtn no" style="font-size:.7rem;" data-id="' + p.id + '" onclick="deleteProd(this)">Eliminar</button>';
       html += '<button class="abtn" style="font-size:.7rem;background:rgba(245,166,35,.1);color:#f5a623;border:1px solid rgba(245,166,35,.2);" data-id="' + p.id + '" data-activo="' + p.activo + '" onclick="toggleProdActivo(this)">' + (p.activo !== false ? 'Desactivar' : 'Activar') + '</button>';
       html += '</div>';
@@ -2998,6 +3324,29 @@ function confirmarCompra() {
 
 // ==========================================
 // STATS
+function toggleRecomendaciones() {
+  var el = document.getElementById('recomendaciones-panel');
+  if (el.style.display === 'none') {
+    el.style.display = 'block';
+    // Load from Firestore
+    db.collection('resenas').orderBy('createdAt','desc').get().then(function(snap){
+      var list = document.getElementById('recom-list');
+      var items = [];
+      snap.forEach(function(d){ var data = d.data(); if (data.recomendacion) items.push(data); });
+      if (!items.length) { list.innerHTML = '<div style="color:var(--muted);font-size:.85rem;">No hay recomendaciones privadas aun.</div>'; return; }
+      list.innerHTML = items.map(function(r){
+        return '<div style="padding:.8rem 0;border-bottom:1px solid rgba(255,255,255,.05);">' +
+          '<div style="font-weight:600;font-size:.85rem;margin-bottom:.3rem;">' + r.nombre + ' &mdash; <span style="color:#64b4ff;">' + (r.svc||'') + '</span></div>' +
+          '<div style="font-size:.83rem;color:rgba(255,255,255,.7);line-height:1.5;">' + r.recomendacion + '</div>' +
+          '<div style="font-size:.7rem;color:var(--muted);margin-top:.3rem;">' + r.fecha + '</div>' +
+          '</div>';
+      }).join('');
+    }).catch(function(){ document.getElementById('recom-list').innerHTML = '<div style="color:var(--muted);">Error al cargar.</div>'; });
+  } else {
+    el.style.display = 'none';
+  }
+}
+
 function toggleRecordatorios() {
   var el = document.getElementById('rec-panel');
   var btn = document.getElementById('rec-toggle-btn');
@@ -3295,6 +3644,7 @@ function renderSvcsAdminList() {
     html += '<div style="font-size:.78rem;color:var(--muted);">Sedan: <span style="color:#64b4ff;">$' + (sv.raw||0).toLocaleString('es-AR') + '</span> &nbsp; SUV: <span style="color:#64b4ff;">$' + (sv.rawSuv||0).toLocaleString('es-AR') + '</span></div>';
     html += '</div>';
     html += '<div style="display:flex;gap:.4rem;">';
+    html += '<button class="abtn" style="font-size:.7rem;background:rgba(100,180,255,.1);color:#64b4ff;border:1px solid rgba(100,180,255,.2);" data-id="' + sv.id + '" onclick="editSvcEl(this)">Editar</button>';
     html += '<button class="abtn" style="font-size:.7rem;background:rgba(245,166,35,.1);color:#f5a623;border:1px solid rgba(245,166,35,.2);" data-id="' + sv.id + '" data-activo="' + activo + '" onclick="toggleSvcActivoEl(this)">' + (activo ? 'Desactivar' : 'Activar') + '</button>';
     html += '<button class="abtn no" style="font-size:.7rem;" data-id="' + sv.id + '" onclick="deleteSvcEl(this)">Eliminar</button>';
     html += '</div>';
@@ -3317,7 +3667,8 @@ function toggleStats() {
 }
 
 function renderStats() {
-  var turnos = loadTurnos();
+  var allTurnos = loadTurnos();
+  var turnos = allTurnos.filter(function(t){ return t.status !== 'cancelado'; });
   if (!turnos.length) {
     ['chart-svcs','chart-months','chart-zonas','chart-tipos','chart-facturacion','chart-conversion'].forEach(function(id) {
       var el = document.getElementById(id);
@@ -3535,7 +3886,7 @@ function renderReviewsList(reviews) {
       imgHtml +
       '<div class="rv-body">' +
         '<span class="rv-cat">Review</span>' +
-        (isAdminLogged ? '<button class="abtn no" style="position:absolute;top:.8rem;right:.8rem;font-size:.7rem;" data-id="' + rv.id + '" onclick="deleteReviewEl(this)">Eliminar</button>' : '') +
+        (isAdminLogged ? '<div style="position:absolute;top:.8rem;right:.8rem;display:flex;gap:.3rem;"><button class="abtn" style="font-size:.65rem;background:rgba(100,180,255,.15);color:#64b4ff;border:1px solid rgba(100,180,255,.3);" data-id="' + rv.id + '" onclick="editReviewEl(this)">Editar</button><button class="abtn no" style="font-size:.65rem;" data-id="' + rv.id + '" onclick="deleteReviewEl(this)">Eliminar</button></div>' : '') +
         '<div class="rv-stars">' + (starsMap[rv.stars]||'') + '</div>' +
         '<div class="rv-title">' + rv.titulo + '</div>' +
         '<div class="rv-text collapsed" id="rvt-' + rv.id + '">' + rv.texto + '</div>' +
@@ -3546,6 +3897,7 @@ function renderReviewsList(reviews) {
   }).join('');
 }
 
+function editReviewEl(btn) { editReviewElFn(btn.getAttribute('data-id')); }
 function deleteReviewEl(btn) {
   var id = btn.getAttribute('data-id');
   if (!confirm('Eliminar esta review?')) return;
@@ -3650,12 +4002,16 @@ function submitResena() {
   if (!nombre) { toast('Ingresa tu nombre'); return; }
   if (!texto) { toast('Escribe tu resena'); return; }
 
+  var recomendacion = document.getElementById('wr-recomendacion') ? document.getElementById('wr-recomendacion').value.trim() : '';
+  var autoModel = currentReviewTurno ? ((currentReviewTurno.autoMarca || '') + ' ' + (currentReviewTurno.autoModelo || '')).trim() : '';
   var resena = {
     id: 'R' + Date.now(),
     nombre: nombre,
     stars: selectedStars,
     texto: texto,
+    auto: autoModel,
     svc: currentReviewTurno ? (currentReviewTurno.svcName || '') : '',
+    recomendacion: recomendacion,
     fecha: new Date().toLocaleDateString('es-AR', {day:'numeric',month:'long',year:'numeric'}),
     createdAt: new Date().toISOString()
   };
@@ -3677,6 +4033,7 @@ function submitResena() {
 
   // Reset form
   document.getElementById('write-review-box').style.display = 'none';
+  document.getElementById('wr-recomendacion').value = '';
   selectedStars = 0;
   currentReviewCode = null;
   currentReviewTurno = null;
@@ -3725,7 +4082,7 @@ function renderResenas() {
         '<div class="res-card-avatar">' + initials + '</div>' +
         '<div class="res-card-info">' +
           '<div class="res-card-name">' + r.nombre + '</div>' +
-          '<div class="res-card-meta">' + (r.svc ? r.svc + ' &middot; ' : '') + r.fecha + '</div>' +
+          '<div class="res-card-meta">' + (r.auto ? r.auto + ' &middot; ' : '') + (r.svc ? r.svc + ' &middot; ' : '') + r.fecha + '</div>' +
         '</div>' +
       '</div>' +
     '</div>';
