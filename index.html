@@ -3118,8 +3118,15 @@ function saveEditRv() {
   var texto = document.getElementById('edit-rv-texto').value.trim();
   if (!titulo || !texto) { toast('Completa titulo y texto'); return; }
   var updates = { titulo: titulo, texto: texto, stars: editRvStars };
-  // Only update images if admin explicitly added new ones (editRvImgsChanged flag)
+  // Only update images if changed
   if (editRvImgsChanged && editRvImgs.length > 0) {
+    // Check total size - Firestore limit is ~1MB per doc
+    var totalSize = editRvImgs.reduce(function(s, img){ return s + (img ? img.length : 0); }, 0);
+    console.log('Total imgs size:', Math.round(totalSize/1024), 'KB');
+    if (totalSize > 800000) {
+      toast('Las fotos son muy pesadas. Intenta con menos fotos o mas pequeñas.');
+      return;
+    }
     updates.imgs = editRvImgs;
     updates.img = editRvImgs[0];
   }
