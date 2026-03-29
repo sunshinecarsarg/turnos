@@ -905,9 +905,30 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
         <button class="star-btn" onclick="setStar(4)">&#11088;</button>
         <button class="star-btn" onclick="setStar(5)">&#11088;</button>
       </div>
+      <!-- Star warning -->
+      <div id="stars-warning" style="display:none;text-align:center;margin-bottom:.8rem;padding:.5rem;background:rgba(255,193,7,.08);border:1px solid rgba(255,193,7,.3);border-radius:8px;">
+        <strong style="color:#ffc107;font-size:.9rem;">&#9888; No olvides seleccionar las estrellas antes de publicar!</strong>
+      </div>
+
       <div class="wr-name-row">
         <input type="text" class="finput" id="wr-nombre" placeholder="Tu nombre (podes usar apodo o iniciales)">
       </div>
+
+      <!-- Foto de perfil opcional -->
+      <div style="margin-bottom:1rem;">
+        <label class="flabel" style="display:block;margin-bottom:.5rem;">Foto de perfil <span style="color:var(--muted);font-weight:400;">(opcional)</span></label>
+        <div style="display:flex;align-items:center;gap:1rem;">
+          <div id="wr-avatar-preview" style="width:56px;height:56px;border-radius:50%;background:var(--m);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:1.2rem;overflow:hidden;flex-shrink:0;">
+            <span id="wr-avatar-initials">?</span>
+            <img id="wr-avatar-img" style="display:none;width:100%;height:100%;object-fit:cover;" src="" alt="">
+          </div>
+          <label style="cursor:pointer;background:rgba(255,255,255,.05);border:1px solid var(--g3);border-radius:8px;padding:.5rem 1rem;font-size:.8rem;color:var(--muted);">
+            <input type="file" accept="image/*" style="display:none;" onchange="wrAvatarPick(this.files[0])">
+            &#128247; Subir foto
+          </label>
+        </div>
+      </div>
+
       <textarea class="wr-textarea" id="wr-texto" placeholder="Contanos como fue tu experiencia con SunshineCars Detail..."></textarea>
       <div style="margin-bottom:1rem;">
         <label class="flabel" style="display:block;margin-bottom:.5rem;">Recomendacion privada al equipo <span style="color:var(--muted);font-weight:400;">(opcional, solo lo lee el admin)</span></label>
@@ -2770,6 +2791,11 @@ function renderAdmin() {
     }
     var waUrl = 'https://wa.me/' + (t.tel || '').replace(/\D/g, '') + '?text=' + encodeURIComponent(wamsg);
     acts += '<a href="' + waUrl + '" target="_blank" class="abtn wa">WhatsApp</a>';
+    // Delete button for cancelado and completado
+    if (t.status === 'cancelado' || t.status === 'completado') {
+      acts += '<button class="abtn" style="background:rgba(255,50,50,.08);color:#ff6b6b;border:1px solid rgba(255,50,50,.2);font-size:.75rem;" data-id="' + t.id + '" onclick="deleteTurnoEl(this)">&#128465; Eliminar</button>';
+    }
+
     if (t.status === 'completado') {
       if (t.reviewCode && !t.reviewUsed) {
         var cMsg = 'Hola ' + (t.nombre||'') + '! Gracias por confiar en SunshineCars Detail. Tu opinion nos importa! Podes dejar tu resena en sunshinecarsarg.github.io/turnos/ usando el codigo: ' + t.reviewCode;
@@ -2804,6 +2830,20 @@ function setStatus(id, status) {
   updateTurno(id, { status: status });
   renderAdmin();
   toast(status === 'confirmado' ? 'Turno confirmado' : status === 'completado' ? 'Marcado como completado' : 'Turno cancelado');
+}
+
+function deleteTurno(id) {
+  if (!confirm('Eliminar este turno del sistema? Esta accion no se puede deshacer.')) return;
+  var t = loadTurnos().find(function(x){ return x.id === id; });
+  if (!t || !t._docId) { toast('Error: turno no encontrado'); return; }
+  db.collection('turnos').doc(t._docId).delete().then(function() {
+    toast('Turno eliminado');
+    renderAdmin();
+  }).catch(function(e){ console.error(e); toast('Error al eliminar'); });
+}
+
+function deleteTurnoEl(btn) {
+  deleteTurno(btn.getAttribute('data-id'));
 }
 function setFilter(f, btn) {
   FILTER = f;
@@ -4182,6 +4222,17 @@ function rvToggle(id, btn) {
 // RESENAS
 // ==========================================
 var currentReviewCode = null;
+var wrAvatarData = null;
+
+function wrAvatarPick(f) {
+  if (!f) return;
+  compressImage(f, function(data) {
+    wrAvatarData = data;
+    document.getElementById('wr-avatar-img').src = data;
+    document.getElementById('wr-avatar-img').style.display = 'block';
+    document.getElementById('wr-avatar-initials').style.display = 'none';
+  });
+}
 var currentReviewTurno = null;
 var selectedStars = 0;
 
@@ -4249,10 +4300,25 @@ function setStar(n) {
   for (var i = 0; i < btns.length; i++) {
     btns[i].classList.toggle('active', i < n);
   }
+  var warn = document.getElementById('stars-warning');
+  if (warn) warn.style.display = 'none';
 }
 
 function submitResena() {
-  if (!selectedStars) { toast('Selecciona una puntuacion'); return; }
+  if (!selectedStars) {
+    var warn = document.getElementById('stars-warning');
+    if (warn) warn.style.display = 'block';
+    document.getElementById('stars-row').scrollIntoView({behavior:'smooth', block:'center'});
+    return;
+  }
+  // Update avatar initials preview
+  var wnEl = document.getElementById('wr-nombre');
+  wnEl.addEventListener('input', function() {
+    var initials = this.value.trim().split(' ').map(function(w){ return w[0]||''; }).join('').slice(0,2).toUpperCase();
+    var ini = document.getElementById('wr-avatar-initials');
+    if (ini && !wrAvatarData) ini.textContent = initials || '?';
+  });
+
   var nombre = document.getElementById('wr-nombre').value.trim();
   var texto = document.getElementById('wr-texto').value.trim();
   if (!nombre) { toast('Ingresa tu nombre'); return; }
@@ -4268,6 +4334,7 @@ function submitResena() {
     auto: autoModel,
     svc: currentReviewTurno ? (currentReviewTurno.svcName || '') : '',
     recomendacion: recomendacion,
+    avatar: wrAvatarData || null,
     fecha: new Date().toLocaleDateString('es-AR', {day:'numeric',month:'long',year:'numeric'}),
     createdAt: new Date().toISOString()
   };
@@ -4290,6 +4357,11 @@ function submitResena() {
   // Reset form
   document.getElementById('write-review-box').style.display = 'none';
   document.getElementById('wr-recomendacion').value = '';
+  wrAvatarData = null;
+  var avImg = document.getElementById('wr-avatar-img');
+  if (avImg) { avImg.style.display = 'none'; avImg.src = ''; }
+  var avIni = document.getElementById('wr-avatar-initials');
+  if (avIni) { avIni.style.display = 'block'; avIni.textContent = '?'; }
   selectedStars = 0;
   currentReviewCode = null;
   currentReviewTurno = null;
@@ -4298,8 +4370,9 @@ function submitResena() {
   renderResenas();
 }
 
+var _resenasCache = [];
 function loadResenas() {
-  try { return JSON.parse(localStorage.getItem('sc_resenas') || '[]'); } catch(e) { return []; }
+  return _resenasCache;
 }
 
 function renderResenas() {
@@ -4335,25 +4408,54 @@ function renderResenas() {
       '<div class="res-card-stars">' + (starsMap[r.stars] || '') + '</div>' +
       '<div class="res-card-text">' + r.texto + '</div>' +
       '<div class="res-card-footer">' +
-        '<div class="res-card-avatar">' + initials + '</div>' +
+        '<div class="res-card-avatar" style="overflow:hidden;padding:0;">' +
+          (r.avatar
+            ? '<img src="' + r.avatar + '" style="width:100%;height:100%;object-fit:cover;">'
+            : initials) +
+        '</div>' +
         '<div class="res-card-info">' +
           '<div class="res-card-name">' + r.nombre + '</div>' +
           '<div class="res-card-meta">' + (r.auto ? r.auto + ' &middot; ' : '') + (r.svc ? r.svc + ' &middot; ' : '') + r.fecha + '</div>' +
         '</div>' +
+        (isAdminLogged
+          ? '<div style="margin-left:auto;display:flex;gap:.4rem;">' +
+            '<button class="abtn" style="font-size:.65rem;background:rgba(100,180,255,.1);color:#64b4ff;border:1px solid rgba(100,180,255,.25);" data-id="' + r._docId + '" onclick="editResenaEl(this)">Editar</button>' +
+            '<button class="abtn no" style="font-size:.65rem;" data-id="' + r._docId + '" onclick="deleteResenaEl(this)">Eliminar</button>' +
+            '</div>'
+          : '') +
       '</div>' +
     '</div>';
   }).join('');
 }
 
 // Load resenas from Firestore too
+function deleteResenaEl(btn) {
+  var docId = btn.getAttribute('data-id');
+  if (!confirm('Eliminar esta reseña?')) return;
+  db.collection('resenas').doc(docId).delete().then(function() {
+    toast('Reseña eliminada');
+    syncResenas();
+  }).catch(function(e){ console.error(e); toast('Error al eliminar'); });
+}
+
+function editResenaEl(btn) {
+  var docId = btn.getAttribute('data-id');
+  var resena = _resenasCache.find(function(r){ return r._docId === docId; });
+  if (!resena) return;
+  var nuevoTexto = prompt('Editar reseña de ' + resena.nombre + ':', resena.texto);
+  if (nuevoTexto === null) return;
+  db.collection('resenas').doc(docId).update({ texto: nuevoTexto.trim() }).then(function() {
+    toast('Reseña actualizada');
+    syncResenas();
+  }).catch(function(e){ console.error(e); toast('Error al editar'); });
+}
+
 function syncResenas() {
   db.collection('resenas').orderBy('createdAt','desc').get().then(function(snap) {
     var arr = [];
-    snap.forEach(function(d){ arr.push(d.data()); });
-    if (arr.length > 0) {
-      localStorage.setItem('sc_resenas', JSON.stringify(arr));
-      renderResenas();
-    }
+    snap.forEach(function(d){ var data = d.data(); data._docId = d.id; arr.push(data); });
+    _resenasCache = arr;
+    renderResenas();
   }).catch(function(e){ console.error(e); });
 }
 
