@@ -2170,43 +2170,7 @@ function renderSvcs() {
     }
     html += '</div></div>';
   }
-  // Admin: add service form and list at bottom of step 1
-  if (svcsAdminActive) {
-    var adminHtml = '<div id="svcs-admin-section" style="margin-top:2rem;border:1px solid rgba(204,0,126,.2);border-radius:12px;padding:1.5rem;background:var(--g1);">';
-    adminHtml += '<div style="font-family:Bebas Neue,cursive;font-size:1.2rem;letter-spacing:2px;color:var(--m);margin-bottom:1rem;">Gestionar servicios</div>';
-    // Existing svcs list with edit/delete
-    for (var k = 0; k < SVCS.length; k++) {
-      var sv = SVCS[k];
-      adminHtml += '<div style="display:flex;align-items:center;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid rgba(255,255,255,.05);gap:.5rem;flex-wrap:wrap;">';
-      adminHtml += '<div style="font-weight:600;font-size:.88rem;">' + sv.name + '<span style="color:var(--m);margin-left:.5rem;font-size:.8rem;">$' + (sv.raw||0).toLocaleString('es-AR') + ' / $' + (sv.rawSuv||0).toLocaleString('es-AR') + '</span></div>';
-      adminHtml += '<div style="display:flex;gap:.4rem;">';
-      adminHtml += '<button class="abtn" style="background:rgba(245,166,35,.1);color:#f5a623;border:1px solid rgba(245,166,35,.2);font-size:.7rem;" data-id="' + sv.id + '" data-activo="' + sv.activo + '" onclick="toggleSvcActivoEl(this)">' + (sv.activo !== false ? 'Desactivar' : 'Activar') + '</button>';
-      adminHtml += '<button class="abtn no" style="font-size:.7rem;" data-id="' + sv.id + '" onclick="deleteSvcEl(this)">Eliminar</button>';
-      adminHtml += '</div></div>';
-    }
-    // New service form
-    adminHtml += '<div style="margin-top:1.2rem;">';
-    adminHtml += '<div style="font-size:.72rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:.8rem;">Agregar nuevo servicio</div>';
-    adminHtml += '<div style="position:relative;border:2px dashed var(--g3);border-radius:8px;padding:1rem;text-align:center;cursor:pointer;margin-bottom:.8rem;overflow:hidden;">';
-    adminHtml += '<input type="file" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;" onchange="svFilePick(this.files[0])">';
-    adminHtml += '<div style="font-size:.85rem;color:var(--muted);">Foto de fondo (marca de agua)</div>';
-    adminHtml += '<img id="sv-img-preview" style="max-height:80px;border-radius:4px;margin-top:.4rem;display:none;" src="" alt="">';
-    adminHtml += '</div>';
-    adminHtml += '<div class="fg" style="margin-bottom:.8rem;">';
-    adminHtml += '<div class="fi"><label class="flabel">Nombre *</label><input type="text" class="finput" id="sv-nombre" placeholder="FULL SHINE"></div>';
-    adminHtml += '<div class="fi"><label class="flabel">Precio Sedan *</label><input type="number" class="finput" id="sv-precio-sedan" placeholder="65000"></div>';
-    adminHtml += '<div class="fi"><label class="flabel">Precio SUV</label><input type="number" class="finput" id="sv-precio-suv" placeholder="70000"></div>';
-    adminHtml += '<div class="fi"><label class="flabel">Descripcion *</label><input type="text" class="finput" id="sv-desc" placeholder="Elevamos el estandar..."></div>';
-    adminHtml += '<div class="fi full"><label class="flabel">Tags (separados por coma)</label><input type="text" class="finput" id="sv-tags" placeholder="Cera protectora, Aspirado, Revitalizado..."></div>';
-    adminHtml += '</div>';
-    adminHtml += '<div style="display:flex;gap:1.5rem;margin-bottom:.8rem;">';
-    adminHtml += '<label style="display:flex;align-items:center;gap:.4rem;font-size:.82rem;cursor:pointer;"><input type="checkbox" id="sv-allday"> Todo el dia (ceramico/correccion)</label>';
-    adminHtml += '<label style="display:flex;align-items:center;gap:.4rem;font-size:.82rem;cursor:pointer;"><input type="checkbox" id="sv-lavado"> Es un lavado (fidelidad)</label>';
-    adminHtml += '</div>';
-    adminHtml += '<button class="btn" onclick="publishServicio()" style="max-width:200px;">Publicar servicio</button>';
-    adminHtml += '</div></div>';
-    html += adminHtml;
-  }
+  // Admin: panel is in admin section, nothing needed here
 
   document.getElementById('svc-grid').innerHTML = html;
 }
