@@ -1126,7 +1126,7 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
         <input type="email" class="finput" id="f-email"
           placeholder="admin@email.com"
           onkeydown="if(event.key==='Enter')doLogin()"
-          autocomplete="email" value="sunshinecars.arg@gmail.com">
+          autocomplete="email" placeholder="Email">
       </div>
       <div class="fi" style="text-align:left;margin-bottom:1rem;">
         <label class="flabel">Contrasena</label>
@@ -2001,17 +2001,39 @@ var _unsubscribe = null;
 
 function startListening() {
   if (_unsubscribe) return;
-  var q = db.collection('turnos').orderBy('createdAt', 'desc');
-  _unsubscribe = q.onSnapshot(function(snapshot) {
-    _turnos = [];
-    snapshot.forEach(function(d) {
-      _turnos.push(Object.assign({}, d.data(), { _docId: d.id }));
+  // Sign in anonymously first so clients can read turnos for availability
+  var doListen = function() {
+    var q = db.collection('turnos').orderBy('createdAt', 'desc');
+    _unsubscribe = q.onSnapshot(function(snapshot) {
+      _turnos = [];
+      snapshot.forEach(function(d) {
+        _turnos.push(Object.assign({}, d.data(), { _docId: d.id }));
+      });
+      var admin = document.getElementById('view-admin');
+      if (admin && admin.classList.contains('active')) {
+        renderAdmin();
+      }
+      renderCal();
+    }, function(err) {
+      console.error('Snapshot error:', err);
     });
-    // Refresh admin if open
-    var admin = document.getElementById('view-admin');
-    if (admin && admin.classList.contains('active')) renderAdmin();
-  });
+  };
+
+  // If already authenticated (admin or anonymous), start listening
+  var currentUser = firebase.auth().currentUser;
+  if (currentUser) {
+    doListen();
+  } else {
+    // Sign in anonymously for read-only access
+    firebase.auth().signInAnonymously()
+      .then(doListen)
+      .catch(function(e) {
+        console.error('Anonymous auth error:', e);
+        doListen(); // try anyway
+      });
+  }
 }
+
 
 function loadTurnos() {
   return _turnos.slice();
