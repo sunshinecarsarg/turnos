@@ -505,49 +505,7 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
     <div class="panel active" id="p1">
       <div class="svc-grid" id="svc-grid"></div>
       <!-- HOMOLOGACION VTV -->
-      <div style="
-        margin-bottom:1.5rem;
-        border:1px solid rgba(100,180,255,.2);
-        border-radius:8px; overflow:hidden;
-        background:linear-gradient(135deg,#0a0f1a 0%,#0d1520 50%,#0a0f1a 100%);
-        padding:1.8rem 2rem;
-        display:flex; align-items:center; justify-content:space-between;
-        gap:1.5rem; flex-wrap:wrap; position:relative;
-      ">
-        <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 20% 50%,rgba(100,180,255,.07) 0%,transparent 70%);pointer-events:none;"></div>
-        <div style="position:relative;z-index:1;">
-          <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem;">
-            <div style="
-              display:inline-block;font-size:.62rem;letter-spacing:2px;text-transform:uppercase;
-              background:rgba(100,180,255,.1);border:1px solid rgba(100,180,255,.3);
-              color:#64b4ff;padding:.2rem .7rem;border-radius:50px;font-weight:700;
-            ">Tramite oficial</div>
-          </div>
-          <div style="font-family:'Bebas Neue',cursive;font-size:clamp(1.3rem,4vw,2rem);letter-spacing:2px;line-height:1;margin-bottom:.5rem;">
-            &#128295; HOMOLOGACION <span style="background:linear-gradient(135deg,#64b4ff,#3a8fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">VTV</span>
-          </div>
-          <div style="font-size:.78rem;color:rgba(255,255,255,.5);font-weight:600;letter-spacing:.5px;margin-bottom:.3rem;">
-            Suspension Neumatica &mdash; Certificacion oficial
-          </div>
-          <p style="font-size:.8rem;color:rgba(255,255,255,.4);line-height:1.5;max-width:420px;">
-            Contamos con el <strong style="color:rgba(255,255,255,.7);">Ing. Sergio Liendo</strong>, habilitado por <strong style="color:#64b4ff;">COPIME</strong>, para la homologacion de suspension neumatica ante la VTV.<br>
-            <span style="color:rgba(255,255,255,.3);">&#8987; Tiempo estimado: <strong style="color:rgba(255,255,255,.5);">10 dias habiles</strong> &nbsp;&middot;&nbsp; Precio a coordinar segun vehiculo.</span>
-          </p>
-        </div>
-        <div style="position:relative;z-index:1;text-align:center;flex-shrink:0;">
-          <a href="https://wa.me/5491173665464?text=Hola!%20Me%20interesa%20consultar%20por%20la%20homologacion%20de%20suspension%20neumatica%20para%20la%20VTV." target="_blank" style="
-            display:inline-flex;align-items:center;gap:.5rem;
-            background:#25D366;color:#fff;text-decoration:none;
-            padding:.7rem 1.4rem;border-radius:50px;
-            font-family:'Outfit',sans-serif;font-size:.85rem;font-weight:700;
-            box-shadow:0 4px 15px rgba(37,211,102,.3);
-            transition:all .2s;
-          " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-            &#128242; Consultar por WhatsApp
-          </a>
-          <div style="font-size:.68rem;color:rgba(255,255,255,.25);margin-top:.5rem;letter-spacing:1px;">Precio segun vehiculo</div>
-        </div>
-      </div>
+      <div id="vtv-card-wrap"></div>
 
       <!-- BANNER PRODUCTOS -->
       <div style="
@@ -1164,6 +1122,7 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
           "></span>
         </button>
         <button class="fbtn" id="svcs-toggle-btn" onclick="toggleSvcsAdmin()" style="border-color:rgba(100,180,255,.4);color:#64b4ff;">Servicios</button>
+        <button class="fbtn" onclick="toggleVtvEdit()" style="border-color:rgba(100,180,255,.3);color:rgba(100,180,255,.7);">Card VTV</button>
         <button class="fbtn" id="stats-toggle-btn" onclick="toggleStats()" style="border-color:rgba(204,0,126,.4);color:var(--m);">Ver estadisticas</button>
         <button class="logout-btn" onclick="doLogout()">Cerrar sesion</button>
       </div>
@@ -1213,6 +1172,47 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
       <button class="fbtn" onclick="setFilter('cancelado',this)">Cancelados</button>
     </div>
     <div class="tlist" id="tlist"></div>
+
+    <!-- VTV EDIT SECTION -->
+    <div id="vtv-edit-panel" style="display:none;margin-top:2rem;margin-bottom:1rem;">
+      <div style="background:var(--g1);border:1px solid rgba(100,180,255,.2);border-radius:12px;padding:1.5rem;">
+        <div style="font-family:'Bebas Neue',cursive;font-size:1.2rem;letter-spacing:2px;color:#64b4ff;margin-bottom:1.2rem;">&#9998; Editar Card VTV / Tramite</div>
+        <div class="fg">
+          <div class="fi">
+            <label class="flabel">Titulo principal *</label>
+            <input type="text" class="finput" id="vtv-titulo" placeholder="HOMOLOGACIÓN VTV">
+          </div>
+          <div class="fi">
+            <label class="flabel">Subtitulo</label>
+            <input type="text" class="finput" id="vtv-subtitulo" placeholder="Suspensión Neumática — Certificación oficial">
+          </div>
+          <div class="fi full">
+            <label class="flabel">Descripcion *</label>
+            <textarea class="wr-textarea" id="vtv-desc" style="height:90px;" placeholder="Contamos con el Ing. Sergio Liendo..."></textarea>
+          </div>
+          <div class="fi">
+            <label class="flabel">Texto del badge</label>
+            <input type="text" class="finput" id="vtv-badge" placeholder="Trámite oficial">
+          </div>
+          <div class="fi">
+            <label class="flabel">Texto boton WhatsApp</label>
+            <input type="text" class="finput" id="vtv-btn-texto" placeholder="Consultar por WhatsApp">
+          </div>
+          <div class="fi full">
+            <label class="flabel">Mensaje WhatsApp pre-armado</label>
+            <input type="text" class="finput" id="vtv-wa-msg" placeholder="Hola! Me interesa consultar por la homologación de suspensión neumática para la VTV.">
+          </div>
+          <div class="fi">
+            <label class="flabel">Nota inferior</label>
+            <input type="text" class="finput" id="vtv-nota" placeholder="Precio según vehículo">
+          </div>
+        </div>
+        <div style="margin-top:1rem;display:flex;gap:.8rem;flex-wrap:wrap;">
+          <button class="btn" onclick="saveVtvCard()" style="max-width:200px;background:linear-gradient(135deg,#3a8fff,#1a6fd4);">Guardar cambios</button>
+          <button class="btn2" onclick="toggleVtvEdit()">Cerrar</button>
+        </div>
+      </div>
+    </div>
 
     <!-- SERVICIOS SECTION -->
     <div id="svcs-admin-panel" style="display:none;margin-top:2rem;">
@@ -3639,6 +3639,88 @@ function confirmReagendar() {
   toast('Turno reagendado y WhatsApp enviado!');
 }
 
+// ══ VTV CARD ══
+var vtvDefaults = {
+  titulo: 'HOMOLOGACIÓN VTV',
+  subtitulo: 'Suspensión Neumática — Certificación oficial',
+  desc: 'Contamos con el Ing. Sergio Liendo, habilitado por COPIME, para la homologación de suspensión neumática ante la VTV. ' +
+    '⏳ Tiempo estimado: 10 días hábiles · Precio a coordinar según vehículo.',
+  badge: 'Trámite oficial',
+  btnTexto: 'Consultar por WhatsApp',
+  waMsg: 'Hola! Me interesa consultar por la homologación de suspensión neumática para la VTV.',
+  nota: 'Precio según vehículo'
+};
+
+function loadVtvCard() {
+  db.collection('config').doc('vtv').get().then(function(d) {
+    var data = d.exists ? d.data() : vtvDefaults;
+    renderVtvCard(data);
+  }).catch(function() { renderVtvCard(vtvDefaults); });
+}
+
+function renderVtvCard(d) {
+  var wrap = document.getElementById('vtv-card-wrap');
+  if (!wrap) return;
+  var waUrl = 'https://wa.me/' + WA_NUM + '?text=' + encodeURIComponent(d.waMsg || vtvDefaults.waMsg);
+  wrap.innerHTML =
+    '<div style="margin-bottom:1.5rem;border:1px solid rgba(100,180,255,.2);border-radius:8px;overflow:hidden;' +
+    'background:linear-gradient(135deg,#0a0f1a 0%,#0d1520 50%,#0a0f1a 100%);' +
+    'padding:1.8rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1.5rem;flex-wrap:wrap;position:relative;">' +
+    '<div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 20% 50%,rgba(100,180,255,.07) 0%,transparent 70%);pointer-events:none;"></div>' +
+    '<div style="position:relative;z-index:1;">' +
+      '<div style="display:inline-block;font-size:.62rem;letter-spacing:2px;text-transform:uppercase;' +
+      'background:rgba(100,180,255,.1);border:1px solid rgba(100,180,255,.3);color:#64b4ff;' +
+      'padding:.2rem .7rem;border-radius:50px;font-weight:700;margin-bottom:.6rem;">' + (d.badge||vtvDefaults.badge) + '</div>' +
+      '<div style="font-family:Bebas Neue,cursive;font-size:clamp(1.3rem,4vw,2rem);letter-spacing:2px;line-height:1;margin-bottom:.5rem;">' +
+      '&#128295; <span style="background:linear-gradient(135deg,#64b4ff,#3a8fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">' +
+      (d.titulo||vtvDefaults.titulo) + '</span></div>' +
+      '<div style="font-size:.78rem;color:rgba(255,255,255,.5);font-weight:600;letter-spacing:.5px;margin-bottom:.4rem;">' + (d.subtitulo||vtvDefaults.subtitulo) + '</div>' +
+      '<p style="font-size:.8rem;color:rgba(255,255,255,.4);line-height:1.6;max-width:420px;white-space:pre-line;">' + (d.desc||vtvDefaults.desc) + '</p>' +
+    '</div>' +
+    '<div style="position:relative;z-index:1;text-align:center;flex-shrink:0;">' +
+      '<a href="' + waUrl + '" target="_blank" style="display:inline-flex;align-items:center;gap:.5rem;background:#25D366;color:#fff;text-decoration:none;padding:.7rem 1.4rem;border-radius:50px;font-family:Outfit,sans-serif;font-size:.85rem;font-weight:700;box-shadow:0 4px 15px rgba(37,211,102,.3);">&#128242; ' + (d.btnTexto||vtvDefaults.btnTexto) + '</a>' +
+      '<div style="font-size:.68rem;color:rgba(255,255,255,.25);margin-top:.5rem;letter-spacing:1px;">' + (d.nota||vtvDefaults.nota) + '</div>' +
+    '</div>' +
+    '</div>';
+}
+
+function toggleVtvEdit() {
+  var el = document.getElementById('vtv-edit-panel');
+  if (el.style.display === 'none') {
+    el.style.display = 'block';
+    // Load current values
+    db.collection('config').doc('vtv').get().then(function(d) {
+      var data = d.exists ? d.data() : vtvDefaults;
+      document.getElementById('vtv-titulo').value = data.titulo || vtvDefaults.titulo;
+      document.getElementById('vtv-subtitulo').value = data.subtitulo || vtvDefaults.subtitulo;
+      document.getElementById('vtv-desc').value = data.desc || vtvDefaults.desc;
+      document.getElementById('vtv-badge').value = data.badge || vtvDefaults.badge;
+      document.getElementById('vtv-btn-texto').value = data.btnTexto || vtvDefaults.btnTexto;
+      document.getElementById('vtv-wa-msg').value = data.waMsg || vtvDefaults.waMsg;
+      document.getElementById('vtv-nota').value = data.nota || vtvDefaults.nota;
+    }).catch(function(){});
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+function saveVtvCard() {
+  var data = {
+    titulo: document.getElementById('vtv-titulo').value.trim() || vtvDefaults.titulo,
+    subtitulo: document.getElementById('vtv-subtitulo').value.trim(),
+    desc: document.getElementById('vtv-desc').value.trim(),
+    badge: document.getElementById('vtv-badge').value.trim() || vtvDefaults.badge,
+    btnTexto: document.getElementById('vtv-btn-texto').value.trim() || vtvDefaults.btnTexto,
+    waMsg: document.getElementById('vtv-wa-msg').value.trim() || vtvDefaults.waMsg,
+    nota: document.getElementById('vtv-nota').value.trim()
+  };
+  db.collection('config').doc('vtv').set(data).then(function() {
+    toast('Card VTV actualizada!');
+    document.getElementById('vtv-edit-panel').style.display = 'none';
+    renderVtvCard(data);
+  }).catch(function(e){ console.error(e); toast('Error al guardar'); });
+}
+
 function toggleSvcsAdmin() {
   var el = document.getElementById('svcs-admin-panel');
   var btn = document.getElementById('svcs-toggle-btn');
@@ -4152,6 +4234,7 @@ document.addEventListener('click', function(e) {
 // ==========================================
 startListening();
 loadSVCS(function(){ renderSvcs(); renderCal(); });
+loadVtvCard();
 </script>
 
 
