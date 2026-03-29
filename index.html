@@ -3065,7 +3065,7 @@ function saveEditProd() {
 }
 
 // ══ EDIT REVIEW ══
-var editRvId = null, editRvImgs = [], editRvStars = 0;
+var editRvId = null, editRvImgs = [], editRvStars = 0, editRvImgsChanged = false;
 function editRvSetStar(n) {
   editRvStars = n;
   var btns = document.getElementById('edit-rv-stars-row').querySelectorAll('.rv-star-sel');
@@ -3073,18 +3073,20 @@ function editRvSetStar(n) {
 }
 function editReviewElFn(id) {
   editRvId = id; editRvNewImg = null;
-  var rv = currentReviews.find(function(r){ return r.id === id; });
+  var rv = currentReviews.find(function(r){ return r._docId === id; });
   if (!rv) { toast('Error al cargar review'); return; }
   document.getElementById('edit-rv-titulo').value = rv.titulo || '';
   document.getElementById('edit-rv-texto').value = rv.texto || '';
   // Load existing images
+  editRvImgsChanged = false;
   editRvImgs = (rv.imgs && rv.imgs.length) ? rv.imgs.slice() : [rv.img, rv.img2, rv.img3].filter(Boolean);
   editRvRenderGrid();
   editRvSetStar(rv.stars || 0);
   document.getElementById('edit-rv-overlay').classList.add('open');
 }
-function closeEditRv() { document.getElementById('edit-rv-overlay').classList.remove('open'); editRvId = null; editRvImgs = []; }
+function closeEditRv() { document.getElementById('edit-rv-overlay').classList.remove('open'); editRvId = null; editRvImgs = []; editRvImgsChanged = false; }
 function editRvAddFiles(files) {
+  editRvImgsChanged = true;
   for (var fi = 0; fi < files.length; fi++) {
     (function(f) {
       compressImage(f, function(d){
@@ -3116,7 +3118,8 @@ function saveEditRv() {
   var texto = document.getElementById('edit-rv-texto').value.trim();
   if (!titulo || !texto) { toast('Completa titulo y texto'); return; }
   var updates = { titulo: titulo, texto: texto, stars: editRvStars };
-  if (editRvImgs.length > 0) {
+  // Only update images if admin explicitly added new ones (editRvImgsChanged flag)
+  if (editRvImgsChanged && editRvImgs.length > 0) {
     updates.imgs = editRvImgs;
     updates.img = editRvImgs[0];
   }
@@ -4009,7 +4012,11 @@ var currentReviews = [];
 function loadAndRenderReviews() {
   db.collection('reviews_autos').orderBy('createdAt','desc').get().then(function(snap) {
     currentReviews = [];
-    snap.forEach(function(d) { currentReviews.push(Object.assign({id:d.id}, d.data())); });
+    snap.forEach(function(d) {
+      var rv = d.data();
+      rv._docId = d.id; // real Firestore document ID
+      currentReviews.push(rv);
+    });
     renderReviewsList(currentReviews);
   }).catch(function(e) {
     console.error(e);
@@ -4057,7 +4064,7 @@ function renderReviewsList(reviews) {
       imgHtml +
       '<div class="rv-body">' +
         '<span class="rv-cat">Review</span>' +
-        (isAdminLogged ? '<div style="position:absolute;top:.8rem;right:.8rem;display:flex;gap:.3rem;"><button class="abtn" style="font-size:.65rem;background:rgba(100,180,255,.15);color:#64b4ff;border:1px solid rgba(100,180,255,.3);" data-id="' + rv.id + '" onclick="editReviewEl(this)">Editar</button><button class="abtn no" style="font-size:.65rem;" data-id="' + rv.id + '" onclick="deleteReviewEl(this)">Eliminar</button></div>' : '') +
+        (isAdminLogged ? '<div style="position:absolute;top:.8rem;right:.8rem;display:flex;gap:.3rem;"><button class="abtn" style="font-size:.65rem;background:rgba(100,180,255,.15);color:#64b4ff;border:1px solid rgba(100,180,255,.3);" data-id="' + rv._docId + '" onclick="editReviewEl(this)">Editar</button><button class="abtn no" style="font-size:.65rem;" data-id="' + rv._docId + '" onclick="deleteReviewEl(this)">Eliminar</button></div>' : '') +
         '<div class="rv-stars">' + (starsMap[rv.stars]||'') + '</div>' +
         '<div class="rv-title">' + rv.titulo + '</div>' +
         '<div class="rv-text collapsed" id="rvt-' + rv.id + '">' + rv.texto + '</div>' +
@@ -4101,23 +4108,14 @@ function startSlideshows() {
 }
 
 function deleteReviewEl(btn) {
-  var id = btn.getAttribute('data-id');
+  var docId = btn.getAttribute('data-id');
   if (!confirm('Eliminar esta review?')) return;
-  // Find matching review to get Firestore doc id
-  var rv = currentReviews.find(function(r){ return r.id === id; });
-  var docId = rv ? rv.id : id;
   db.collection('reviews_autos').doc(docId).delete().then(function() {
-    currentReviews = currentReviews.filter(function(r){ return r.id !== id; });
     toast('Review eliminada');
     loadAndRenderReviews();
   }).catch(function(e){
     console.error('Delete error:', e);
-    // Try querying by field
-    db.collection('reviews_autos').where('id','==',id).get().then(function(snap){
-      snap.forEach(function(d){ d.ref.delete(); });
-      toast('Review eliminada');
-      loadAndRenderReviews();
-    });
+    toast('Error al eliminar');
   });
 }
 
