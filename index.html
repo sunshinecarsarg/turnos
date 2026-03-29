@@ -2859,7 +2859,7 @@ function compressImage(file, callback) {
 
 // High quality compression (for reviews - multiple images, need balance)
 function compressImageHQ(file, callback) {
-  compressImageCustom(file, 1200, 700000, callback);
+  compressImageCustom(file, 800, 150000, callback); // 150KB per photo max
 }
 
 function compressImageCustom(file, maxPx, maxBytes, callback) {
@@ -4016,6 +4016,13 @@ function publishReview() {
   if (!titulo) { toast('Ingresa un titulo'); return; }
   if (!texto) { toast('Ingresa el texto'); return; }
   if (!rvStars) { toast('Selecciona una calificacion'); return; }
+
+  // Check total size
+  var totalSize = rvImgData.reduce(function(s,i){ return s+(i?i.length:0); }, 0);
+  if (totalSize > 850000) {
+    toast('Las ' + rvImgData.length + ' fotos pesan demasiado (' + Math.round(totalSize/1024) + 'KB). Usa menos fotos o intenta con imagenes mas pequeñas.');
+    return;
+  }
 
   var review = {
     id: 'RV' + Date.now(),
