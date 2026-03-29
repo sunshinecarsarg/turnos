@@ -809,40 +809,51 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
   </div>
 
   <div class="rv-section">
-    <!-- Admin form (solo visible si admin logueado) -->
-    <div class="rv-admin-form" id="rv-admin-form" style="display:none;">
-      <div class="rv-admin-title">&#128221; Nueva publicacion</div>
-      
-        <div style="font-size:.85rem;color:var(--muted);"><strong style="color:#fff;">Click o arrastra</strong> una foto del auto</div>
-        <img id="rv-preview" class="rv-upload-preview" src="" alt="">
-      </div>
-      <div class="fg" style="margin-bottom:1rem;">
-        <div class="fi full">
-          <label class="flabel">Titulo *</label>
-          <input type="text" class="finput" id="rv-titulo" placeholder="BMW M2 - La bestia alemana">
+
+    <!-- Admin form - SOLO ADMIN -->
+    <div id="rv-admin-form" style="display:none !important;">
+      <div style="background:var(--g1);border:1px solid rgba(100,180,255,.2);border-radius:12px;padding:2rem;margin-bottom:2.5rem;">
+        <div class="rv-admin-title">&#128221; Nueva publicacion</div>
+
+        <!-- Fotos ilimitadas -->
+        <div style="margin-bottom:1rem;">
+          <div id="rv-fotos-grid" style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.5rem;"></div>
+          <label style="display:inline-flex;align-items:center;gap:.5rem;cursor:pointer;background:rgba(100,180,255,.08);border:1px dashed rgba(100,180,255,.3);border-radius:8px;padding:.6rem 1rem;font-size:.82rem;color:#64b4ff;">
+            <input type="file" accept="image/*" multiple style="display:none;" onchange="rvAddFiles(this.files)">
+            &#128247; Agregar foto(s)
+          </label>
+          <span style="font-size:.72rem;color:var(--muted);margin-left:.5rem;">Sin limite</span>
         </div>
-      </div>
-      <div style="margin-bottom:.8rem;">
-        <label class="flabel" style="display:block;margin-bottom:.5rem;">Calificacion</label>
-        <div class="rv-star-row" id="rv-star-row">
-          <button class="rv-star-sel" onclick="rvSetStar(1)">&#11088;</button>
-          <button class="rv-star-sel" onclick="rvSetStar(2)">&#11088;</button>
-          <button class="rv-star-sel" onclick="rvSetStar(3)">&#11088;</button>
-          <button class="rv-star-sel" onclick="rvSetStar(4)">&#11088;</button>
-          <button class="rv-star-sel" onclick="rvSetStar(5)">&#11088;</button>
+
+        <div class="fg" style="margin-bottom:1rem;">
+          <div class="fi full">
+            <label class="flabel">Titulo *</label>
+            <input type="text" class="finput" id="rv-titulo" placeholder="BMW M2 - La bestia alemana">
+          </div>
         </div>
+        <div style="margin-bottom:.8rem;">
+          <label class="flabel" style="display:block;margin-bottom:.5rem;">Calificacion</label>
+          <div class="rv-star-row" id="rv-star-row">
+            <button class="rv-star-sel" onclick="rvSetStar(1)">&#11088;</button>
+            <button class="rv-star-sel" onclick="rvSetStar(2)">&#11088;</button>
+            <button class="rv-star-sel" onclick="rvSetStar(3)">&#11088;</button>
+            <button class="rv-star-sel" onclick="rvSetStar(4)">&#11088;</button>
+            <button class="rv-star-sel" onclick="rvSetStar(5)">&#11088;</button>
+          </div>
+        </div>
+        <div style="margin-bottom:1rem;">
+          <label class="flabel" style="display:block;margin-bottom:.5rem;">Texto / descripcion *</label>
+          <textarea class="wr-textarea" id="rv-texto" placeholder="Escribi tu review..." style="height:160px;border-color:rgba(100,180,255,.3);"></textarea>
+        </div>
+        <button class="btn" onclick="publishReview()" style="background:linear-gradient(135deg,#3a8fff,#1a6fd4);">
+          Publicar review
+        </button>
       </div>
-      <div style="margin-bottom:1rem;">
-        <label class="flabel" style="display:block;margin-bottom:.5rem;">Texto / descripcion *</label>
-        <textarea class="wr-textarea" id="rv-texto" placeholder="Escribi tu review sin limite de caracteres..." style="height:160px;border-color:rgba(100,180,255,.3);"></textarea>
-      </div>
-      <button class="btn" onclick="if(!isAdminLogged){toast('Solo el admin puede publicar reviews');return;} publishReview();" style="background:linear-gradient(135deg,#3a8fff,#1a6fd4);">
-        Publicar review
-      </button>
     </div>
 
     <!-- Lista de reviews -->
     <div class="rv-list" id="rv-list"></div>
+
   </div>
 </div>
 
@@ -2015,11 +2026,11 @@ function showView(name) {
   if (name === 'galeria') { renderGaleria(); }
   if (name === 'resenas') { syncResenas(); renderResenas(); }
   if (name === 'reviews') {
-    // Always enforce admin check - never show form to non-admins
-    var form = document.getElementById('rv-admin-form');
-    if (form) form.style.display = 'none'; // hide first
     loadAndRenderReviews();
-    if (form && isAdminLogged) form.style.display = 'block';
+    var form = document.getElementById('rv-admin-form');
+    if (form) {
+      form.style.cssText = isAdminLogged ? 'display:block !important;' : 'display:none !important;';
+    }
   }
 }
 
