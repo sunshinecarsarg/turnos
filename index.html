@@ -504,6 +504,51 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
     <!-- PASO 1 -->
     <div class="panel active" id="p1">
       <div class="svc-grid" id="svc-grid"></div>
+      <!-- HOMOLOGACION VTV -->
+      <div style="
+        margin-bottom:1.5rem;
+        border:1px solid rgba(100,180,255,.2);
+        border-radius:8px; overflow:hidden;
+        background:linear-gradient(135deg,#0a0f1a 0%,#0d1520 50%,#0a0f1a 100%);
+        padding:1.8rem 2rem;
+        display:flex; align-items:center; justify-content:space-between;
+        gap:1.5rem; flex-wrap:wrap; position:relative;
+      ">
+        <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 20% 50%,rgba(100,180,255,.07) 0%,transparent 70%);pointer-events:none;"></div>
+        <div style="position:relative;z-index:1;">
+          <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem;">
+            <div style="
+              display:inline-block;font-size:.62rem;letter-spacing:2px;text-transform:uppercase;
+              background:rgba(100,180,255,.1);border:1px solid rgba(100,180,255,.3);
+              color:#64b4ff;padding:.2rem .7rem;border-radius:50px;font-weight:700;
+            ">Tramite oficial</div>
+          </div>
+          <div style="font-family:'Bebas Neue',cursive;font-size:clamp(1.3rem,4vw,2rem);letter-spacing:2px;line-height:1;margin-bottom:.5rem;">
+            &#128295; HOMOLOGACION <span style="background:linear-gradient(135deg,#64b4ff,#3a8fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">VTV</span>
+          </div>
+          <div style="font-size:.78rem;color:rgba(255,255,255,.5);font-weight:600;letter-spacing:.5px;margin-bottom:.3rem;">
+            Suspension Neumatica &mdash; Certificacion oficial
+          </div>
+          <p style="font-size:.8rem;color:rgba(255,255,255,.4);line-height:1.5;max-width:420px;">
+            Contamos con el <strong style="color:rgba(255,255,255,.7);">Ing. Sergio Liendo</strong>, habilitado por <strong style="color:#64b4ff;">COPIME</strong>, para la homologacion de suspension neumatica ante la VTV.<br>
+            <span style="color:rgba(255,255,255,.3);">&#8987; Tiempo estimado: <strong style="color:rgba(255,255,255,.5);">10 dias habiles</strong> &nbsp;&middot;&nbsp; Precio a coordinar segun vehiculo.</span>
+          </p>
+        </div>
+        <div style="position:relative;z-index:1;text-align:center;flex-shrink:0;">
+          <a href="https://wa.me/5491173665464?text=Hola!%20Me%20interesa%20consultar%20por%20la%20homologacion%20de%20suspension%20neumatica%20para%20la%20VTV." target="_blank" style="
+            display:inline-flex;align-items:center;gap:.5rem;
+            background:#25D366;color:#fff;text-decoration:none;
+            padding:.7rem 1.4rem;border-radius:50px;
+            font-family:'Outfit',sans-serif;font-size:.85rem;font-weight:700;
+            box-shadow:0 4px 15px rgba(37,211,102,.3);
+            transition:all .2s;
+          " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+            &#128242; Consultar por WhatsApp
+          </a>
+          <div style="font-size:.68rem;color:rgba(255,255,255,.25);margin-top:.5rem;letter-spacing:1px;">Precio segun vehiculo</div>
+        </div>
+      </div>
+
       <!-- BANNER PRODUCTOS -->
       <div style="
         margin-bottom:1.5rem;
@@ -1215,12 +1260,15 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
           </div>
         </div>
 
-        <div style="display:flex;gap:2rem;margin:1rem 0;">
+        <div style="display:flex;gap:2rem;margin:1rem 0;flex-wrap:wrap;">
           <label style="display:flex;align-items:center;gap:.5rem;font-size:.85rem;cursor:pointer;">
             <input type="checkbox" id="sv-allday"> Ocupa todo el dia (ceramico/correccion)
           </label>
           <label style="display:flex;align-items:center;gap:.5rem;font-size:.85rem;cursor:pointer;">
             <input type="checkbox" id="sv-lavado"> Cuenta como lavado (fidelidad)
+          </label>
+          <label style="display:flex;align-items:center;gap:.5rem;font-size:.85rem;cursor:pointer;">
+            <input type="checkbox" id="sv-extra"> Servicio extra (abre WhatsApp, no reserva turno)
           </label>
         </div>
 
@@ -1785,12 +1833,15 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
         <input type="text" class="finput" id="edit-sv-tags">
       </div>
     </div>
-    <div style="display:flex;gap:2rem;margin:1rem 0;">
+    <div style="display:flex;gap:1.5rem;margin:1rem 0;flex-wrap:wrap;">
       <label style="display:flex;align-items:center;gap:.5rem;font-size:.85rem;cursor:pointer;">
-        <input type="checkbox" id="edit-sv-allday"> Todo el dia
+        <input type="checkbox" id="edit-sv-allday"> Ocupa todo el dia
       </label>
       <label style="display:flex;align-items:center;gap:.5rem;font-size:.85rem;cursor:pointer;">
         <input type="checkbox" id="edit-sv-lavado"> Cuenta como lavado
+      </label>
+      <label style="display:flex;align-items:center;gap:.5rem;font-size:.85rem;cursor:pointer;">
+        <input type="checkbox" id="edit-sv-extra"> Servicio extra (WhatsApp)
       </label>
     </div>
 
@@ -2014,15 +2065,17 @@ function publishServicio() {
   if (!rawSedan) { toast('Ingresa el precio Sedan'); return; }
   if (!desc) { toast('Ingresa la descripcion'); return; }
 
+  var isExtra = document.getElementById('sv-extra') ? document.getElementById('sv-extra').checked : false;
   var svc = {
     name: nombre,
     raw: rawSedan,
     rawSuv: rawSuv || rawSedan,
-    price: 'Desde $' + rawSedan.toLocaleString('es-AR'),
+    price: isExtra ? 'A coordinar' : 'Desde $' + rawSedan.toLocaleString('es-AR'),
     desc: desc,
     tags: tags ? tags.split(',').map(function(t){ return t.trim(); }) : [],
     allDay: allDay,
     isLavado: isLavado,
+    isExtra: isExtra,
     activo: true,
     img: window.svImgData || null,
     orden: Date.now()
@@ -2037,6 +2090,7 @@ function publishServicio() {
     document.getElementById('sv-tags').value = '';
     document.getElementById('sv-allday').checked = false;
     document.getElementById('sv-lavado').checked = false;
+    if (document.getElementById('sv-extra')) document.getElementById('sv-extra').checked = false;
     var prev = document.getElementById('sv-img-preview');
     if (prev) prev.style.display = 'none';
     window.svImgData = null;
@@ -2152,7 +2206,13 @@ function renderSvcs() {
   for (var i = 0; i < SVCS.length; i++) {
     var s = SVCS[i];
     var sel = S.svc && S.svc.id === s.id;
-    html += '<div class="svc-card' + (sel ? ' sel' : '') + '" onclick="pickSvc(\'' + s.id + '\')">';
+    // Extra services open WhatsApp instead of booking
+    var cardOnclick = s.isExtra
+      ? 'onclick="window.open(\'https://wa.me/5491173665464?text=\' + encodeURIComponent(\'Hola! Me interesa consultar por el servicio: \' + s.name), \'_blank\')\"'
+      : 'onclick="pickSvc(\'' + s.id + '\')\"';
+    var extraBadge = s.isExtra ? '<div style="position:absolute;top:.5rem;right:.5rem;background:rgba(100,180,255,.15);border:1px solid rgba(100,180,255,.4);color:#64b4ff;font-size:.6rem;font-weight:700;letter-spacing:1.5px;padding:.15rem .5rem;border-radius:50px;text-transform:uppercase;">Consultar</div>' : '';
+    html += '<div class="svc-card' + (sel && !s.isExtra ? ' sel' : '') + '" ' + cardOnclick + ' style="' + (s.isExtra ? 'border-color:rgba(100,180,255,.25);' : '') + '">';
+    html += extraBadge;
     if (s.img) { html += '<div class="svc-card-bg" style="background-image:url(' + s.img + ')"></div>'; }
     html += '<div class="svc-name">' + s.name + '</div>';
     var displayPrice = (S.tipo) 
@@ -2194,6 +2254,7 @@ function editSvcEl(btn) {
   document.getElementById('edit-sv-tags').value = svc.tags ? svc.tags.join(', ') : '';
   document.getElementById('edit-sv-allday').checked = !!svc.allDay;
   document.getElementById('edit-sv-lavado').checked = !!svc.isLavado;
+  document.getElementById('edit-sv-extra').checked = !!svc.isExtra;
   document.getElementById('edit-svc-preview').style.display = 'none';
 
   document.getElementById('edit-svc-overlay').classList.add('open');
@@ -2227,15 +2288,17 @@ function saveEditSvc() {
   if (!rawSedan) { toast('Ingresa el precio Sedan'); return; }
   if (!desc) { toast('Ingresa la descripcion'); return; }
 
+  var isExtraEdit = document.getElementById('edit-sv-extra').checked;
   var updates = {
     name: nombre,
     raw: rawSedan,
     rawSuv: rawSuv,
-    price: 'Desde $' + rawSedan.toLocaleString('es-AR'),
+    price: isExtraEdit ? 'A coordinar' : 'Desde $' + rawSedan.toLocaleString('es-AR'),
     desc: desc,
     tags: tags ? tags.split(',').map(function(t){ return t.trim(); }) : [],
     allDay: document.getElementById('edit-sv-allday').checked,
-    isLavado: document.getElementById('edit-sv-lavado').checked
+    isLavado: document.getElementById('edit-sv-lavado').checked,
+    isExtra: isExtraEdit
   };
 
   // Only update image if a new one was picked
