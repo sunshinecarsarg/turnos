@@ -1770,22 +1770,12 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
 <div class="modal-overlay" id="edit-rv-overlay" onclick="closeEditRv()">
   <div class="modal-box" onclick="event.stopPropagation()">
     <div class="modal-title" style="color:#64b4ff;">&#9998; Editar review</div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:1rem;">
-      <div style="position:relative;border:2px dashed rgba(100,180,255,.3);border-radius:8px;padding:.8rem;text-align:center;cursor:pointer;overflow:hidden;">
-        <input type="file" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;" onchange="editRvFilePickN(this.files[0],0)">
-        <div style="font-size:.72rem;color:var(--muted);">Foto 1</div>
-        <img id="edit-rv-preview-0" style="max-height:60px;border-radius:4px;margin-top:.3rem;display:none;width:100%;object-fit:cover;" src="" alt="">
-      </div>
-      <div style="position:relative;border:2px dashed rgba(100,180,255,.3);border-radius:8px;padding:.8rem;text-align:center;cursor:pointer;overflow:hidden;">
-        <input type="file" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;" onchange="editRvFilePickN(this.files[0],1)">
-        <div style="font-size:.72rem;color:var(--muted);">Foto 2</div>
-        <img id="edit-rv-preview-1" style="max-height:60px;border-radius:4px;margin-top:.3rem;display:none;width:100%;object-fit:cover;" src="" alt="">
-      </div>
-      <div style="position:relative;border:2px dashed rgba(100,180,255,.3);border-radius:8px;padding:.8rem;text-align:center;cursor:pointer;overflow:hidden;">
-        <input type="file" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;" onchange="editRvFilePickN(this.files[0],2)">
-        <div style="font-size:.72rem;color:var(--muted);">Foto 3</div>
-        <img id="edit-rv-preview-2" style="max-height:60px;border-radius:4px;margin-top:.3rem;display:none;width:100%;object-fit:cover;" src="" alt="">
-      </div>
+    <div style="margin-bottom:1rem;">
+      <div id="edit-rv-fotos-grid" style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.5rem;"></div>
+      <label style="display:inline-flex;align-items:center;gap:.5rem;cursor:pointer;background:rgba(100,180,255,.08);border:1px dashed rgba(100,180,255,.3);border-radius:8px;padding:.6rem 1rem;font-size:.82rem;color:#64b4ff;">
+        <input type="file" accept="image/*" multiple style="display:none;" onchange="editRvAddFiles(this.files)">
+        &#128247; Agregar foto(s)
+      </label>
     </div>
     <div class="fi" style="margin-bottom:.8rem;"><label class="flabel">Titulo *</label><input type="text" class="finput" id="edit-rv-titulo"></div>
     <div style="margin-bottom:.8rem;">
@@ -3075,7 +3065,7 @@ function saveEditProd() {
 }
 
 // ══ EDIT REVIEW ══
-var editRvId = null, editRvNewImgs = [null,null,null], editRvStars = 0;
+var editRvId = null, editRvImgs = [], editRvStars = 0;
 function editRvSetStar(n) {
   editRvStars = n;
   var btns = document.getElementById('edit-rv-stars-row').querySelectorAll('.rv-star-sel');
@@ -3087,26 +3077,38 @@ function editReviewElFn(id) {
   if (!rv) { toast('Error al cargar review'); return; }
   document.getElementById('edit-rv-titulo').value = rv.titulo || '';
   document.getElementById('edit-rv-texto').value = rv.texto || '';
-  editRvNewImgs = [null, null, null];
-  var existingImgs = [rv.img, rv.img2, rv.img3];
-  for (var ei = 0; ei < 3; ei++) {
-    var ep = document.getElementById('edit-rv-preview-' + ei);
-    if (ep) {
-      if (existingImgs[ei]) { ep.src = existingImgs[ei]; ep.style.display = 'block'; }
-      else ep.style.display = 'none';
-    }
-  }
+  // Load existing images
+  editRvImgs = (rv.imgs && rv.imgs.length) ? rv.imgs.slice() : [rv.img, rv.img2, rv.img3].filter(Boolean);
+  editRvRenderGrid();
   editRvSetStar(rv.stars || 0);
   document.getElementById('edit-rv-overlay').classList.add('open');
 }
-function closeEditRv() { document.getElementById('edit-rv-overlay').classList.remove('open'); editRvId = null; editRvNewImgs = [null,null,null]; }
-function editRvFilePickN(f, n) {
-  if (!f) return;
-  compressImage(f, function(d){
-    editRvNewImgs[n] = d;
-    var p = document.getElementById('edit-rv-preview-' + n);
-    if (p) { p.src = d; p.style.display = 'block'; }
-  });
+function closeEditRv() { document.getElementById('edit-rv-overlay').classList.remove('open'); editRvId = null; editRvImgs = []; }
+function editRvAddFiles(files) {
+  for (var fi = 0; fi < files.length; fi++) {
+    (function(f) {
+      compressImage(f, function(d){
+        editRvImgs.push(d);
+        editRvRenderGrid();
+      });
+    })(files[fi]);
+  }
+}
+
+function editRvRenderGrid() {
+  var grid = document.getElementById('edit-rv-fotos-grid');
+  if (!grid) return;
+  grid.innerHTML = editRvImgs.map(function(img, i) {
+    return '<div style="position:relative;width:70px;height:70px;">' +
+      '<img src="' + img + '" style="width:70px;height:70px;object-fit:cover;border-radius:6px;border:1px solid rgba(100,180,255,.3);">' +
+      '<button onclick="editRvRemoveFoto(' + i + ')" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:#cc007e;border:none;color:#fff;font-size:.6rem;cursor:pointer;">&#10005;</button>' +
+      '</div>';
+  }).join('');
+}
+
+function editRvRemoveFoto(i) {
+  editRvImgs.splice(i, 1);
+  editRvRenderGrid();
 }
 function saveEditRv() {
   if (!editRvId) return;
@@ -3114,9 +3116,10 @@ function saveEditRv() {
   var texto = document.getElementById('edit-rv-texto').value.trim();
   if (!titulo || !texto) { toast('Completa titulo y texto'); return; }
   var updates = { titulo: titulo, texto: texto, stars: editRvStars };
-  if (editRvNewImgs[0]) updates.img = editRvNewImgs[0];
-  if (editRvNewImgs[1]) updates.img2 = editRvNewImgs[1];
-  if (editRvNewImgs[2]) updates.img3 = editRvNewImgs[2];
+  if (editRvImgs.length > 0) {
+    updates.imgs = editRvImgs;
+    updates.img = editRvImgs[0];
+  }
   db.collection('reviews_autos').doc(editRvId).update(updates).then(function(){
     toast('Review actualizada!'); closeEditRv(); loadAndRenderReviews();
   }).catch(function(e){ console.error(e); toast('Error al guardar'); });
@@ -3929,7 +3932,7 @@ function renderBars(elId, data, max, color) {
 // REVIEWS AUTOS
 // ==========================================
 var rvStars = 0;
-var rvImgData = [null, null, null];
+var rvImgData = []; // array of base64 strings, unlimited
 var rvAdminActive = false;
 
 function rvSetStar(n) {
@@ -3938,15 +3941,33 @@ function rvSetStar(n) {
   for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('on', i < n);
 }
 
-function rvFileN(f, n) {
-  if (!f || !f.type.startsWith('image/')) return;
-  if (f.size > 10*1024*1024) { toast('Foto mayor a 10MB'); return; }
-  compressImage(f, function(data) {
-    rvImgData[n] = data;
-    var prev = document.getElementById('rv-preview-' + n);
-    if (prev) { prev.src = data; prev.style.display = 'block'; }
-    toast('Foto ' + (n+1) + ' lista');
-  });
+function rvAddFiles(files) {
+  for (var fi = 0; fi < files.length; fi++) {
+    (function(f) {
+      if (!f.type.startsWith('image/')) return;
+      compressImage(f, function(data) {
+        rvImgData.push(data);
+        rvRenderFotoGrid();
+        toast('Foto agregada (' + rvImgData.length + ')');
+      });
+    })(files[fi]);
+  }
+}
+
+function rvRenderFotoGrid() {
+  var grid = document.getElementById('rv-fotos-grid');
+  if (!grid) return;
+  grid.innerHTML = rvImgData.map(function(img, i) {
+    return '<div style="position:relative;width:80px;height:80px;">' +
+      '<img src="' + img + '" style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid rgba(100,180,255,.3);">' +
+      '<button onclick="rvRemoveFoto(' + i + ')" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:#cc007e;border:none;color:#fff;font-size:.6rem;cursor:pointer;display:flex;align-items:center;justify-content:center;">&#10005;</button>' +
+      '</div>';
+  }).join('');
+}
+
+function rvRemoveFoto(i) {
+  rvImgData.splice(i, 1);
+  rvRenderFotoGrid();
 }
 
 function publishReview() {
@@ -3956,15 +3977,13 @@ function publishReview() {
   if (!texto) { toast('Ingresa el texto'); return; }
   if (!rvStars) { toast('Selecciona una calificacion'); return; }
 
-  var imgs = rvImgData.filter(function(i){ return i !== null; });
   var review = {
     id: 'RV' + Date.now(),
     titulo: titulo,
     texto: texto,
     stars: rvStars,
-    img: imgs[0] || null,
-    img2: imgs[1] || null,
-    img3: imgs[2] || null,
+    imgs: rvImgData.slice(),
+    img: rvImgData[0] || null,
     fecha: new Date().toLocaleDateString('es-AR', {day:'numeric',month:'long',year:'numeric'}),
     createdAt: new Date().toISOString()
   };
@@ -3975,11 +3994,9 @@ function publishReview() {
     // Reset form
     document.getElementById('rv-titulo').value = '';
     document.getElementById('rv-texto').value = '';
-    for (var ri = 0; ri < 3; ri++) {
-      var rp = document.getElementById('rv-preview-' + ri);
-      if (rp) rp.style.display = 'none';
-    }
-    rvStars = 0; rvImgData = [null, null, null];
+    rvImgData = [];
+    rvRenderFotoGrid();
+    rvStars = 0;
     rvSetStar(0);
     loadAndRenderReviews();
   }).catch(function(e) {
@@ -4011,20 +4028,29 @@ function renderReviewsList(reviews) {
 
   var starsMap = {1:'&#11088;',2:'&#11088;&#11088;',3:'&#11088;&#11088;&#11088;',4:'&#11088;&#11088;&#11088;&#11088;',5:'&#11088;&#11088;&#11088;&#11088;&#11088;'};
 
+  // Clear old timers
+  Object.keys(slideshowTimers).forEach(function(k){ clearInterval(slideshowTimers[k]); });
+  slideshowTimers = {};
+
   list.innerHTML = reviews.map(function(rv) {
-    var imgs = [rv.img, rv.img2, rv.img3].filter(Boolean);
+    var imgs = (rv.imgs && rv.imgs.length) ? rv.imgs : [rv.img, rv.img2, rv.img3].filter(Boolean);
+    var ssId = 'ss-' + rv.id;
     var imgHtml;
     if (imgs.length === 0) {
       imgHtml = '<div class="rv-img-placeholder">&#128663;</div>';
     } else if (imgs.length === 1) {
-      imgHtml = '<img class="rv-img" src="' + imgs[0] + '" alt="' + rv.titulo + '">';
+      imgHtml = '<img class="rv-img" src="' + imgs[0] + '" alt="' + rv.titulo + '" style="width:100%;height:100%;object-fit:cover;">';
     } else {
-      // Multiple images - show as mini gallery
-      imgHtml = '<div style="display:grid;grid-template-rows:repeat(' + imgs.length + ',1fr);height:100%;gap:2px;">';
+      // Slideshow
+      imgHtml = '<div id="' + ssId + '" style="position:relative;width:100%;height:100%;min-height:200px;overflow:hidden;">';
       for (var ii = 0; ii < imgs.length; ii++) {
-        imgHtml += '<img src="' + imgs[ii] + '" style="width:100%;height:100%;object-fit:cover;" alt="">';
+        imgHtml += '<img src="' + imgs[ii] + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:' + (ii===0?'1':'0') + ';transition:opacity .8s ease;" data-ss="' + ssId + '" data-idx="' + ii + '">';
       }
-      imgHtml += '</div>';
+      imgHtml += '<div style="position:absolute;bottom:.5rem;left:50%;transform:translateX(-50%);display:flex;gap:.3rem;">';
+      for (var di = 0; di < imgs.length; di++) {
+        imgHtml += '<div id="' + ssId + '-dot-' + di + '" style="width:6px;height:6px;border-radius:50%;background:' + (di===0?'#fff':'rgba(255,255,255,.4)') + ';transition:background .3s;"></div>';
+      }
+      imgHtml += '</div></div>';
     }
 
     return '<div class="rv-card">' +
@@ -4040,16 +4066,59 @@ function renderReviewsList(reviews) {
       '</div>' +
     '</div>';
   }).join('');
+
+  // Start slideshows after DOM is updated
+  setTimeout(startSlideshows, 100);
 }
 
 function editReviewEl(btn) { editReviewElFn(btn.getAttribute('data-id')); }
+// ══ SLIDESHOW ENGINE ══
+var slideshowTimers = {};
+function startSlideshows() {
+  // Find all slideshow containers and start auto-rotate
+  var containers = document.querySelectorAll('[data-ss]');
+  var ssIds = {};
+  for (var i = 0; i < containers.length; i++) {
+    ssIds[containers[i].getAttribute('data-ss')] = true;
+  }
+  Object.keys(ssIds).forEach(function(ssId) {
+    if (slideshowTimers[ssId]) clearInterval(slideshowTimers[ssId]);
+    var imgs = document.querySelectorAll('[data-ss="' + ssId + '"]');
+    if (imgs.length < 2) return;
+    var cur = 0;
+    slideshowTimers[ssId] = setInterval(function() {
+      var allImgs = document.querySelectorAll('[data-ss="' + ssId + '"]');
+      if (!allImgs.length) { clearInterval(slideshowTimers[ssId]); return; }
+      allImgs[cur].style.opacity = '0';
+      var dot = document.getElementById(ssId + '-dot-' + cur);
+      if (dot) dot.style.background = 'rgba(255,255,255,.4)';
+      cur = (cur + 1) % allImgs.length;
+      allImgs[cur].style.opacity = '1';
+      var newDot = document.getElementById(ssId + '-dot-' + cur);
+      if (newDot) newDot.style.background = '#fff';
+    }, 3000);
+  });
+}
+
 function deleteReviewEl(btn) {
   var id = btn.getAttribute('data-id');
   if (!confirm('Eliminar esta review?')) return;
-  db.collection('reviews_autos').doc(id).delete().then(function() {
+  // Find matching review to get Firestore doc id
+  var rv = currentReviews.find(function(r){ return r.id === id; });
+  var docId = rv ? rv.id : id;
+  db.collection('reviews_autos').doc(docId).delete().then(function() {
+    currentReviews = currentReviews.filter(function(r){ return r.id !== id; });
     toast('Review eliminada');
     loadAndRenderReviews();
-  }).catch(function(e){ console.error(e); toast('Error al eliminar'); });
+  }).catch(function(e){
+    console.error('Delete error:', e);
+    // Try querying by field
+    db.collection('reviews_autos').where('id','==',id).get().then(function(snap){
+      snap.forEach(function(d){ d.ref.delete(); });
+      toast('Review eliminada');
+      loadAndRenderReviews();
+    });
+  });
 }
 
 function rvToggleEl(btn) {
