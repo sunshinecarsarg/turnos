@@ -836,7 +836,7 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
         <label class="flabel" style="display:block;margin-bottom:.5rem;">Texto / descripcion *</label>
         <textarea class="wr-textarea" id="rv-texto" placeholder="Escribi tu review sin limite de caracteres..." style="height:160px;border-color:rgba(100,180,255,.3);"></textarea>
       </div>
-      <button class="btn" onclick="publishReview()" style="background:linear-gradient(135deg,#3a8fff,#1a6fd4);">
+      <button class="btn" onclick="if(!isAdminLogged){toast('Solo el admin puede publicar reviews');return;} publishReview();" style="background:linear-gradient(135deg,#3a8fff,#1a6fd4);">
         Publicar review
       </button>
     </div>
@@ -2015,9 +2015,11 @@ function showView(name) {
   if (name === 'galeria') { renderGaleria(); }
   if (name === 'resenas') { syncResenas(); renderResenas(); }
   if (name === 'reviews') {
-    loadAndRenderReviews();
+    // Always enforce admin check - never show form to non-admins
     var form = document.getElementById('rv-admin-form');
-    if (form) form.style.display = isAdminLogged ? 'block' : 'none';
+    if (form) form.style.display = 'none'; // hide first
+    loadAndRenderReviews();
+    if (form && isAdminLogged) form.style.display = 'block';
   }
 }
 
@@ -3997,6 +3999,7 @@ function rvRemoveFoto(i) {
 }
 
 function publishReview() {
+  if (!isAdminLogged) { toast('Solo el admin puede publicar reviews'); return; }
   var titulo = document.getElementById('rv-titulo').value.trim();
   var texto = document.getElementById('rv-texto').value.trim();
   if (!titulo) { toast('Ingresa un titulo'); return; }
