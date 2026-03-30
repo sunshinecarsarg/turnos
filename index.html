@@ -4913,84 +4913,38 @@ function chatSug(text) {
   if (sugs) sugs.style.display = 'none';
 }
 
-function getBotReply(text) {
-  var t = text.toLowerCase();
-  var wa = '+54 9 11 7366-5464';
-  var web = 'www.sunshinecarsdetail.com';
-  var nl = '\n';
-
-  if (t.match(/precio|cuanto.?cuesta|cuanto.?vale|tarifa|cobran/)) {
-    return 'Nuestros precios:' + nl + nl + 'Full Shine: Sedan $65.000 / SUV $70.000' + nl + 'High Shine: Sedan $100.000 / SUV $120.000' + nl + 'Total Shine: Sedan $160.000 / SUV $200.000' + nl + 'Correccion y Brillo: Sedan $250.000 / SUV $300.000' + nl + 'Ceramico N1: Sedan $400.000 / SUV $500.000' + nl + 'Ceramico N2: Sedan $550.000 / SUV $650.000' + nl + 'Ceramico N3: Sedan $650.000 / SUV $750.000';
-  }
-  if (t.match(/full.?shine/)) {
-    return 'Full Shine' + nl + nl + 'Descontaminante ferrico, cera protectora, aspirado profundo, revitalizado de plasticos y proteccion UV.' + nl + nl + 'Sedan/Hatch: $65.000 | SUV/Camioneta: $70.000' + nl + nl + 'Reserva en ' + web;
-  }
-  if (t.match(/high.?shine/)) {
-    return 'High Shine' + nl + nl + 'Todo el Full Shine + ceramic coating llantas, pasarruedas Full Black, sellado cristales, cuero hidratado.' + nl + nl + 'Sedan: $100.000 | SUV: $120.000';
-  }
-  if (t.match(/total.?shine/)) {
-    return 'Total Shine' + nl + nl + 'Todo el High Shine + lavado de motor a vapor y barniz protector plasticos.' + nl + nl + 'Sedan: $160.000 | SUV: $200.000';
-  }
-  if (t.match(/ceramico|ceramic/)) {
-    return 'Tratamientos Ceramicos (todo el dia, 6-10 hs):' + nl + nl + 'N1 (Vonixx): Sedan $400.000 / SUV $500.000' + nl + 'N2 (Gyeon Quartz): Sedan $550.000 / SUV $650.000' + nl + 'N3: Sedan $650.000 / SUV $750.000';
-  }
-  if (t.match(/zona|donde.?llegan|cobertura|plata|gba|caba/)) {
-    return 'Zonas de cobertura:' + nl + nl + 'La Plata: Casco urbano y localidades' + nl + 'GBA: Norte, Sur, Oeste y Este' + nl + 'CABA: Todas las comunas' + nl + nl + 'Fuera de La Plata puede aplicar adicional por traslado.';
-  }
-  if (t.match(/horario|cuando.?atienden|dias.?atienden|disponibilidad/)) {
-    return 'Horarios:' + nl + nl + 'Lunes a Viernes: 08:00 / 11:30 / 15:00 hs' + nl + 'Sabado: Solo 15:30 hs' + nl + 'Domingo: Solo High Shine en adelante a las 08:00 hs' + nl + nl + 'Reserva en ' + web;
-  }
-  if (t.match(/reservar|sacar.?turno|pedir.?turno|como.?reservo/)) {
-    return 'Como reservar:' + nl + nl + '1. Entra a ' + web + nl + '2. Elige el servicio' + nl + '3. Selecciona fecha y horario' + nl + '4. Completa tus datos' + nl + '5. Paga la seña del 10%' + nl + '6. Confirmacion por WhatsApp!';
-  }
-  if (t.match(/se.a|adelanto|deposito|transferencia|alias|brubank/)) {
-    return 'Seña: 10% del servicio' + nl + nl + 'BruBank - Alias: sergio2292' + nl + nl + 'Una vez confirmada te contactamos por WhatsApp.';
-  }
-  if (t.match(/vtv|homolog|suspension|neumatica|copime/)) {
-    return 'Homologacion VTV - Suspension Neumatica' + nl + nl + 'Contamos con el Ing. Sergio Liendo, habilitado por COPIME.' + nl + nl + 'Tiempo: 10 dias habiles' + nl + 'Precio segun vehiculo' + nl + nl + 'Consultanos: ' + wa;
-  }
-  if (t.match(/product|tienda|ambientador|lavado.?seco|microfibra|claybar/)) {
-    return 'Productos disponibles:' + nl + nl + 'Ambientadores 250ml: $7.000' + nl + 'Lavado en Seco 500ml: $20.000' + nl + 'Microfibra Laffitte: $6.000' + nl + 'Claybar Vintex: $16.000' + nl + nl + 'Envio gratis en La Plata. Ver en seccion Tienda.';
-  }
-  if (t.match(/fidelidad|descuento|promo|cliente.?frecuente/)) {
-    return 'Programa de Fidelidad:' + nl + nl + 'Cada 4 lavados completados, el 5to tiene 20% de descuento automatico.';
-  }
-  if (t.match(/cuanto.?tarda|demora|cuanto.?tiempo|cuantas.?horas/)) {
-    return 'Tiempos estimados:' + nl + nl + 'Full Shine: 2-3 hs' + nl + 'High Shine: 3-4 hs' + nl + 'Total Shine: 4-6 hs' + nl + 'Correccion y Brillo: 6-10 hs (todo el dia)' + nl + 'Ceramicos: 6-10 hs (todo el dia)';
-  }
-  if (t.match(/puerta.?a.?puerta|retirar.?auto/)) {
-    return 'Servicio Puerta a Puerta' + nl + nl + 'Retiramos tu auto y lo devolvemos. Tambien lo llevamos a donde necesites.' + nl + nl + 'Precio a coordinar. Consultanos: ' + wa;
-  }
-  if (t.match(/necesit|requis|agua|enchufe/)) {
-    return 'Requisitos:' + nl + nl + '- Canilla de agua cerca del vehiculo' + nl + '- Enchufe de 220V accesible' + nl + nl + 'El resto del equipamiento lo traemos nosotros.';
-  }
-  if (t.match(/whatsapp|contacto|telefono|llamar/)) {
-    return 'Contacto:' + nl + nl + 'WhatsApp: ' + wa + nl + 'Web: ' + web + nl + 'Instagram: @sunshinecars.arg';
-  }
-  if (t.match(/^(hola|buenos|buen|hi|hey|buenas)/)) {
-    return 'Hola! Bienvenido a SunshineCars Detail.' + nl + nl + 'Somos detailing automotriz a domicilio en La Plata, GBA y CABA.' + nl + nl + 'Preguntame sobre precios, servicios, zonas o como reservar.';
-  }
-  if (t.match(/gracias/)) {
-    return 'De nada! Estamos para ayudarte. Cualquier consulta: ' + wa;
-  }
-  return 'Para darte la mejor atencion escribinos al WhatsApp:' + nl + nl + wa + nl + nl + 'O reserva en ' + web + nl + nl + 'Preguntame sobre: precios, servicios, zonas, horarios o como reservar.';
-}
-
-
 function sendChat() {
   var input = document.getElementById('chat-input');
-  var text = input ? input.value.trim() : '';
+  if (!input) return;
+  var text = input.value.trim();
   if (!text) return;
   input.value = '';
   addChatMsg('user', sanitize(text));
+  chatHistory.push({ role: 'user', content: text });
   var typing = addTyping();
-  // Simulate thinking delay
-  var delay = 600 + Math.random() * 800;
-  setTimeout(function() {
+
+  fetch('https://sunshine-proxy.sergioliendo92.workers.dev', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 500,
+      system: CHAT_SYSTEM,
+      messages: chatHistory.slice(-10)
+    })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data) {
     if (typing) typing.remove();
-    var reply = getBotReply(text);
+    var reply = data.content && data.content[0] ? data.content[0].text : 'Lo siento, hubo un error. Contactanos por WhatsApp.';
     addChatMsg('bot', reply);
-  }, delay);
+    chatHistory.push({ role: 'assistant', content: reply });
+  })
+  .catch(function(e) {
+    console.error('Chat error:', e);
+    if (typing) typing.remove();
+    addChatMsg('bot', 'Hubo un problema de conexion. Escribinos al WhatsApp: +54 9 11 7366-5464');
+  });
 }
 
 setTimeout(function() {
