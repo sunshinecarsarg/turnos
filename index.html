@@ -2137,6 +2137,38 @@ firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
 
 // ==========================================
+// SECURITY - XSS Sanitization
+// ==========================================
+function sanitize(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    .trim();
+}
+
+function sanitizeNum(val, min, max) {
+  var n = parseInt(val) || 0;
+  if (min !== undefined && n < min) n = min;
+  if (max !== undefined && n > max) n = max;
+  return n;
+}
+
+var _reservaCount = 0;
+var _lastReservaTime = 0;
+function checkRateLimit() {
+  var now = Date.now();
+  if (now - _lastReservaTime > 3600000) { _reservaCount = 0; }
+  if (_reservaCount >= 3) { toast('Demasiados intentos. Espera un momento.'); return false; }
+  _reservaCount++;
+  _lastReservaTime = now;
+  return true;
+}
+
+// ==========================================
 // CONFIG
 // ==========================================
 var WA_NUM = '5491173665464';
