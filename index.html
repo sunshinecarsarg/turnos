@@ -2081,14 +2081,21 @@ function showView(name) {
   galAdminActive = isAdminLogged;
   tiendaAdminActive = isAdminLogged;
   svcsAdminActive = isAdminLogged;
-  if (name === 'tienda') { renderTienda(); }
-  if (name === 'galeria') { renderGaleria(); }
+  if (name === 'tienda') {
+    tiendaAdminActive = isAdminLogged;
+    renderTienda();
+  }
+  if (name === 'galeria') {
+    galAdminActive = isAdminLogged;
+    renderGaleria();
+  }
   if (name === 'resenas') { syncResenas(); renderResenas(); }
   if (name === 'reviews') {
     loadAndRenderReviews();
     var form = document.getElementById('rv-admin-form');
     if (form) {
-      form.style.cssText = isAdminLogged ? 'display:block !important;' : 'display:none !important;';
+      var showForm = isAdminLogged && !firebase.auth().currentUser?.isAnonymous;
+      form.style.cssText = showForm ? 'display:block !important;' : 'display:none !important;';
     }
   }
 }
@@ -3011,6 +3018,7 @@ function galFile(f) {
 }
 
 function publishGaleria() {
+  if (!isAdminLogged) { toast('Solo el admin puede publicar'); return; }
   if (!galImgData) { toast('Selecciona una foto'); return; }
   var titulo = document.getElementById('gal-titulo').value.trim();
   if (!titulo) { toast('Ingresa un titulo'); return; }
@@ -3314,6 +3322,7 @@ function prodFile(f) {
 }
 
 function publishProducto() {
+  if (!isAdminLogged) { toast('Solo el admin puede publicar'); return; }
   var nombre = document.getElementById('prod-nombre').value.trim();
   var precio = parseInt(document.getElementById('prod-precio').value) || 0;
   var desc = document.getElementById('prod-desc').value.trim();
@@ -4587,10 +4596,19 @@ document.addEventListener('click', function(e) {
 startListening();
 // Check if already logged in
 firebase.auth().onAuthStateChanged(function(user) {
-  if (user) {
+  // Only set admin logged for real email users, NOT anonymous
+  if (user && !user.isAnonymous) {
     isAdminLogged = true;
+    rvAdminActive = true;
+    galAdminActive = true;
+    tiendaAdminActive = true;
+    svcsAdminActive = true;
   } else {
     isAdminLogged = false;
+    rvAdminActive = false;
+    galAdminActive = false;
+    tiendaAdminActive = false;
+    svcsAdminActive = false;
   }
 });
 
