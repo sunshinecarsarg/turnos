@@ -1034,14 +1034,14 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
         <div style="font-family:'Bebas Neue',cursive;font-size:1.3rem;letter-spacing:2px;color:var(--m);margin-bottom:1.2rem;">
           &#128247; Subir nuevo trabajo
         </div>
-        <div class="rv-upload" id="gal-upload-zone"
-          ondragover="event.preventDefault();this.style.borderColor='var(--m)'"
-          ondragleave="this.style.borderColor=''"
-          ondrop="galDrop(event)">
-          <input type="file" id="gal-file" accept="image/*" onchange="galFile(this.files[0])">
-          <div style="font-size:2rem;margin-bottom:.4rem;">&#128247;</div>
-          <div style="font-size:.85rem;color:var(--muted);"><strong style="color:#fff;">Click o arrastra</strong> la foto del trabajo</div>
-          <img id="gal-preview" style="max-height:140px;border-radius:6px;margin-top:.8rem;display:none;" src="" alt="">
+        <!-- Fotos multiples -->
+        <div style="margin-bottom:1rem;">
+          <div id="gal-fotos-grid" style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.5rem;"></div>
+          <label style="display:inline-flex;align-items:center;gap:.5rem;cursor:pointer;background:rgba(204,0,126,.08);border:1px dashed rgba(204,0,126,.3);border-radius:8px;padding:.6rem 1rem;font-size:.82rem;color:var(--m);">
+            <input type="file" accept="image/*" multiple style="display:none;" onchange="galAddFiles(this.files)">
+            &#128247; Agregar foto(s)
+          </label>
+          <span style="font-size:.72rem;color:var(--muted);margin-left:.5rem;">Hasta 5 fotos (antes, durante, despues)</span>
         </div>
         <div style="margin-top:1rem;display:flex;flex-direction:column;gap:.8rem;">
           <div class="fi">
@@ -3085,7 +3085,7 @@ function toast(msg) {
 // ==========================================
 // GALERIA - Firestore
 // ==========================================
-var galImgData = null;
+var galImgData = [];
 var galAdminActive = false;
 
 // ==========================================
@@ -3130,32 +3130,55 @@ function compressImageCustom(file, maxPx, maxBytes, callback) {
   reader.readAsDataURL(file);
 }
 
-function galDrop(e) {
-  e.preventDefault();
-  if (e.dataTransfer.files[0]) galFile(e.dataTransfer.files[0]);
+function galAddFiles(files) {
+  for (var fi = 0; fi < files.length; fi++) {
+    if (galImgData.length >= 5) { toast('Maximo 5 fotos'); break; }
+    (function(f) {
+      if (!f.type.startsWith('image/')) return;
+      compressImage(f, function(data) {
+        galImgData.push(data);
+        galRenderGrid();
+        toast('Foto ' + galImgData.length + ' agregada');
+      });
+    })(files[fi]);
+  }
 }
 
-function galFile(f) {
-  if (!f || !f.type.startsWith('image/')) return;
-  if (f.size > 10*1024*1024) { toast('Foto mayor a 10MB'); return; }
-  compressImage(f, function(data) {
-    galImgData = data;
-    var prev = document.getElementById('gal-preview');
-    prev.src = data; prev.style.display = 'block';
-  });
+function galRenderGrid() {
+  var grid = document.getElementById('gal-fotos-grid');
+  if (!grid) return;
+  var labels = ['Antes', 'Durante', 'Despues', 'Detalle', 'Extra'];
+  grid.innerHTML = galImgData.map(function(img, i) {
+    return '<div style="position:relative;width:80px;height:80px;">' +
+      '<img src="' + img + '" style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:2px solid rgba(204,0,126,.4);">' +
+      '<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.6);font-size:.55rem;text-align:center;color:#fff;padding:2px;">' + labels[i] + '</div>' +
+      '<button onclick="galRemoveFoto(' + i + ')" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:#cc007e;border:none;color:#fff;font-size:.65rem;cursor:pointer;line-height:1;">x</button>' +
+      '</div>';
+  }).join('');
 }
+
+function galRemoveFoto(i) {
+  galImgData.splice(i, 1);
+  galRenderGrid();
+}
+
 
 function publishGaleria() {
   if (!isAdminLogged) { toast('Solo el admin puede publicar'); return; }
-  if (!galImgData) { toast('Selecciona una foto'); return; }
+  if (!galImgData.length) { toast('Selecciona al menos una foto'); return; }
   var titulo = document.getElementById('gal-titulo').value.trim();
   if (!titulo) { toast('Ingresa un titulo'); return; }
   var desc = document.getElementById('gal-desc').value.trim();
 
+  // Check total size
+  var totalSize = galImgData.reduce(function(s,i){ return s + (i?i.length:0); }, 0);
+  if (totalSize > 850000) { toast('Fotos muy pesadas. Usa menos o mas pequenas.'); return; }
+
   var item = {
     titulo: titulo,
     desc: desc,
-    img: galImgData,
+    img: galImgData[0],
+    imgs: galImgData.slice(),
     fecha: new Date().toLocaleDateString('es-AR', {day:'numeric',month:'long',year:'numeric'}),
     createdAt: new Date().toISOString()
   };
@@ -3187,6 +3210,16 @@ function renderGaleria() {
   loadAndRenderGaleria();
 }
 
+function galBuildImgHtml(item, i) {
+  var imgs = (item.imgs && item.imgs.length) ? item.imgs : [item.img].filter(Boolean);
+  if (!imgs.length) return '<div style="background:var(--g2);width:100%;height:100%;"></div>';
+  var out = '<img src="' + imgs[0] + '" alt="' + (item.titulo||'') + '" loading="lazy" style="width:100%;height:100%;object-fit:cover;">';
+  if (imgs.length > 1) {
+    out += '<div style="position:absolute;top:.5rem;right:.5rem;background:rgba(0,0,0,.7);color:#fff;font-size:.7rem;padding:.2rem .5rem;border-radius:20px;pointer-events:none;">&#128247; ' + imgs.length + '</div>';
+  }
+  return out;
+}
+
 function renderGaleriaItems(items) {
   var grid = document.getElementById('gal-grid');
   if (!grid) return;
@@ -3202,7 +3235,7 @@ function renderGaleriaItems(items) {
     var isFirst = i === 0;
     html += '<div class="gal-item' + (isFirst ? ' gal-first' : '') + '" onclick="openGalLbFirestore(' + i + ',galCurrentItems)">';
     html += '<span class="gal-badge">SunshineCars</span>';
-    html += '<img src="' + item.img + '" alt="' + item.titulo + '" loading="lazy">';
+    html += galBuildImgHtml(item, i);
     html += '<div class="gal-overlay">';
     html += '<div>';
     html += '<div class="gal-label">' + item.titulo + '</div>';
@@ -3216,40 +3249,121 @@ function renderGaleriaItems(items) {
     html += '</div>';
   }
   grid.innerHTML = html;
+
   galCurrentItems = items;
 }
 
 var galCurrentItems = [];
 var galLbIdx = 0;
 
-function openGalLbFirestore(idx) {
-  galLbIdx = idx;
-  var item = galCurrentItems[idx];
+function openGalLbFirestore(itemIdx, items) {
+  var item = (items || galCurrentItems)[itemIdx];
   if (!item) return;
-  document.getElementById('lb-img').src = item.img;
-  document.getElementById('lb').classList.add('open');
-  // Add/update nav
+  // Build imgs array for this item
+  var imgs = (item.imgs && item.imgs.length) ? item.imgs : [item.img].filter(Boolean);
+  if (!imgs.length) return;
+
+  // Store current state
+  window._galLb = { itemIdx: itemIdx, imgs: imgs, imgIdx: 0, items: items || galCurrentItems };
+
+  // Open lightbox
   var lb = document.getElementById('lb');
-  if (!document.getElementById('lb-prev')) {
-    var prev = document.createElement('button');
-    prev.id = 'lb-prev';
-    prev.innerHTML = '&#8249;';
-    prev.style.cssText = 'position:absolute;left:1rem;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.2);color:#fff;width:44px;height:44px;border-radius:50%;font-size:1.5rem;cursor:pointer;';
-    prev.onclick = function(e){ e.stopPropagation(); navGalLbF(-1); };
-    lb.appendChild(prev);
-    var next = document.createElement('button');
-    next.id = 'lb-next';
-    next.innerHTML = '&#8250;';
-    next.style.cssText = 'position:absolute;right:1rem;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.2);color:#fff;width:44px;height:44px;border-radius:50%;font-size:1.5rem;cursor:pointer;';
-    next.onclick = function(e){ e.stopPropagation(); navGalLbF(1); };
-    lb.appendChild(next);
-    var counter = document.createElement('div');
-    counter.id = 'lb-counter';
-    counter.style.cssText = 'position:absolute;bottom:1.5rem;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.6);font-size:.8rem;letter-spacing:2px;text-align:center;';
-    lb.appendChild(counter);
+  lb.classList.add('open');
+  document.getElementById('lb-img').src = imgs[0];
+
+  // Update counter
+  galLbUpdateCounter();
+
+  // Setup prev/next for items AND photos within item
+  var lbPrev = document.getElementById('lb-prev');
+  var lbNext = document.getElementById('lb-next');
+  if (!lbPrev) {
+    lbPrev = document.createElement('button');
+    lbPrev.id = 'lb-prev';
+    lbPrev.innerHTML = '&#8592;';
+    lbPrev.style.cssText = 'position:absolute;left:1rem;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.6);color:#fff;border:none;width:44px;height:44px;border-radius:50%;font-size:1.3rem;cursor:pointer;z-index:10;';
+    lb.appendChild(lbPrev);
   }
-  updateGalLbF();
+  if (!lbNext) {
+    lbNext = document.createElement('button');
+    lbNext.id = 'lb-next';
+    lbNext.innerHTML = '&#8594;';
+    lbNext.style.cssText = 'position:absolute;right:1rem;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.6);color:#fff;border:none;width:44px;height:44px;border-radius:50%;font-size:1.3rem;cursor:pointer;z-index:10;';
+    lb.appendChild(lbNext);
+  }
+
+  // Photo counter dots
+  var dotsEl = document.getElementById('lb-dots');
+  if (!dotsEl) {
+    dotsEl = document.createElement('div');
+    dotsEl.id = 'lb-dots';
+    dotsEl.style.cssText = 'position:absolute;bottom:4rem;left:50%;transform:translateX(-50%);display:flex;gap:.5rem;z-index:10;';
+    lb.appendChild(dotsEl);
+  }
+  galLbRenderDots();
+
+  lbPrev.onclick = function(e) { e.stopPropagation(); galLbNav(-1); };
+  lbNext.onclick = function(e) { e.stopPropagation(); galLbNav(1); };
 }
+
+function galLbUpdateCounter() {
+  var state = window._galLb;
+  if (!state) return;
+  var totalImgs = state.imgs.length;
+  var totalItems = state.items.length;
+  var counter = document.getElementById('lb-counter');
+  if (!counter) {
+    counter = document.createElement('div');
+    counter.id = 'lb-counter';
+    counter.style.cssText = 'position:absolute;top:1rem;right:4rem;background:rgba(0,0,0,.6);color:#fff;padding:.3rem .8rem;border-radius:20px;font-size:.8rem;z-index:10;';
+    document.getElementById('lb').appendChild(counter);
+  }
+  var photoText = totalImgs > 1 ? ' | Foto ' + (state.imgIdx + 1) + '/' + totalImgs : '';
+  counter.textContent = 'Trabajo ' + (state.itemIdx + 1) + '/' + totalItems + photoText;
+}
+
+function galLbRenderDots() {
+  var state = window._galLb;
+  var dotsEl = document.getElementById('lb-dots');
+  if (!dotsEl || !state) return;
+  if (state.imgs.length <= 1) { dotsEl.innerHTML = ''; return; }
+  dotsEl.innerHTML = state.imgs.map(function(img, i) {
+    return '<div style="width:8px;height:8px;border-radius:50%;background:' + (i===state.imgIdx?'#fff':'rgba(255,255,255,.4)') + ';cursor:pointer;" onclick="galLbGoPhoto(' + i + ')"></div>';
+  }).join('');
+}
+
+function galLbGoPhoto(photoIdx) {
+  var state = window._galLb;
+  if (!state) return;
+  state.imgIdx = photoIdx;
+  document.getElementById('lb-img').src = state.imgs[photoIdx];
+  galLbRenderDots();
+  galLbUpdateCounter();
+}
+
+function galLbNav(dir) {
+  var state = window._galLb;
+  if (!state) return;
+  var newPhotoIdx = state.imgIdx + dir;
+  // If within current item photos
+  if (newPhotoIdx >= 0 && newPhotoIdx < state.imgs.length) {
+    galLbGoPhoto(newPhotoIdx);
+    return;
+  }
+  // Move to next/prev item
+  var newItemIdx = state.itemIdx + dir;
+  if (newItemIdx < 0) newItemIdx = state.items.length - 1;
+  if (newItemIdx >= state.items.length) newItemIdx = 0;
+  var newItem = state.items[newItemIdx];
+  var newImgs = (newItem.imgs && newItem.imgs.length) ? newItem.imgs : [newItem.img].filter(Boolean);
+  state.itemIdx = newItemIdx;
+  state.imgs = newImgs;
+  state.imgIdx = dir > 0 ? 0 : newImgs.length - 1;
+  document.getElementById('lb-img').src = state.imgs[state.imgIdx];
+  galLbRenderDots();
+  galLbUpdateCounter();
+}
+
 
 function navGalLbF(dir) {
   galLbIdx = (galLbIdx + dir + galCurrentItems.length) % galCurrentItems.length;
