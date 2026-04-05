@@ -3187,8 +3187,8 @@ function publishGaleria() {
     toast('Foto publicada en la galeria!');
     document.getElementById('gal-titulo').value = '';
     document.getElementById('gal-desc').value = '';
-    document.getElementById('gal-preview').style.display = 'none';
-    galImgData = null;
+    galImgData = [];
+    galRenderGrid();
     loadAndRenderGaleria();
   }).catch(function(e) { console.error(e); toast('Error al publicar'); });
 }
