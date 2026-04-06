@@ -5081,6 +5081,7 @@ function sendChat() {
   })
   .then(function(r){ return r.json(); })
   .then(function(data) {
+    console.log('Proxy response:', JSON.stringify(data));
     if (typing) typing.remove();
     var reply = data.content && data.content[0] ? data.content[0].text : 'Lo siento, hubo un error. Contactanos por WhatsApp.';
     addChatMsg('bot', reply);
