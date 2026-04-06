@@ -1938,6 +1938,44 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
   .chat-window { width:calc(100vw - 2rem); right:1rem; bottom:5rem; }
   .chat-bubble { bottom:1rem; right:1rem; }
 }
+.cb-btn-list { display:flex; flex-direction:column; gap:.35rem; margin-top:.2rem; }
+.cb-btn {
+  text-align:left; background:rgba(204,0,126,.08);
+  border:1px solid rgba(204,0,126,.22); color:#fff; border-radius:8px;
+  padding:.5rem .8rem; font-family:'Outfit',sans-serif; font-size:.8rem;
+  cursor:pointer; transition:all .2s; width:100%;
+}
+.cb-btn:hover { background:rgba(204,0,126,.2); border-color:rgba(204,0,126,.5); }
+.cb-btn-row { display:flex; flex-wrap:wrap; gap:.35rem; margin-top:.2rem; }
+.cb-btn-sm {
+  background:rgba(100,180,255,.1); border:1px solid rgba(100,180,255,.25);
+  color:#fff; border-radius:50px; padding:.35rem .75rem;
+  font-family:'Outfit',sans-serif; font-size:.78rem; cursor:pointer; transition:all .2s;
+}
+.cb-btn-sm:hover { background:rgba(100,180,255,.25); }
+.cb-summary {
+  background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1);
+  border-radius:10px; padding:.7rem .9rem; font-size:.82rem;
+  line-height:1; display:flex; flex-direction:column; gap:.45rem; margin-top:.2rem;
+}
+.cb-summary-row { display:flex; align-items:center; gap:.4rem; }
+.cb-confirm-btn {
+  width:100%; margin-top:.6rem;
+  background:linear-gradient(135deg,var(--m),var(--deep));
+  color:#fff; border:none; border-radius:8px; padding:.7rem;
+  font-family:'Outfit',sans-serif; font-size:.88rem; font-weight:700;
+  cursor:pointer; transition:all .2s;
+}
+.cb-confirm-btn:hover { opacity:.9; transform:translateY(-1px); }
+.chat-file-btn {
+  width:34px; height:34px; border-radius:50%; flex-shrink:0;
+  background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15);
+  color:rgba(255,255,255,.7); font-size:1rem; cursor:pointer;
+  display:none; align-items:center; justify-content:center; transition:all .2s;
+  position:relative; overflow:hidden;
+}
+.chat-file-btn input { position:absolute; inset:0; opacity:0; cursor:pointer; font-size:0; }
+.chat-file-btn:hover { background:rgba(255,255,255,.15); color:#fff; }
 </style></style>
 
 <!-- EDIT GALERIA MODAL -->
@@ -2953,6 +2991,7 @@ function confirmar() {
 
   var url = 'https://wa.me/' + WA_NUM + '?text=' + encodeURIComponent(msg);
   document.getElementById('wa-final').href = url;
+  window.open(url, '_blank');
 
   document.getElementById('p5').classList.remove('active');
   document.getElementById('steps-bar').style.display = 'none';
@@ -4999,6 +5038,232 @@ try {
 })();
 
 // ==========================================
+// CHAT BOOKING FLOW
+// ==========================================
+var CB = { active:false, step:null, carType:null, carModel:null, svc:null, date:null, dateStr:null, slot:null, nombre:null, tel:null, zona:null, dir:null, proofName:null, proofUrl:null };
+
+function cbStart() {
+  CB = { active:true, step:'car', carType:null, carModel:null, svc:null, date:null, dateStr:null, slot:null, nombre:null, tel:null, zona:null, dir:null, proofName:null, proofUrl:null };
+  var sugs = document.getElementById('chat-suggestions');
+  if (sugs) sugs.style.display = 'none';
+  if (!chatOpen) toggleChat();
+  setTimeout(function() {
+    addChatMsg('bot', '¡Vamos a reservar tu turno! 🚗\n\n¿Qué auto tenés? Decime la marca y modelo.\n_(Ej: Toyota Hilux, Fiat Cronos, VW Polo)_');
+  }, chatGreeted ? 0 : 500);
+  chatGreeted = true;
+}
+
+function cbReset() {
+  CB.active = false;
+  var sugs = document.getElementById('chat-suggestions');
+  if (sugs) sugs.style.display = '';
+  var fb = document.getElementById('chat-file-btn');
+  if (fb) fb.style.display = 'none';
+}
+
+function cbHandleInput(text) {
+  switch (CB.step) {
+    case 'car':    cbIdentifyCar(text); break;
+    case 'nombre': CB.nombre = sanitize(text); CB.step = 'tel'; addChatMsg('bot', '¿Cuál es tu número de **WhatsApp**?'); break;
+    case 'tel':    CB.tel = sanitize(text); CB.step = 'zona'; addChatMsg('bot', '¿De qué zona sos?'); cbShowZonaPicker(); break;
+    case 'dir':    CB.dir = sanitize(text); cbGotDir(); break;
+    default:       addChatMsg('bot', 'Usá los botones para avanzar con la reserva 👆'); break;
+  }
+}
+
+function cbIdentifyCar(text) {
+  CB.carModel = text;
+  var typing = addTyping();
+  fetch('https://sunshine-proxy.sergioliendo92.workers.dev', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:10,
+      system:'Responde UNICAMENTE con la palabra SEDAN o SUV segun el tipo de vehiculo. SEDAN para autos chicos medianos y hatchback. SUV para camionetas pickups SUVs y 4x4.',
+      messages:[{role:'user', content:text}] })
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(typing) typing.remove();
+    var r = (data.content && data.content[0] ? data.content[0].text : 'SEDAN').toUpperCase();
+    CB.carType = r.includes('SUV') ? 'suv' : 'sedan';
+    var label = CB.carType==='suv' ? 'SUV / Camioneta' : 'Sedán / Hatchback';
+    addChatMsg('bot', '✅ **' + text + '** → **' + label + '**\n\nElegí el servicio:');
+    CB.step = 'service'; cbShowServices();
+  })
+  .catch(function(){
+    if(typing) typing.remove();
+    CB.carType = 'sedan';
+    addChatMsg('bot', '¡Listo! Elegí el servicio:');
+    CB.step = 'service'; cbShowServices();
+  });
+}
+
+function cbShowServices() {
+  var list = SVCS.filter(function(s){return !s.extra;});
+  if (!list.length) list = [
+    {id:'full',name:'Full Shine',raw:65000,rawSuv:70000},
+    {id:'high',name:'High Shine',raw:100000,rawSuv:120000},
+    {id:'total',name:'Total Shine',raw:160000,rawSuv:200000},
+    {id:'corr',name:'Corrección y Brillo',raw:250000,rawSuv:300000},
+    {id:'cer1',name:'Cerámico N1 (Vonixx)',raw:400000,rawSuv:500000},
+    {id:'cer2',name:'Cerámico N2 (Gyeon)',raw:550000,rawSuv:650000},
+    {id:'cer3',name:'Cerámico N3',raw:650000,rawSuv:750000}
+  ];
+  var html = '<div class="cb-btn-list">';
+  list.forEach(function(s){
+    var p = CB.carType==='suv' ? (s.rawSuv||s.raw||0) : (s.raw||0);
+    var ps = p ? '$'+p.toLocaleString('es-AR') : (s.price||'');
+    html += '<button class="cb-btn" onclick="cbSelectService(\''+s.id+'\')"><b>'+s.name+'</b><span style="color:var(--m);"> — '+ps+'</span></button>';
+  });
+  html += '</div>';
+  cbRawMsg(html);
+}
+
+function cbSelectService(id) {
+  var s = SVCS.find(function(x){return x.id===id;});
+  if (!s) { var fb={full:{name:'Full Shine',raw:65000,rawSuv:70000},high:{name:'High Shine',raw:100000,rawSuv:120000},total:{name:'Total Shine',raw:160000,rawSuv:200000},corr:{name:'Corrección y Brillo',raw:250000,rawSuv:300000},cer1:{name:'Cerámico N1 (Vonixx)',raw:400000,rawSuv:500000},cer2:{name:'Cerámico N2 (Gyeon)',raw:550000,rawSuv:650000},cer3:{name:'Cerámico N3',raw:650000,rawSuv:750000}}; s = fb[id] ? Object.assign({id:id},fb[id]) : null; }
+  if (!s) return;
+  CB.svc = s; CB.step = 'date';
+  var p = CB.carType==='suv' ? (s.rawSuv||s.raw||0) : (s.raw||0);
+  addChatMsg('bot', '✅ **'+s.name+'** — **$'+p.toLocaleString('es-AR')+'**\n\nElegí la fecha:');
+  cbShowDatePicker();
+}
+
+function cbShowDatePicker() {
+  var today = new Date(); today.setHours(0,0,0,0);
+  var html = '<div class="cb-btn-row">', count=0;
+  var d = new Date(today); d.setDate(d.getDate()+1);
+  while (count < 10 && (d-today) < 33*86400000) {
+    var dow=d.getDay(), slots=dow===6?SLOTS_SAB:(dow===0?SLOTS_DOM:SLOTS);
+    if (slots.length) {
+      var dfmt=d.toLocaleDateString('es-AR');
+      var taken=(_turnos||[]).filter(function(t){return t.date===dfmt&&t.status!=='cancelado';}).map(function(t){return t.slot;});
+      var avail=slots.filter(function(sl){return taken.indexOf(sl)===-1;});
+      if (avail.length) {
+        var days=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+        html+='<button class="cb-btn-sm" onclick="cbSelectDate(\''+d.toISOString()+'\')">'+days[d.getDay()]+' '+d.getDate()+'/'+(d.getMonth()+1)+'</button>';
+        count++;
+      }
+    }
+    d.setDate(d.getDate()+1);
+  }
+  if (!count) html += '<span style="font-size:.8rem;color:var(--muted);">Sin fechas disponibles. Contactanos por WhatsApp.</span>';
+  html += '</div>';
+  cbRawMsg(html);
+}
+
+function cbSelectDate(iso) {
+  var d=new Date(iso); CB.date=d;
+  CB.dateStr = d.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'});
+  CB.dateStr = CB.dateStr.charAt(0).toUpperCase()+CB.dateStr.slice(1);
+  addChatMsg('bot','✅ **'+CB.dateStr+'**\n\nElegí el horario:');
+  CB.step='slot'; cbShowSlotPicker(d);
+}
+
+function cbShowSlotPicker(d) {
+  var dow=d.getDay(), slots=dow===6?SLOTS_SAB:(dow===0?SLOTS_DOM:SLOTS);
+  var dfmt=d.toLocaleDateString('es-AR');
+  var taken=(_turnos||[]).filter(function(t){return t.date===dfmt&&t.status!=='cancelado';}).map(function(t){return t.slot;});
+  var html='<div class="cb-btn-row">';
+  slots.forEach(function(sl){
+    if(taken.indexOf(sl)===-1) html+='<button class="cb-btn-sm" style="background:rgba(0,200,117,.12);border-color:rgba(0,200,117,.3);" onclick="cbSelectSlot(\''+sl+'\')">'+sl+' hs</button>';
+  });
+  html+='</div>';
+  cbRawMsg(html);
+}
+
+function cbSelectSlot(slot) {
+  CB.slot=slot; CB.step='nombre';
+  addChatMsg('bot','✅ **'+slot+' hs**\n\n¿Cuál es tu **nombre y apellido**?');
+}
+
+function cbShowZonaPicker() {
+  var zonas=['La Plata','GBA Norte','GBA Sur','GBA Oeste','GBA Este','CABA'];
+  var html='<div class="cb-btn-row" style="flex-wrap:wrap;">';
+  zonas.forEach(function(z){ html+='<button class="cb-btn-sm" onclick="cbSelectZona(\''+z+'\')">'+z+'</button>'; });
+  html+='</div>';
+  cbRawMsg(html);
+}
+
+function cbSelectZona(zona) {
+  CB.zona=zona; CB.step='dir';
+  addChatMsg('bot','✅ **'+zona+'**\n\n¿Cuál es tu **dirección**? (calle y número)');
+}
+
+function cbGotDir() {
+  CB.step='proof';
+  var p = CB.svc ? (CB.carType==='suv'?(CB.svc.rawSuv||CB.svc.raw||0):(CB.svc.raw||0)) : 0;
+  var senia = Math.round(p*0.1);
+  addChatMsg('bot','¡Casi listo! 💪\n\nTransferí la seña de **$'+senia.toLocaleString('es-AR')+'** al alias **sergio2292** en BruBank y adjuntá el comprobante haciendo click en 📎.');
+  document.getElementById('chat-file-btn').style.display='flex';
+}
+
+function cbFileSelected(file) {
+  if (!file) return;
+  if (file.size > 5*1024*1024) { toast('Archivo mayor a 5MB'); return; }
+  CB.proofName=file.name;
+  var r=new FileReader();
+  r.onload=function(ev){
+    CB.proofUrl=ev.target.result;
+    document.getElementById('chat-file-btn').style.display='none';
+    addChatMsg('bot','✅ Comprobante **'+file.name+'** adjunto. Revisá el resumen y confirmá:');
+    cbShowConfirm();
+  };
+  r.readAsDataURL(file);
+}
+
+function cbShowConfirm() {
+  CB.step='confirm';
+  var p=CB.svc?(CB.carType==='suv'?(CB.svc.rawSuv||CB.svc.raw||0):(CB.svc.raw||0)):0;
+  var senia=Math.round(p*0.1);
+  var html='<div class="cb-summary">';
+  html+='<div class="cb-summary-row">🚗 <b>'+(CB.carModel||'')+'</b> ('+(CB.carType==='suv'?'SUV/Camioneta':'Sedán')+')</div>';
+  html+='<div class="cb-summary-row">✨ <b>'+(CB.svc?CB.svc.name:'')+'</b> — $'+p.toLocaleString('es-AR')+'</div>';
+  html+='<div class="cb-summary-row">📅 <b>'+CB.dateStr+'</b> · <b>'+CB.slot+' hs</b></div>';
+  html+='<div class="cb-summary-row">👤 <b>'+(CB.nombre||'')+'</b> · '+(CB.tel||'')+'</div>';
+  html+='<div class="cb-summary-row">📍 <b>'+(CB.zona||'')+'</b> · '+(CB.dir||'')+'</div>';
+  html+='<div class="cb-summary-row">💳 Seña: <b>$'+senia.toLocaleString('es-AR')+'</b>'+(CB.proofName?' ✅':' ⏳')+'</div>';
+  html+='</div>';
+  html+='<button class="cb-confirm-btn" onclick="cbConfirmar()">&#128242; Confirmar y enviar por WhatsApp</button>';
+  cbRawMsg(html);
+}
+
+function cbConfirmar() {
+  var p=CB.svc?(CB.carType==='suv'?(CB.svc.rawSuv||CB.svc.raw||0):(CB.svc.raw||0)):0;
+  var senia=Math.round(p*0.1);
+  var id='SC'+Date.now();
+  var np=(CB.nombre||'').trim().split(' ');
+  addTurno({id:id, svcId:CB.svc?CB.svc.id:'', svcName:CB.svc?CB.svc.name:'', svcPrice:'$'+p.toLocaleString('es-AR'),
+    date:CB.date?CB.date.toLocaleDateString('es-AR'):'', slot:CB.slot||'',
+    nombre:np[0]||'', apellido:np.slice(1).join(' ')||'', tel:CB.tel||'',
+    zona:CB.zona||'', dir:CB.dir||'',
+    tipo:CB.carType==='suv'?'Camioneta / SUV':'Sedan/Hatchback', auto:CB.carModel||'',
+    notas:'Via chat', senia:senia, discount:false,
+    proofName:CB.proofName||'', proofUrl:CB.proofUrl||null,
+    status:'pendiente', createdAt:new Date().toISOString()});
+  var msg='🚗 *NUEVA SOLICITUD DE TURNO*\n_SunshineCars Detail_\n\n'+
+    '👤 *'+(CB.nombre||'')+'*\n📱 '+(CB.tel||'')+'\n'+
+    '📍 '+(CB.zona||'')+' — '+(CB.dir||'')+'\n\n'+
+    '🚘 '+(CB.carModel||'')+' ('+(CB.carType==='suv'?'SUV/Camioneta':'Sedán')+')\n'+
+    '✨ '+(CB.svc?CB.svc.name:'')+' — $'+p.toLocaleString('es-AR')+'\n'+
+    '📅 '+CB.dateStr+' · '+CB.slot+' hs\n'+
+    '💳 Seña: $'+senia.toLocaleString('es-AR')+(CB.proofName?' ✅ adjunto':' ⏳ pendiente')+'\n\n'+
+    'Ref: '+id;
+  window.open('https://wa.me/'+WA_NUM+'?text='+encodeURIComponent(msg),'_blank');
+  addChatMsg('bot','¡Turno enviado! ✅\n\nSe abrió WhatsApp con tus datos. Enviá el mensaje para que el equipo te confirme a la brevedad. ¡Gracias por elegirnos!');
+  cbReset();
+}
+
+function cbRawMsg(html) {
+  var msgs=document.getElementById('chat-messages');
+  if(!msgs) return;
+  var div=document.createElement('div');
+  div.className='chat-msg bot';
+  div.style.cssText='background:transparent;padding:.2rem 0;max-width:100%;';
+  div.innerHTML=html;
+  msgs.appendChild(div);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
 // CHAT IA
 // ==========================================
 var chatHistory = [];
@@ -5066,6 +5331,7 @@ function sendChat() {
   if (!text) return;
   input.value = '';
   addChatMsg('user', sanitize(text));
+  if (CB.active) { cbHandleInput(text); return; }
   chatHistory.push({ role: 'user', content: text });
   var typing = addTyping();
 
@@ -5145,12 +5411,16 @@ loadVtvCard();
   </div>
   <div class="chat-messages" id="chat-messages"></div>
   <div class="chat-suggestions" id="chat-suggestions">
-    <button onclick="chatSug('¿Cuánto sale el detailing para mi auto?')">&#128176; Ver precios</button>
-    <button onclick="chatSug('Tengo un ')">&#128663; Identificar mi auto</button>
+    <button onclick="cbStart()">&#128197; Reservar turno</button>
+    <button onclick="chatSug('¿Cuánto sale para mi auto?')">&#128176; Ver precios</button>
     <button onclick="chatSug('¿En qué zonas trabajan?')">&#128205; Zonas</button>
     <button onclick="chatSug('¿Cuáles son los horarios?')">&#128336; Horarios</button>
   </div>
   <div class="chat-footer">
+    <label class="chat-file-btn" id="chat-file-btn" title="Adjuntar comprobante">
+      &#128206;
+      <input type="file" accept="image/*,application/pdf" onchange="cbFileSelected(this.files[0])">
+    </label>
     <input type="text" class="chat-input" id="chat-input"
       placeholder="Ej: tengo un Toyota Hilux..."
       onkeypress="if(event.key==='Enter')sendChat()">
