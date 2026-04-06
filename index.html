@@ -528,7 +528,7 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
     <button class="nav-btn" onclick="showView('resenas')" style="border-color:rgba(255,193,7,.4);color:#ffc107;">&#11088; Resenas</button>
     <button class="nav-btn" onclick="showView('galeria')" style="border-color:rgba(204,0,126,.3);color:rgba(255,255,255,.7);">&#127757; Galeria</button>
     <button class="nav-btn" onclick="showView('tienda')" style="border-color:rgba(204,0,126,.5);color:var(--m);">&#128722; Tienda</button>
-    <button class="nav-btn" onclick="showView('admin-login')">Admin</button>
+    <button class="nav-btn" onclick="showView('admin-login');clearAdminBadge();" id="nav-admin-btn" style="position:relative;">Admin<span id="admin-badge" style="display:none;position:absolute;top:-6px;right:-6px;background:#ff3b3b;color:#fff;width:18px;height:18px;border-radius:50%;font-size:.65rem;font-weight:800;display:none;align-items:center;justify-content:center;border:2px solid #0a0a0a;" id="admin-badge">0</span></button>
   </div>
   <!-- Mobile hamburger -->
   <button class="nav-hamburger" onclick="toggleMobileMenu()" id="nav-hamburger">&#9776;</button>
@@ -2270,16 +2270,59 @@ var FILTER = 'todos';
 var _turnos = [];  // local cache
 var _unsubscribe = null;
 
+function playNotifSound() {
+  try {
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [523, 659, 784].forEach(function(freq, i) {
+      var o = ctx.createOscillator();
+      var g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = freq;
+      o.type = 'sine';
+      g.gain.setValueAtTime(0, ctx.currentTime + i*0.12);
+      g.gain.linearRampToValueAtTime(0.3, ctx.currentTime + i*0.12 + 0.05);
+      g.gain.linearRampToValueAtTime(0, ctx.currentTime + i*0.12 + 0.18);
+      o.start(ctx.currentTime + i*0.12);
+      o.stop(ctx.currentTime + i*0.12 + 0.2);
+    });
+  } catch(e) {}
+}
+
+var _adminBadgeCount = 0;
+function showAdminBadge(n) {
+  _adminBadgeCount += n;
+  var b = document.getElementById('admin-badge');
+  if (b) { b.textContent = _adminBadgeCount; b.style.display = 'flex'; }
+  // Also update page title
+  document.title = '('+_adminBadgeCount+') SunshineCars Detail';
+}
+
+function clearAdminBadge() {
+  _adminBadgeCount = 0;
+  var b = document.getElementById('admin-badge');
+  if (b) { b.style.display = 'none'; }
+  document.title = 'SunshineCars Detail - Detailing Automotriz a Domicilio';
+}
+
 function startListening() {
   if (_unsubscribe) return;
   // Sign in anonymously first so clients can read turnos for availability
   var doListen = function() {
     var q = db.collection('turnos').orderBy('createdAt', 'desc');
+    var _prevPendingCount = -1;
     _unsubscribe = q.onSnapshot(function(snapshot) {
       _turnos = [];
       snapshot.forEach(function(d) {
         _turnos.push(Object.assign({}, d.data(), { _docId: d.id }));
       });
+      // Admin notification for new pending turnos
+      var pendingCount = _turnos.filter(function(t){ return t.status === 'pendiente'; }).length;
+      if (_prevPendingCount >= 0 && pendingCount > _prevPendingCount) {
+        var diff = pendingCount - _prevPendingCount;
+        playNotifSound();
+        showAdminBadge(diff);
+      }
+      _prevPendingCount = pendingCount;
       var admin = document.getElementById('view-admin');
       if (admin && admin.classList.contains('active')) {
         renderAdmin();
@@ -5046,11 +5089,21 @@ function cbStart() {
   CB = { active:true, step:'car', carType:null, carModel:null, svc:null, date:null, dateStr:null, slot:null, nombre:null, tel:null, zona:null, dir:null, proofName:null, proofUrl:null };
   var sugs = document.getElementById('chat-suggestions');
   if (sugs) sugs.style.display = 'none';
+  var title = document.getElementById('chat-title');
+  var sub = document.getElementById('chat-subtitle');
+  if (title) title.textContent = 'Reservando turno';
+  if (sub) sub.innerHTML = '<span style="color:#f5a623;">&#9679; En proceso</span> &nbsp;<button onclick="cbCancel()" style="background:rgba(255,60,60,.15);border:1px solid rgba(255,60,60,.3);color:#ff6b6b;border-radius:50px;padding:.1rem .5rem;font-size:.65rem;cursor:pointer;font-family:Outfit,sans-serif;">&#10005; Cancelar</button>';
   if (!chatOpen) toggleChat();
   setTimeout(function() {
     addChatMsg('bot', '¡Vamos a reservar tu turno! 🚗\n\n¿Qué auto tenés? Decime la marca y modelo.\n_(Ej: Toyota Hilux, Fiat Cronos, VW Polo)_');
   }, chatGreeted ? 0 : 500);
   chatGreeted = true;
+}
+
+function cbCancel() {
+  cbReset();
+  var msgs = document.getElementById('chat-messages');
+  if (msgs) { var div = document.createElement('div'); div.className='chat-msg bot'; div.textContent='Reserva cancelada. ¿En qué más te puedo ayudar?'; msgs.appendChild(div); msgs.scrollTop=msgs.scrollHeight; }
 }
 
 function cbReset() {
@@ -5059,16 +5112,60 @@ function cbReset() {
   if (sugs) sugs.style.display = '';
   var fb = document.getElementById('chat-file-btn');
   if (fb) fb.style.display = 'none';
+  var title = document.getElementById('chat-title');
+  var sub = document.getElementById('chat-subtitle');
+  if (title) title.textContent = 'Sunshine AI';
+  if (sub) sub.innerHTML = '&#9679; En linea';
 }
 
 function cbHandleInput(text) {
   switch (CB.step) {
+    case 'car_only': cbIdentifyCarOnly(text); break;
     case 'car':    cbIdentifyCar(text); break;
     case 'nombre': CB.nombre = sanitize(text); CB.step = 'tel'; addChatMsg('bot', '¿Cuál es tu número de **WhatsApp**?'); break;
     case 'tel':    CB.tel = sanitize(text); CB.step = 'zona'; addChatMsg('bot', '¿De qué zona sos?'); cbShowZonaPicker(); break;
     case 'dir':    CB.dir = sanitize(text); cbGotDir(); break;
     default:       addChatMsg('bot', 'Usá los botones para avanzar con la reserva 👆'); break;
   }
+}
+
+function cbIdentifyCarOnly(text) {
+  var typing = addTyping();
+  fetch('https://sunshine-proxy.sergioliendo92.workers.dev', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:10,
+      system:'Responde UNICAMENTE con la palabra SEDAN o SUV segun el tipo de vehiculo.',
+      messages:[{role:'user', content:text}] })
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(typing) typing.remove();
+    var r = (data.content && data.content[0] ? data.content[0].text : 'SEDAN').toUpperCase();
+    var tipo = r.includes('SUV') ? 'suv' : 'sedan';
+    var label = tipo==='suv' ? 'SUV / Camioneta' : 'Sedán / Hatchback';
+    var svcs = SVCS.filter(function(s){return !s.extra;});
+    if (!svcs.length) svcs = [{name:'Full Shine',raw:65000,rawSuv:70000},{name:'High Shine',raw:100000,rawSuv:120000},{name:'Total Shine',raw:160000,rawSuv:200000},{name:'Corrección y Brillo',raw:250000,rawSuv:300000},{name:'Cerámico N1 (Vonixx)',raw:400000,rawSuv:500000},{name:'Cerámico N2 (Gyeon)',raw:550000,rawSuv:650000},{name:'Cerámico N3',raw:650000,rawSuv:750000}];
+    var msg = '**'+text+'** es un **'+label+'**. Estos son los precios para tu vehículo:\n\n';
+    svcs.forEach(function(s){
+      var p = tipo==='suv' ? (s.rawSuv||s.raw||0) : (s.raw||0);
+      msg += '• **'+s.name+'** — $'+p.toLocaleString('es-AR')+'\n';
+    });
+    msg += '\n¿Querés reservar un turno?';
+    addChatMsg('bot', msg);
+    cbRawMsg('<div class="cb-btn-row"><button class="cb-btn-sm" onclick="cbStart()">📅 Sí, reservar</button><button class="cb-btn-sm" style="background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.15);" onclick="cbResetSugs()">No, gracias</button></div>');
+    CB.active = false;
+  })
+  .catch(function(){
+    if(typing) typing.remove();
+    addChatMsg('bot', 'Hubo un error. Contactanos por WhatsApp: +54 9 11 7366-5464');
+    cbReset();
+  });
+}
+
+function cbResetSugs() {
+  CB.active = false;
+  var sugs = document.getElementById('chat-suggestions');
+  if (sugs) sugs.style.display = '';
 }
 
 function cbIdentifyCar(text) {
@@ -5195,6 +5292,13 @@ function cbGotDir() {
   var senia = Math.round(p*0.1);
   addChatMsg('bot','¡Casi listo! 💪\n\nTransferí la seña de **$'+senia.toLocaleString('es-AR')+'** al alias **sergio2292** en BruBank y adjuntá el comprobante haciendo click en 📎.');
   document.getElementById('chat-file-btn').style.display='flex';
+  cbRawMsg('<button class="cb-btn-sm" style="margin-top:.3rem;background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.15);" onclick="cbSkipProof()">⏩ Lo envío por WhatsApp después</button>');
+}
+
+function cbSkipProof() {
+  document.getElementById('chat-file-btn').style.display='none';
+  addChatMsg('bot','Ok, podés enviarlo por WhatsApp una vez que abramos el chat. Revisá el resumen:');
+  cbShowConfirm();
 }
 
 function cbFileSelected(file) {
@@ -5249,8 +5353,17 @@ function cbConfirmar() {
     '💳 Seña: $'+senia.toLocaleString('es-AR')+(CB.proofName?' ✅ adjunto':' ⏳ pendiente')+'\n\n'+
     'Ref: '+id;
   window.open('https://wa.me/'+WA_NUM+'?text='+encodeURIComponent(msg),'_blank');
-  addChatMsg('bot','¡Turno enviado! ✅\n\nSe abrió WhatsApp con tus datos. Enviá el mensaje para que el equipo te confirme a la brevedad. ¡Gracias por elegirnos!');
+  addChatMsg('bot','¡Listo! ✅\n\nSe abrió WhatsApp con todos tus datos. **Tocá "Enviar" en WhatsApp** para que el equipo reciba tu solicitud y te confirme el turno a la brevedad.\n\n¡Gracias por elegirnos! 🚗✨');
   cbReset();
+}
+
+function cbConsultarPrecio() {
+  if (!chatOpen) toggleChat();
+  chatGreeted = true;
+  var sugs = document.getElementById('chat-suggestions');
+  if (sugs) sugs.style.display = 'none';
+  addChatMsg('bot', '¡Claro! ¿Qué auto tenés? Decime la marca y modelo y te digo el precio exacto para cada servicio.');
+  CB.active = true; CB.step = 'car_only';
 }
 
 function cbRawMsg(html) {
@@ -5403,8 +5516,8 @@ loadVtvCard();
     <div class="chat-header-info">
       <div class="chat-avatar">&#128663;</div>
       <div>
-        <div class="chat-name">Sunshine AI</div>
-        <div class="chat-status">&#9679; En linea</div>
+        <div class="chat-name" id="chat-title">Sunshine AI</div>
+        <div class="chat-status" id="chat-subtitle">&#9679; En linea</div>
       </div>
     </div>
     <button class="chat-close" onclick="toggleChat()">&#10005;</button>
@@ -5412,7 +5525,7 @@ loadVtvCard();
   <div class="chat-messages" id="chat-messages"></div>
   <div class="chat-suggestions" id="chat-suggestions">
     <button onclick="cbStart()">&#128197; Reservar turno</button>
-    <button onclick="chatSug('¿Cuánto sale para mi auto?')">&#128176; Ver precios</button>
+    <button onclick="cbConsultarPrecio()">&#128176; Consultar precio</button>
     <button onclick="chatSug('¿En qué zonas trabajan?')">&#128205; Zonas</button>
     <button onclick="chatSug('¿Cuáles son los horarios?')">&#128336; Horarios</button>
   </div>
