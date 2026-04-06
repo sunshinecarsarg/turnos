@@ -5386,7 +5386,7 @@ function cbConfirmar() {
   var id='SC'+Date.now();
   var np=(CB.nombre||'').trim().split(' ');
   addTurno({id:id, svcId:CB.svc?CB.svc.id:'', svcName:CB.svc?CB.svc.name:'', svcPrice:'$'+p.toLocaleString('es-AR'),
-    date:CB.date?CB.date.toLocaleDateString('es-AR'):'', slot:CB.slot||'',
+    date:CB.date?dStr(CB.date):'', slot:CB.slot||'',
     nombre:np[0]||'', apellido:np.slice(1).join(' ')||'', tel:CB.tel||'',
     zona:CB.zona||'', dir:CB.dir||'',
     tipo:CB.carType==='suv'?'Camioneta / SUV':'Sedan/Hatchback', auto:CB.carModel||'',
