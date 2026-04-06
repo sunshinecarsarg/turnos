@@ -3158,9 +3158,15 @@ function renderAdmin() {
   var html = '';
   for (var i = 0; i < filtered.length; i++) {
     var t = filtered[i];
-    var dt = new Date(t.date + 'T12:00:00');
-    var dayN = dt.getDate();
-    var monL = MONTHS_ES[dt.getMonth()].slice(0, 3).toUpperCase();
+    var dtRaw = t.date || '';
+    // Normalize d/m/yyyy → yyyy-mm-dd so old chat bookings parse correctly
+    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dtRaw)) {
+      var dp = dtRaw.split('/');
+      dtRaw = dp[2] + '-' + (dp[1].length<2?'0':'')+dp[1] + '-' + (dp[0].length<2?'0':'')+dp[0];
+    }
+    var dt = new Date(dtRaw + 'T12:00:00');
+    var dayN = isNaN(dt.getTime()) ? '?' : dt.getDate();
+    var monL = isNaN(dt.getTime()) ? '???' : MONTHS_ES[dt.getMonth()].slice(0, 3).toUpperCase();
     var nombre = (t.nombre || '') + ' ' + (t.apellido || '');
 
     var acts = '';
