@@ -1653,37 +1653,44 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
   gap:12px;
 }
 .gal-item {
-  position:relative; overflow:hidden; border-radius:8px;
-  aspect-ratio:4/3; cursor:pointer; background:var(--g2);
-  border:1px solid rgba(204,0,126,.08);
+  position:relative; border-radius:10px;
+  cursor:pointer; background:var(--g2);
+  border:1px solid rgba(204,0,126,.15);
   transition:transform .3s, box-shadow .3s;
+  overflow:hidden; display:flex; flex-direction:column;
 }
-.gal-item:first-child { grid-column:span 2; aspect-ratio:16/9; }
-.gal-item.gal-first { grid-column:span 2; aspect-ratio:16/9; }
-.gal-item:hover { transform:scale(1.02); box-shadow:0 8px 30px rgba(204,0,126,.25); }
+.gal-item:first-child { grid-column:span 2; }
+.gal-item.gal-first { grid-column:span 2; }
+.gal-item:hover { transform:translateY(-3px); box-shadow:0 10px 35px rgba(204,0,126,.3); }
+.gal-item-img {
+  position:relative; aspect-ratio:4/3; overflow:hidden; flex-shrink:0;
+}
+.gal-item:first-child .gal-item-img,
+.gal-item.gal-first .gal-item-img { aspect-ratio:16/9; }
 .gal-item img {
   width:100%; height:100%; object-fit:cover;
-  transition:transform .4s;
+  transition:transform .4s; display:block;
 }
 .gal-item:hover img { transform:scale(1.06); }
-.gal-overlay {
-  position:absolute; inset:0;
-  background:linear-gradient(to top, rgba(0,0,0,.75) 0%, transparent 55%);
-  opacity:1;
-  opacity:0; transition:opacity .3s;
-  display:flex; align-items:flex-end; padding:1rem;
+.gal-info {
+  padding:.8rem 1rem .85rem;
+  background:linear-gradient(135deg, rgba(204,0,126,.12) 0%, rgba(8,4,12,.97) 100%);
+  border-top:2px solid rgba(204,0,126,.4);
+  flex:1;
 }
-.gal-item:hover .gal-overlay { opacity:1; }
-@media(hover:none) { .gal-overlay { opacity:1 !important; } }
 .gal-label {
-  font-family:'Bebas Neue',cursive; font-size:1.1rem;
-  letter-spacing:1px; color:#fff;
+  font-family:'Bebas Neue',cursive; font-size:1.05rem;
+  letter-spacing:1.5px; color:#fff; line-height:1.2;
+}
+.gal-desc-txt {
+  font-size:.74rem; color:rgba(255,190,225,.72);
+  margin-top:.25rem; line-height:1.4;
 }
 .gal-badge {
   position:absolute; top:.6rem; left:.6rem;
   background:var(--m); color:#fff;
   font-size:.62rem; font-weight:700; letter-spacing:1.5px;
-  text-transform:uppercase; padding:.2rem .6rem; border-radius:3px;
+  text-transform:uppercase; padding:.2rem .6rem; border-radius:3px; z-index:2;
 }
 
 /* ======== TIENDA ======== */
@@ -3416,11 +3423,13 @@ function renderGaleria() {
 
 function galBuildImgHtml(item, i) {
   var imgs = (item.imgs && item.imgs.length) ? item.imgs : [item.img].filter(Boolean);
-  if (!imgs.length) return '<div style="background:var(--g2);width:100%;height:100%;"></div>';
-  var out = '<img src="' + imgs[0] + '" alt="' + (item.titulo||'') + '" loading="lazy" style="width:100%;height:100%;object-fit:cover;">';
+  if (!imgs.length) return '<div class="gal-item-img" style="background:var(--g2);"></div>';
+  var out = '<div class="gal-item-img">';
+  out += '<img src="' + imgs[0] + '" alt="' + (item.titulo||'') + '" loading="lazy">';
   if (imgs.length > 1) {
     out += '<div style="position:absolute;top:.5rem;right:.5rem;background:rgba(0,0,0,.7);color:#fff;font-size:.7rem;padding:.2rem .5rem;border-radius:20px;pointer-events:none;">&#128247; ' + imgs.length + '</div>';
   }
+  out += '</div>';
   return out;
 }
 
@@ -3440,14 +3449,14 @@ function renderGaleriaItems(items) {
     html += '<div class="gal-item' + (isFirst ? ' gal-first' : '') + '" onclick="openGalLbFirestore(' + i + ',galCurrentItems)">';
     html += '<span class="gal-badge">SunshineCars</span>';
     html += galBuildImgHtml(item, i);
-    html += '<div class="gal-overlay">';
-    html += '<div>';
-    html += '<div class="gal-label">' + item.titulo + '</div>';
-    if (item.desc) html += '<div style="font-size:.75rem;color:rgba(255,255,255,.6);margin-top:.2rem;">' + item.desc + '</div>';
-    html += '</div>';
+    html += '<div class="gal-info">';
+    html += '<div class="gal-label">' + (item.titulo||'') + '</div>';
+    if (item.desc) html += '<div class="gal-desc-txt">' + item.desc + '</div>';
     if (galAdminActive) {
-      html += '<button class="abtn" data-id="' + item.id + '" onclick="editGalItem(event,this)" style="font-size:.65rem;padding:.2rem .5rem;margin-left:.3rem;background:rgba(100,180,255,.15);color:#64b4ff;border:1px solid rgba(100,180,255,.3);">Editar</button>';
-      html += '<button class="abtn no" data-id="' + item.id + '" onclick="deleteGalItem(event,this)" style="font-size:.65rem;padding:.2rem .5rem;margin-left:.3rem;">Eliminar</button>';
+      html += '<div style="margin-top:.5rem;display:flex;gap:.4rem;" onclick="event.stopPropagation()">';
+      html += '<button class="abtn" data-id="' + item.id + '" onclick="editGalItem(event,this)" style="font-size:.65rem;padding:.2rem .5rem;background:rgba(100,180,255,.15);color:#64b4ff;border:1px solid rgba(100,180,255,.3);">Editar</button>';
+      html += '<button class="abtn no" data-id="' + item.id + '" onclick="deleteGalItem(event,this)" style="font-size:.65rem;padding:.2rem .5rem;">Eliminar</button>';
+      html += '</div>';
     }
     html += '</div>';
     html += '</div>';
