@@ -1668,11 +1668,13 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
 .gal-item:hover img { transform:scale(1.06); }
 .gal-overlay {
   position:absolute; inset:0;
-  background:linear-gradient(to top, rgba(0,0,0,.7) 0%, transparent 50%);
+  background:linear-gradient(to top, rgba(0,0,0,.75) 0%, transparent 55%);
+  opacity:1;
   opacity:0; transition:opacity .3s;
   display:flex; align-items:flex-end; padding:1rem;
 }
 .gal-item:hover .gal-overlay { opacity:1; }
+@media(hover:none) { .gal-overlay { opacity:1 !important; } }
 .gal-label {
   font-family:'Bebas Neue',cursive; font-size:1.1rem;
   letter-spacing:1px; color:#fff;
@@ -3546,24 +3548,9 @@ function galLbGoPhoto(photoIdx) {
 function galLbNav(dir) {
   var state = window._galLb;
   if (!state) return;
-  var newPhotoIdx = state.imgIdx + dir;
-  // If within current item photos
-  if (newPhotoIdx >= 0 && newPhotoIdx < state.imgs.length) {
-    galLbGoPhoto(newPhotoIdx);
-    return;
-  }
-  // Move to next/prev item
-  var newItemIdx = state.itemIdx + dir;
-  if (newItemIdx < 0) newItemIdx = state.items.length - 1;
-  if (newItemIdx >= state.items.length) newItemIdx = 0;
-  var newItem = state.items[newItemIdx];
-  var newImgs = (newItem.imgs && newItem.imgs.length) ? newItem.imgs : [newItem.img].filter(Boolean);
-  state.itemIdx = newItemIdx;
-  state.imgs = newImgs;
-  state.imgIdx = dir > 0 ? 0 : newImgs.length - 1;
-  document.getElementById('lb-img').src = state.imgs[state.imgIdx];
-  galLbRenderDots();
-  galLbUpdateCounter();
+  // Navigate only within current item's photos — wrap around
+  var newPhotoIdx = (state.imgIdx + dir + state.imgs.length) % state.imgs.length;
+  galLbGoPhoto(newPhotoIdx);
 }
 
 
