@@ -1041,7 +1041,7 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
             <input type="file" accept="image/*" multiple style="display:none;" onchange="galAddFiles(this.files)">
             &#128247; Agregar foto(s)
           </label>
-          <span style="font-size:.72rem;color:var(--muted);margin-left:.5rem;">Hasta 5 fotos (antes, durante, despues)</span>
+          <span style="font-size:.72rem;color:var(--muted);margin-left:.5rem;">Hasta 10 fotos (antes, durante, despues)</span>
         </div>
         <div style="margin-top:1rem;display:flex;flex-direction:column;gap:.8rem;">
           <div class="fi">
@@ -3334,7 +3334,7 @@ function compressImageCustom(file, maxPx, maxBytes, callback) {
 
 function galAddFiles(files) {
   for (var fi = 0; fi < files.length; fi++) {
-    if (galImgData.length >= 5) { toast('Maximo 5 fotos'); break; }
+    if (galImgData.length >= 10) { toast('Maximo 10 fotos'); break; }
     (function(f) {
       if (!f.type.startsWith('image/')) return;
       compressImage(f, function(data) {
