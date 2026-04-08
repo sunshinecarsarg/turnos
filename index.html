@@ -3279,6 +3279,7 @@ function renderAdmin() {
         acts += '<a href="' + cUrl + '" target="_blank" class="abtn" style="background:rgba(255,193,7,.1);color:#ffc107;border:1px solid rgba(255,193,7,.25);">Cod: ' + t.reviewCode + '</a>';
       } else if (t.reviewCode && t.reviewUsed) {
         acts += '<span style="font-size:.7rem;color:var(--muted);padding:.3rem .6rem;">Resena recibida</span>';
+        acts += '<button class="abtn" style="background:rgba(255,193,7,.08);color:#ffc107;border:1px solid rgba(255,193,7,.2);font-size:.68rem;padding:.2rem .5rem;" data-id="' + t.id + '" onclick="genCodeEl(this)">&#8635; Regenerar</button>';
       } else {
         acts += '<button class="abtn" style="background:rgba(255,193,7,.1);color:#ffc107;border:1px solid rgba(255,193,7,.25);" data-id="' + t.id + '" onclick="genCodeEl(this)">Generar codigo</button>';
       }
