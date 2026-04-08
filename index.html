@@ -456,8 +456,8 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
   position:fixed; inset:0; background:rgba(0,0,0,.93); z-index:9998;
   display:none; align-items:center; justify-content:center;
 }
-.lb.open { display:flex; }
-.lb img { max-width:90vw; max-height:90vh; border-radius:8px; }
+.lb.open { display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.lb img, .lb video { max-width:90vw; max-height:70vh; border-radius:8px; }
 .lb-x { position:absolute; top:1.5rem; right:1.5rem; background:none; border:none; color:#fff; font-size:2rem; cursor:pointer; }
 
 /* TOAST */
@@ -1038,10 +1038,10 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
         <div style="margin-bottom:1rem;">
           <div id="gal-fotos-grid" style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.5rem;"></div>
           <label style="display:inline-flex;align-items:center;gap:.5rem;cursor:pointer;background:rgba(204,0,126,.08);border:1px dashed rgba(204,0,126,.3);border-radius:8px;padding:.6rem 1rem;font-size:.82rem;color:var(--m);">
-            <input type="file" accept="image/*,.gif" multiple style="display:none;" onchange="galAddFiles(this.files)">
-            &#128247; Agregar fotos o GIF
+            <input type="file" accept="image/*,.gif,video/mp4,video/*" multiple style="display:none;" onchange="galAddFiles(this.files)">
+            &#128247; Agregar fotos, GIF o video
           </label>
-          <span style="font-size:.72rem;color:var(--muted);margin-left:.5rem;">Hasta 10 fotos/GIFs &mdash; GIF max 500KB</span>
+          <span style="font-size:.72rem;color:var(--muted);margin-left:.5rem;">Fotos, GIF (max 500KB) o MP4 (cualquier tamaño)</span>
         </div>
         <div style="margin-top:1rem;display:flex;flex-direction:column;gap:.8rem;">
           <div class="fi">
@@ -2206,7 +2206,8 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
 <!-- LIGHTBOX -->
 <div class="lb" id="lb" onclick="closeLb()">
   <button class="lb-x" onclick="closeLb()">&#10005;</button>
-  <img id="lb-img" src="" alt="">
+  <img id="lb-img" src="" alt="" style="max-width:90vw;max-height:70vh;border-radius:8px;">
+  <video id="lb-video" style="display:none;max-width:90vw;max-height:70vh;border-radius:8px;outline:none;" controls autoplay muted loop playsinline onclick="event.stopPropagation()"></video>
   <div class="lb-gal-info" id="lb-gal-info" onclick="event.stopPropagation()" style="display:none;">
     <div class="lb-gal-titulo" id="lb-gal-titulo"></div>
     <div class="lb-gal-short" id="lb-gal-short"></div>
@@ -2248,6 +2249,7 @@ src="https://www.facebook.com/tr?id=1446912083475161&ev=PageView&noscript=1"/>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 <script>
 // ==========================================
 // FIREBASE CONFIG
@@ -2263,6 +2265,7 @@ var firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
+var storage = firebase.storage();
 
 // ==========================================
 // SECURITY - XSS Sanitization
@@ -3336,6 +3339,8 @@ function openLb(id) {
 function closeLb() {
   document.getElementById('lb').classList.remove('open');
   document.getElementById('lb-img').src = '';
+  var lbVid = document.getElementById('lb-video');
+  if (lbVid) { lbVid.pause(); lbVid.src = ''; lbVid.style.display = 'none'; }
   var infoEl = document.getElementById('lb-gal-info');
   if (infoEl) infoEl.style.display = 'none';
 }
@@ -3378,6 +3383,29 @@ function compressImageHQ(file, callback) {
   compressImageCustom(file, 800, 150000, callback); // 150KB per photo max
 }
 
+function isVideoUrl(src) {
+  if (!src) return false;
+  return src.indexOf('https://') === 0 && (src.indexOf('.mp4') !== -1 || src.indexOf('.mov') !== -1 || src.indexOf('.webm') !== -1 || src.indexOf('video') !== -1);
+}
+
+function uploadGalMedia(file, onProgress, onDone, onError) {
+  var ext = (file.name || 'video.mp4').split('.').pop().toLowerCase();
+  var path = 'galeria/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.' + ext;
+  var ref = storage.ref().child(path);
+  var task = ref.put(file);
+  task.on('state_changed',
+    function(snap) {
+      if (onProgress) onProgress(Math.round(snap.bytesTransferred / snap.totalBytes * 100));
+    },
+    function(err) { if (onError) onError(err); },
+    function() {
+      task.snapshot.ref.getDownloadURL().then(function(url) {
+        if (onDone) onDone(url);
+      }).catch(onError);
+    }
+  );
+}
+
 function compressImageCustom(file, maxPx, maxBytes, callback) {
   var reader = new FileReader();
   reader.onload = function(ev) {
@@ -3409,25 +3437,34 @@ function compressImageCustom(file, maxPx, maxBytes, callback) {
 
 function galAddFiles(files) {
   for (var fi = 0; fi < files.length; fi++) {
-    if (galImgData.length >= 10) { toast('Maximo 10 fotos/GIFs'); break; }
+    if (galImgData.length >= 10) { toast('Maximo 10 archivos'); break; }
     (function(f) {
-      if (!f.type.startsWith('image/')) return;
-      if (f.type === 'image/gif') {
-        // GIFs: read as-is (no canvas = no animation loss), limit 500KB raw
+      if (f.type.startsWith('video/')) {
+        // MP4/video → upload to Firebase Storage
+        toast('Subiendo video... 0%');
+        uploadGalMedia(f,
+          function(pct) { toast('Subiendo video... ' + pct + '%'); },
+          function(url) {
+            galImgData.push(url);
+            galRenderGrid();
+            toast('Video subido ✅ (' + galImgData.length + ')');
+          },
+          function(err) { console.error(err); toast('Error al subir video. Verificá Storage rules.'); }
+        );
+      } else if (f.type === 'image/gif') {
         if (f.size > 512000) { toast('GIF demasiado grande. Max 500KB.'); return; }
         var r = new FileReader();
         r.onload = function(ev) {
           galImgData.push(ev.target.result);
           galRenderGrid();
-          toast('GIF ' + galImgData.length + ' agregado ✨');
+          toast('GIF agregado (' + galImgData.length + ')');
         };
         r.readAsDataURL(f);
-      } else {
-        // Photos: compress to 80KB so 10 fit in Firestore 1MB limit
+      } else if (f.type.startsWith('image/')) {
         compressImageCustom(f, 800, 80000, function(data) {
           galImgData.push(data);
           galRenderGrid();
-          toast('Foto ' + galImgData.length + ' agregada');
+          toast('Foto agregada (' + galImgData.length + ')');
         });
       }
     })(files[fi]);
@@ -3461,9 +3498,9 @@ function publishGaleria() {
   var desc = document.getElementById('gal-desc').value.trim();
   var proceso = document.getElementById('gal-proceso').value.trim();
 
-  // Check total size
-  var totalSize = galImgData.reduce(function(s,i){ return s + (i?i.length:0); }, 0);
-  if (totalSize > 900000) { toast('Archivos muy pesados. Usa menos o GIFs mas pequenos.'); return; }
+  // Only count base64 data toward Firestore 1MB limit (Storage URLs are just short strings)
+  var totalSize = galImgData.filter(function(d){ return d && d.indexOf('data:') === 0; }).reduce(function(s,i){ return s + i.length; }, 0);
+  if (totalSize > 900000) { toast('Fotos muy pesadas. Usa menos o reducí el tamaño.'); return; }
 
   var item = {
     titulo: titulo,
@@ -3508,10 +3545,16 @@ function galBuildImgHtml(item, i) {
   if (!imgs.length) return '<div class="gal-item-img" style="background:var(--g2);"></div>';
   var firstImg = imgs[0];
   var isGif = firstImg && firstImg.indexOf('data:image/gif') === 0;
+  var isVid = isVideoUrl(firstImg);
   var out = '<div class="gal-item-img">';
-  out += '<img src="' + firstImg + '" alt="' + (item.titulo||'') + '" loading="lazy">';
-  if (isGif) out += '<span class="gal-gif-badge">GIF</span>';
-  else if (imgs.length > 1) out += '<span class="gal-gif-badge">&#128247; ' + imgs.length + '</span>';
+  if (isVid) {
+    out += '<video autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;" src="' + firstImg + '"></video>';
+    out += '<span class="gal-gif-badge">&#9654; VIDEO</span>';
+  } else {
+    out += '<img src="' + firstImg + '" alt="' + (item.titulo||'') + '" loading="lazy">';
+    if (isGif) out += '<span class="gal-gif-badge">GIF</span>';
+    else if (imgs.length > 1) out += '<span class="gal-gif-badge">&#128247; ' + imgs.length + '</span>';
+  }
   out += '</div>';
   return out;
 }
@@ -3566,7 +3609,17 @@ function openGalLbFirestore(itemIdx, items) {
   // Open lightbox
   var lb = document.getElementById('lb');
   lb.classList.add('open');
-  document.getElementById('lb-img').src = imgs[0];
+  var lbImg = document.getElementById('lb-img');
+  var lbVid = document.getElementById('lb-video');
+  if (isVideoUrl(imgs[0])) {
+    lbImg.style.display = 'none';
+    lbVid.style.display = 'block';
+    lbVid.src = imgs[0];
+  } else {
+    lbVid.style.display = 'none'; lbVid.src = '';
+    lbImg.style.display = 'block';
+    lbImg.src = imgs[0];
+  }
 
   // Fill info panel
   var infoEl = document.getElementById('lb-gal-info');
@@ -3653,7 +3706,16 @@ function galLbGoPhoto(photoIdx) {
   var state = window._galLb;
   if (!state) return;
   state.imgIdx = photoIdx;
-  document.getElementById('lb-img').src = state.imgs[photoIdx];
+  var src = state.imgs[photoIdx];
+  var lbImg = document.getElementById('lb-img');
+  var lbVid = document.getElementById('lb-video');
+  if (isVideoUrl(src)) {
+    lbImg.style.display = 'none';
+    lbVid.style.display = 'block'; lbVid.src = src;
+  } else {
+    lbVid.style.display = 'none'; lbVid.src = '';
+    lbImg.style.display = 'block'; lbImg.src = src;
+  }
   galLbRenderDots();
   galLbUpdateCounter();
 }
