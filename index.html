@@ -3346,7 +3346,8 @@ function galAddFiles(files) {
     if (galImgData.length >= 10) { toast('Maximo 10 fotos'); break; }
     (function(f) {
       if (!f.type.startsWith('image/')) return;
-      compressImage(f, function(data) {
+      // 800px max, 80KB max per photo so 10 photos fit in Firestore (1MB doc limit)
+      compressImageCustom(f, 800, 80000, function(data) {
         galImgData.push(data);
         galRenderGrid();
         toast('Foto ' + galImgData.length + ' agregada');
