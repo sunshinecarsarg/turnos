@@ -2462,6 +2462,11 @@ function showView(name) {
     views[i].classList.remove('active');
   }
   document.getElementById('view-' + name).classList.add('active');
+  // Recordar ultima vista (solo vistas de cliente, no admin)
+  var clientViews = ['booking','galeria','tienda','reviews','resenas'];
+  if (clientViews.indexOf(name) !== -1) {
+    localStorage.setItem('sc_last_view', name);
+  }
   if (name === 'admin') {
     startListening(); renderAdmin(); setTimeout(checkRecBadge, 800);
     isAdminLogged = true;
@@ -3184,9 +3189,11 @@ function doLogout() {
     galAdminActive = false;
     tiendaAdminActive = false;
     svcsAdminActive = false;
+    localStorage.removeItem('sc_last_view');
     showView('booking');
   }).catch(function() {
     isAdminLogged = false;
+    localStorage.removeItem('sc_last_view');
     showView('booking');
   });
 }
@@ -5721,19 +5728,26 @@ setTimeout(function() {
 startListening();
 // Check if already logged in
 firebase.auth().onAuthStateChanged(function(user) {
-  // Only set admin logged for real email users, NOT anonymous
   if (user && !user.isAnonymous) {
+    // Admin: restaurar sesion y volver al panel
     isAdminLogged = true;
     rvAdminActive = true;
     galAdminActive = true;
     tiendaAdminActive = true;
     svcsAdminActive = true;
+    showView('admin');
   } else {
     isAdminLogged = false;
     rvAdminActive = false;
     galAdminActive = false;
     tiendaAdminActive = false;
     svcsAdminActive = false;
+    // Cliente: restaurar ultima vista visitada
+    var lastView = localStorage.getItem('sc_last_view');
+    var validViews = ['booking','galeria','tienda','reviews','resenas'];
+    if (lastView && validViews.indexOf(lastView) !== -1) {
+      showView(lastView);
+    }
   }
 });
 
