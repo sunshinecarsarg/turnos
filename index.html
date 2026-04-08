@@ -1038,19 +1038,23 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
         <div style="margin-bottom:1rem;">
           <div id="gal-fotos-grid" style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.5rem;"></div>
           <label style="display:inline-flex;align-items:center;gap:.5rem;cursor:pointer;background:rgba(204,0,126,.08);border:1px dashed rgba(204,0,126,.3);border-radius:8px;padding:.6rem 1rem;font-size:.82rem;color:var(--m);">
-            <input type="file" accept="image/*" multiple style="display:none;" onchange="galAddFiles(this.files)">
-            &#128247; Agregar foto(s)
+            <input type="file" accept="image/*,.gif" multiple style="display:none;" onchange="galAddFiles(this.files)">
+            &#128247; Agregar fotos o GIF
           </label>
-          <span style="font-size:.72rem;color:var(--muted);margin-left:.5rem;">Hasta 10 fotos (antes, durante, despues)</span>
+          <span style="font-size:.72rem;color:var(--muted);margin-left:.5rem;">Hasta 10 fotos/GIFs &mdash; GIF max 500KB</span>
         </div>
         <div style="margin-top:1rem;display:flex;flex-direction:column;gap:.8rem;">
           <div class="fi">
             <label class="flabel">Titulo *</label>
-            <input type="text" class="finput" id="gal-titulo" placeholder="BMW 320i - Full Shine">
+            <input type="text" class="finput" id="gal-titulo" placeholder="Limpieza de llantas — Full Shine">
           </div>
           <div class="fi">
-            <label class="flabel">Descripcion</label>
-            <input type="text" class="finput" id="gal-desc" placeholder="Lavado completo con tratamiento ceramico en llantas...">
+            <label class="flabel">Descripcion corta <span style="font-weight:400;color:var(--muted)">(se ve en la tarjeta)</span></label>
+            <input type="text" class="finput" id="gal-desc" placeholder="Con APC y Ferrico — BMW 320i">
+          </div>
+          <div class="fi">
+            <label class="flabel">Descripcion del proceso <span style="font-weight:400;color:var(--muted)">(se ve al abrir la foto)</span></label>
+            <textarea class="finput" id="gal-proceso" rows="4" placeholder="Se realizo una limpieza de llantas aplicando Ferrico que elimina el polvo de freno acumulado. A continuacion se aplico APC para remover grasa y restos organicos. Se finalizo con sellador de llantas para mayor proteccion..." style="resize:vertical;min-height:90px;font-family:inherit;"></textarea>
           </div>
         </div>
         <div style="margin-top:1rem;display:flex;gap:.8rem;">
@@ -1652,16 +1656,22 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
   grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));
   gap:12px;
 }
+.gal-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));
+  gap:16px;
+}
 .gal-item {
-  position:relative; border-radius:10px;
-  cursor:pointer; background:var(--g2);
-  border:1px solid rgba(204,0,126,.15);
-  transition:transform .3s, box-shadow .3s;
+  position:relative; border-radius:12px;
+  cursor:pointer; background:#0d0710;
+  border:1px solid rgba(204,0,126,.18);
+  transition:transform .3s, box-shadow .3s, border-color .3s;
   overflow:hidden; display:flex; flex-direction:column;
+  box-shadow:0 4px 20px rgba(0,0,0,.4);
 }
 .gal-item:first-child { grid-column:span 2; }
 .gal-item.gal-first { grid-column:span 2; }
-.gal-item:hover { transform:translateY(-3px); box-shadow:0 10px 35px rgba(204,0,126,.3); }
+.gal-item:hover { transform:translateY(-4px); box-shadow:0 14px 40px rgba(204,0,126,.28); border-color:rgba(204,0,126,.45); }
 .gal-item-img {
   position:relative; aspect-ratio:4/3; overflow:hidden; flex-shrink:0;
 }
@@ -1669,28 +1679,64 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
 .gal-item.gal-first .gal-item-img { aspect-ratio:16/9; }
 .gal-item img {
   width:100%; height:100%; object-fit:cover;
-  transition:transform .4s; display:block;
+  transition:transform .5s ease; display:block;
 }
-.gal-item:hover img { transform:scale(1.06); }
+.gal-item:hover img { transform:scale(1.07); }
 .gal-info {
-  padding:.8rem 1rem .85rem;
-  background:linear-gradient(135deg, rgba(204,0,126,.12) 0%, rgba(8,4,12,.97) 100%);
-  border-top:2px solid rgba(204,0,126,.4);
-  flex:1;
+  padding:.9rem 1.1rem 1rem;
+  background:linear-gradient(160deg, rgba(204,0,126,.1) 0%, rgba(5,2,10,1) 100%);
+  border-top:2px solid rgba(204,0,126,.5);
+  flex:1; display:flex; flex-direction:column; gap:.3rem;
+}
+.gal-tag {
+  font-size:.58rem; font-weight:800; letter-spacing:2px; text-transform:uppercase;
+  color:var(--m); display:inline-flex; align-items:center; gap:.3rem;
 }
 .gal-label {
-  font-family:'Bebas Neue',cursive; font-size:1.05rem;
-  letter-spacing:1.5px; color:#fff; line-height:1.2;
+  font-family:'Bebas Neue',cursive; font-size:1.15rem;
+  letter-spacing:2px; color:#fff; line-height:1.2;
+  display:flex; align-items:center; justify-content:space-between;
 }
+.gal-label-arrow { color:rgba(204,0,126,.7); font-size:.9rem; transition:transform .3s; }
+.gal-item:hover .gal-label-arrow { transform:translateX(4px); }
 .gal-desc-txt {
-  font-size:.74rem; color:rgba(255,190,225,.72);
-  margin-top:.25rem; line-height:1.4;
+  font-size:.74rem; color:rgba(255,185,220,.65);
+  line-height:1.4;
 }
 .gal-badge {
-  position:absolute; top:.6rem; left:.6rem;
+  position:absolute; top:.7rem; left:.7rem;
   background:var(--m); color:#fff;
-  font-size:.62rem; font-weight:700; letter-spacing:1.5px;
-  text-transform:uppercase; padding:.2rem .6rem; border-radius:3px; z-index:2;
+  font-size:.58rem; font-weight:800; letter-spacing:1.5px;
+  text-transform:uppercase; padding:.25rem .65rem; border-radius:4px; z-index:2;
+}
+.gal-gif-badge {
+  position:absolute; top:.7rem; right:.7rem;
+  background:rgba(0,0,0,.75); color:#fff; border:1px solid rgba(255,255,255,.3);
+  font-size:.62rem; font-weight:700; letter-spacing:1px;
+  padding:.2rem .55rem; border-radius:4px; z-index:2;
+}
+/* Lightbox redesign for gallery */
+.lb-gal-info {
+  position:absolute; bottom:0; left:0; right:0;
+  background:linear-gradient(to top, rgba(0,0,0,.97) 0%, rgba(0,0,0,.7) 70%, transparent 100%);
+  padding:1.5rem 1.5rem 1.2rem;
+  transform:translateY(100%); transition:transform .35s ease;
+  max-height:55%;  overflow-y:auto;
+}
+.lb.open .lb-gal-info { transform:translateY(0); }
+.lb-gal-titulo {
+  font-family:'Bebas Neue',cursive; font-size:1.4rem; letter-spacing:2px; color:#fff; margin-bottom:.3rem;
+}
+.lb-gal-short { font-size:.78rem; color:rgba(204,0,126,1); font-weight:600; margin-bottom:.7rem; letter-spacing:.5px; }
+.lb-gal-proceso {
+  font-size:.82rem; color:rgba(255,255,255,.75); line-height:1.6;
+  border-top:1px solid rgba(204,0,126,.25); padding-top:.7rem; margin-top:.3rem;
+}
+.lb-toggle-desc {
+  background:rgba(204,0,126,.15); border:1px solid rgba(204,0,126,.35); color:var(--m);
+  border-radius:6px; padding:.35rem .9rem; font-size:.75rem; font-weight:600;
+  cursor:pointer; letter-spacing:.5px; margin-top:.5rem;
+  display:inline-block;
 }
 
 /* ======== TIENDA ======== */
@@ -2000,9 +2046,13 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
       <label class="flabel">Titulo *</label>
       <input type="text" class="finput" id="edit-gal-titulo">
     </div>
-    <div class="fi" style="margin-bottom:1rem;">
-      <label class="flabel">Descripcion</label>
+    <div class="fi" style="margin-bottom:.8rem;">
+      <label class="flabel">Descripcion corta <span style="font-weight:400;color:var(--muted)">(tarjeta)</span></label>
       <input type="text" class="finput" id="edit-gal-desc">
+    </div>
+    <div class="fi" style="margin-bottom:1rem;">
+      <label class="flabel">Descripcion del proceso <span style="font-weight:400;color:var(--muted)">(lightbox)</span></label>
+      <textarea class="finput" id="edit-gal-proceso" rows="4" style="resize:vertical;min-height:80px;font-family:inherit;"></textarea>
     </div>
     <div class="modal-footer">
       <button class="btn2" onclick="closeEditGal()">Cancelar</button>
@@ -2157,6 +2207,12 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
 <div class="lb" id="lb" onclick="closeLb()">
   <button class="lb-x" onclick="closeLb()">&#10005;</button>
   <img id="lb-img" src="" alt="">
+  <div class="lb-gal-info" id="lb-gal-info" onclick="event.stopPropagation()" style="display:none;">
+    <div class="lb-gal-titulo" id="lb-gal-titulo"></div>
+    <div class="lb-gal-short" id="lb-gal-short"></div>
+    <div class="lb-gal-proceso" id="lb-gal-proceso" style="display:none;"></div>
+    <button class="lb-toggle-desc" id="lb-toggle-desc" onclick="lbToggleProceso()" style="display:none;">&#128203; Ver proceso completo</button>
+  </div>
 </div>
 
 <!-- TOAST -->
@@ -3280,6 +3336,16 @@ function openLb(id) {
 function closeLb() {
   document.getElementById('lb').classList.remove('open');
   document.getElementById('lb-img').src = '';
+  var infoEl = document.getElementById('lb-gal-info');
+  if (infoEl) infoEl.style.display = 'none';
+}
+function lbToggleProceso() {
+  var el = document.getElementById('lb-gal-proceso');
+  var btn = document.getElementById('lb-toggle-desc');
+  if (!el) return;
+  var open = el.style.display !== 'none';
+  el.style.display = open ? 'none' : 'block';
+  if (btn) btn.textContent = open ? '📋 Ver proceso completo' : '✖ Cerrar';
 }
 
 // ==========================================
@@ -3343,15 +3409,27 @@ function compressImageCustom(file, maxPx, maxBytes, callback) {
 
 function galAddFiles(files) {
   for (var fi = 0; fi < files.length; fi++) {
-    if (galImgData.length >= 10) { toast('Maximo 10 fotos'); break; }
+    if (galImgData.length >= 10) { toast('Maximo 10 fotos/GIFs'); break; }
     (function(f) {
       if (!f.type.startsWith('image/')) return;
-      // 800px max, 80KB max per photo so 10 photos fit in Firestore (1MB doc limit)
-      compressImageCustom(f, 800, 80000, function(data) {
-        galImgData.push(data);
-        galRenderGrid();
-        toast('Foto ' + galImgData.length + ' agregada');
-      });
+      if (f.type === 'image/gif') {
+        // GIFs: read as-is (no canvas = no animation loss), limit 500KB raw
+        if (f.size > 512000) { toast('GIF demasiado grande. Max 500KB.'); return; }
+        var r = new FileReader();
+        r.onload = function(ev) {
+          galImgData.push(ev.target.result);
+          galRenderGrid();
+          toast('GIF ' + galImgData.length + ' agregado ✨');
+        };
+        r.readAsDataURL(f);
+      } else {
+        // Photos: compress to 80KB so 10 fit in Firestore 1MB limit
+        compressImageCustom(f, 800, 80000, function(data) {
+          galImgData.push(data);
+          galRenderGrid();
+          toast('Foto ' + galImgData.length + ' agregada');
+        });
+      }
     })(files[fi]);
   }
 }
@@ -3381,14 +3459,16 @@ function publishGaleria() {
   var titulo = document.getElementById('gal-titulo').value.trim();
   if (!titulo) { toast('Ingresa un titulo'); return; }
   var desc = document.getElementById('gal-desc').value.trim();
+  var proceso = document.getElementById('gal-proceso').value.trim();
 
   // Check total size
   var totalSize = galImgData.reduce(function(s,i){ return s + (i?i.length:0); }, 0);
-  if (totalSize > 850000) { toast('Fotos muy pesadas. Usa menos o mas pequenas.'); return; }
+  if (totalSize > 900000) { toast('Archivos muy pesados. Usa menos o GIFs mas pequenos.'); return; }
 
   var item = {
     titulo: titulo,
     desc: desc,
+    proceso: proceso,
     img: galImgData[0],
     imgs: galImgData.slice(),
     fecha: new Date().toLocaleDateString('es-AR', {day:'numeric',month:'long',year:'numeric'}),
@@ -3396,9 +3476,10 @@ function publishGaleria() {
   };
 
   db.collection('galeria').add(item).then(function() {
-    toast('Foto publicada en la galeria!');
+    toast('Trabajo publicado en la galeria!');
     document.getElementById('gal-titulo').value = '';
     document.getElementById('gal-desc').value = '';
+    document.getElementById('gal-proceso').value = '';
     galImgData = [];
     galRenderGrid();
     loadAndRenderGaleria();
@@ -3425,11 +3506,12 @@ function renderGaleria() {
 function galBuildImgHtml(item, i) {
   var imgs = (item.imgs && item.imgs.length) ? item.imgs : [item.img].filter(Boolean);
   if (!imgs.length) return '<div class="gal-item-img" style="background:var(--g2);"></div>';
+  var firstImg = imgs[0];
+  var isGif = firstImg && firstImg.indexOf('data:image/gif') === 0;
   var out = '<div class="gal-item-img">';
-  out += '<img src="' + imgs[0] + '" alt="' + (item.titulo||'') + '" loading="lazy">';
-  if (imgs.length > 1) {
-    out += '<div style="position:absolute;top:.5rem;right:.5rem;background:rgba(0,0,0,.7);color:#fff;font-size:.7rem;padding:.2rem .5rem;border-radius:20px;pointer-events:none;">&#128247; ' + imgs.length + '</div>';
-  }
+  out += '<img src="' + firstImg + '" alt="' + (item.titulo||'') + '" loading="lazy">';
+  if (isGif) out += '<span class="gal-gif-badge">GIF</span>';
+  else if (imgs.length > 1) out += '<span class="gal-gif-badge">&#128247; ' + imgs.length + '</span>';
   out += '</div>';
   return out;
 }
@@ -3451,10 +3533,11 @@ function renderGaleriaItems(items) {
     html += '<span class="gal-badge">SunshineCars</span>';
     html += galBuildImgHtml(item, i);
     html += '<div class="gal-info">';
-    html += '<div class="gal-label">' + (item.titulo||'') + '</div>';
+    html += '<div class="gal-tag">&#9889; Detailing profesional</div>';
+    html += '<div class="gal-label"><span>' + (item.titulo||'') + '</span><span class="gal-label-arrow">&#8594;</span></div>';
     if (item.desc) html += '<div class="gal-desc-txt">' + item.desc + '</div>';
     if (galAdminActive) {
-      html += '<div style="margin-top:.5rem;display:flex;gap:.4rem;" onclick="event.stopPropagation()">';
+      html += '<div style="margin-top:.6rem;display:flex;gap:.4rem;" onclick="event.stopPropagation()">';
       html += '<button class="abtn" data-id="' + item.id + '" onclick="editGalItem(event,this)" style="font-size:.65rem;padding:.2rem .5rem;background:rgba(100,180,255,.15);color:#64b4ff;border:1px solid rgba(100,180,255,.3);">Editar</button>';
       html += '<button class="abtn no" data-id="' + item.id + '" onclick="deleteGalItem(event,this)" style="font-size:.65rem;padding:.2rem .5rem;">Eliminar</button>';
       html += '</div>';
@@ -3484,6 +3567,26 @@ function openGalLbFirestore(itemIdx, items) {
   var lb = document.getElementById('lb');
   lb.classList.add('open');
   document.getElementById('lb-img').src = imgs[0];
+
+  // Fill info panel
+  var infoEl = document.getElementById('lb-gal-info');
+  var tituloEl = document.getElementById('lb-gal-titulo');
+  var shortEl = document.getElementById('lb-gal-short');
+  var procesoEl = document.getElementById('lb-gal-proceso');
+  var toggleBtn = document.getElementById('lb-toggle-desc');
+  if (infoEl) {
+    infoEl.style.display = 'block';
+    if (tituloEl) tituloEl.textContent = item.titulo || '';
+    if (shortEl) shortEl.textContent = item.desc || '';
+    if (procesoEl) {
+      procesoEl.textContent = item.proceso || '';
+      procesoEl.style.display = 'none';
+    }
+    if (toggleBtn) {
+      toggleBtn.style.display = item.proceso ? 'inline-block' : 'none';
+      toggleBtn.textContent = '📋 Ver proceso completo';
+    }
+  }
 
   // Update counter
   galLbUpdateCounter();
@@ -3587,6 +3690,7 @@ function editGalItem(e, btn) {
   editGalId = id; editGalNewImg = null;
   document.getElementById('edit-gal-titulo').value = item.titulo || '';
   document.getElementById('edit-gal-desc').value = item.desc || '';
+  document.getElementById('edit-gal-proceso').value = item.proceso || '';
   document.getElementById('edit-gal-preview').style.display = 'none';
   document.getElementById('edit-gal-overlay').classList.add('open');
 }
@@ -3599,7 +3703,7 @@ function saveEditGal() {
   if (!editGalId) return;
   var titulo = document.getElementById('edit-gal-titulo').value.trim();
   if (!titulo) { toast('Ingresa un titulo'); return; }
-  var updates = { titulo: titulo, desc: document.getElementById('edit-gal-desc').value.trim() };
+  var updates = { titulo: titulo, desc: document.getElementById('edit-gal-desc').value.trim(), proceso: document.getElementById('edit-gal-proceso').value.trim() };
   if (editGalNewImg) updates.img = editGalNewImg;
   db.collection('galeria').doc(editGalId).update(updates).then(function(){
     toast('Foto actualizada!'); closeEditGal(); loadAndRenderGaleria();
