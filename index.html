@@ -1656,6 +1656,10 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
   grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));
   gap:12px;
 }
+@media(max-width:600px) {
+  .gal-grid { grid-template-columns:1fr !important; }
+  .gal-item:first-child, .gal-item.gal-first { grid-column:span 1 !important; }
+}
 .gal-grid {
   display:grid;
   grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));
@@ -1693,15 +1697,18 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
   color:var(--m); display:inline-flex; align-items:center; gap:.3rem;
 }
 .gal-label {
-  font-family:'Bebas Neue',cursive; font-size:1.15rem;
+  font-family:'Bebas Neue',cursive; font-size:1.1rem;
   letter-spacing:2px; color:#fff; line-height:1.2;
-  display:flex; align-items:center; justify-content:space-between;
+  display:flex; align-items:flex-start; justify-content:space-between; gap:.4rem;
+  word-break:break-word;
 }
-.gal-label-arrow { color:rgba(204,0,126,.7); font-size:.9rem; transition:transform .3s; }
+.gal-label span:first-child { flex:1; min-width:0; }
+.gal-label-arrow { color:rgba(204,0,126,.7); font-size:.9rem; transition:transform .3s; flex-shrink:0; margin-top:.1rem; }
 .gal-item:hover .gal-label-arrow { transform:translateX(4px); }
 .gal-desc-txt {
-  font-size:.74rem; color:rgba(255,185,220,.65);
+  font-size:.72rem; color:rgba(255,185,220,.65);
   line-height:1.4;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
 }
 .gal-badge {
   position:absolute; top:.7rem; left:.7rem;
