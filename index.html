@@ -3383,27 +3383,38 @@ function compressImageHQ(file, callback) {
   compressImageCustom(file, 800, 150000, callback); // 150KB per photo max
 }
 
+var CLOUDINARY_CLOUD = 'dmibvrnfw';
+var CLOUDINARY_PRESET = 'galeria_sunshine';
+
 function isVideoUrl(src) {
   if (!src) return false;
-  return src.indexOf('https://') === 0 && (src.indexOf('.mp4') !== -1 || src.indexOf('.mov') !== -1 || src.indexOf('.webm') !== -1 || src.indexOf('video') !== -1);
+  return src.indexOf('https://') === 0 && (
+    src.indexOf('res.cloudinary.com') !== -1 ||
+    src.indexOf('.mp4') !== -1 || src.indexOf('.mov') !== -1 || src.indexOf('.webm') !== -1
+  );
 }
 
 function uploadGalMedia(file, onProgress, onDone, onError) {
-  var ext = (file.name || 'video.mp4').split('.').pop().toLowerCase();
-  var path = 'galeria/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.' + ext;
-  var ref = storage.ref().child(path);
-  var task = ref.put(file);
-  task.on('state_changed',
-    function(snap) {
-      if (onProgress) onProgress(Math.round(snap.bytesTransferred / snap.totalBytes * 100));
-    },
-    function(err) { if (onError) onError(err); },
-    function() {
-      task.snapshot.ref.getDownloadURL().then(function(url) {
-        if (onDone) onDone(url);
-      }).catch(onError);
+  var isVideo = file.type.startsWith('video/');
+  var endpoint = 'https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD + '/' + (isVideo ? 'video' : 'image') + '/upload';
+  var xhr = new XMLHttpRequest();
+  var form = new FormData();
+  form.append('file', file);
+  form.append('upload_preset', CLOUDINARY_PRESET);
+  xhr.upload.onprogress = function(e) {
+    if (e.lengthComputable && onProgress) onProgress(Math.round(e.loaded / e.total * 100));
+  };
+  xhr.onload = function() {
+    if (xhr.status === 200) {
+      var res = JSON.parse(xhr.responseText);
+      if (onDone) onDone(res.secure_url);
+    } else {
+      if (onError) onError(new Error('Cloudinary error ' + xhr.status));
     }
-  );
+  };
+  xhr.onerror = function() { if (onError) onError(new Error('Network error')); };
+  xhr.open('POST', endpoint);
+  xhr.send(form);
 }
 
 function compressImageCustom(file, maxPx, maxBytes, callback) {
