@@ -2695,6 +2695,7 @@ function renderSvcs() {
   var html = '';
   for (var i = 0; i < SVCS.length; i++) {
     var s = SVCS[i];
+    if (s.activo === false) continue; // skip disabled services
     var sel = S.svc && S.svc.id === s.id;
     // Extra services open WhatsApp instead of booking
     var cardOnclick = s.isExtra
@@ -2803,6 +2804,24 @@ function saveEditSvc() {
 
 function deleteSvcEl(btn) { deleteSvc(btn.getAttribute('data-id')); }
 function toggleSvcActivoEl(btn) { toggleSvcActivo(btn.getAttribute('data-id'), btn.getAttribute('data-activo') !== 'false'); }
+
+function moveSvc(btn, dir) {
+  var id = btn.getAttribute('data-id');
+  var idx = SVCS.findIndex(function(s){ return s.id === id; });
+  var swapIdx = idx + dir;
+  if (swapIdx < 0 || swapIdx >= SVCS.length) return;
+  var a = SVCS[idx], b = SVCS[swapIdx];
+  // Swap orden values
+  var ordenA = typeof a.orden === 'number' ? a.orden : idx;
+  var ordenB = typeof b.orden === 'number' ? b.orden : swapIdx;
+  var batch = db.batch();
+  batch.update(db.collection('servicios').doc(a.id), { orden: ordenB });
+  batch.update(db.collection('servicios').doc(b.id), { orden: ordenA });
+  batch.commit().then(function() {
+    loadSVCS(function(){ renderSvcs(); renderSvcsAdminList(); });
+    toast('Orden actualizado');
+  }).catch(function(e){ console.error(e); toast('Error al reordenar'); });
+}
 
 function pickSvc(id) {
   S.svc = null;
@@ -4577,7 +4596,9 @@ function renderSvcsAdminList() {
     html += '<div style="font-weight:700;font-size:.9rem;">' + sv.name + '</div>';
     html += '<div style="font-size:.78rem;color:var(--muted);">Sedan: <span style="color:#64b4ff;">$' + (sv.raw||0).toLocaleString('es-AR') + '</span> &nbsp; SUV: <span style="color:#64b4ff;">$' + (sv.rawSuv||0).toLocaleString('es-AR') + '</span></div>';
     html += '</div>';
-    html += '<div style="display:flex;gap:.4rem;">';
+    html += '<div style="display:flex;gap:.4rem;flex-wrap:wrap;">';
+    html += '<button class="abtn" style="font-size:.7rem;padding:.2rem .5rem;" data-id="' + sv.id + '" onclick="moveSvc(this,-1)" ' + (i===0?'disabled style="opacity:.3;font-size:.7rem;"':'') + '>↑</button>';
+    html += '<button class="abtn" style="font-size:.7rem;padding:.2rem .5rem;" data-id="' + sv.id + '" onclick="moveSvc(this,1)" ' + (i===SVCS.length-1?'disabled style="opacity:.3;font-size:.7rem;"':'') + '>↓</button>';
     html += '<button class="abtn" style="font-size:.7rem;background:rgba(100,180,255,.1);color:#64b4ff;border:1px solid rgba(100,180,255,.2);" data-id="' + sv.id + '" onclick="editSvcEl(this)">Editar</button>';
     html += '<button class="abtn" style="font-size:.7rem;background:rgba(245,166,35,.1);color:#f5a623;border:1px solid rgba(245,166,35,.2);" data-id="' + sv.id + '" data-activo="' + activo + '" onclick="toggleSvcActivoEl(this)">' + (activo ? 'Desactivar' : 'Activar') + '</button>';
     html += '<button class="abtn no" style="font-size:.7rem;" data-id="' + sv.id + '" onclick="deleteSvcEl(this)">Eliminar</button>';
