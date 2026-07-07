@@ -1312,6 +1312,7 @@ body.light-mode .res-card-meta { color:#3a4a5c !important; }
         </button>
         <button class="fbtn" id="svcs-toggle-btn" onclick="toggleSvcsAdmin()" style="border-color:rgba(100,180,255,.4);color:#64b4ff;">Servicios</button>
         <button class="fbtn" onclick="toggleVtvEdit()" style="border-color:rgba(100,180,255,.3);color:rgba(100,180,255,.7);">Card VTV</button>
+        <button class="fbtn" onclick="toggleOrdenIngreso()" style="border-color:rgba(0,200,117,.4);color:#00c875;">&#128203; Orden de Ingreso</button>
         <button class="fbtn" onclick="toggleCupones()" style="border-color:rgba(255,193,7,.4);color:#ffc107;">&#127915; Cupones</button>
         <button class="fbtn" id="stats-toggle-btn" onclick="toggleStats()" style="border-color:rgba(205,127,50,.4);color:var(--m);">Ver estadisticas</button>
         <button class="logout-btn" onclick="doLogout()">Cerrar sesion</button>
@@ -1320,6 +1321,42 @@ body.light-mode .res-card-meta { color:#3a4a5c !important; }
     <div class="stats-row" id="stats-row"></div>
 
     <!-- RECOMENDACIONES PRIVADAS -->
+    <!-- PANEL ORDEN DE INGRESO -->
+    <div id="orden-panel" style="display:none; background:var(--g1); border:1px solid rgba(0,200,117,.25); border-radius:12px; padding:1.5rem; margin-bottom:1.5rem;">
+      <div style="font-weight:800; color:#00c875; margin-bottom:1rem;">&#128203; Nueva Orden de Ingreso</div>
+
+      <div class="fg" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:.8rem; margin-bottom:1rem;">
+        <div><label class="flabel">Nombre y Apellido *</label><input type="text" class="finput" id="oi-nombre" maxlength="80"></div>
+        <div><label class="flabel">Tel&eacute;fono *</label><input type="text" class="finput" id="oi-tel" maxlength="20"></div>
+        <div><label class="flabel">Domicilio <span style="color:var(--muted);font-weight:400;">(opcional)</span></label><input type="text" class="finput" id="oi-dom" maxlength="100"></div>
+        <div><label class="flabel">Email <span style="color:var(--muted);font-weight:400;">(opcional)</span></label><input type="email" class="finput" id="oi-mail" maxlength="80"></div>
+        <div><label class="flabel">Marca *</label><input type="text" class="finput" id="oi-marca" maxlength="40"></div>
+        <div><label class="flabel">Modelo *</label><input type="text" class="finput" id="oi-modelo" maxlength="40"></div>
+        <div><label class="flabel">A&ntilde;o</label><input type="text" class="finput" id="oi-anio" maxlength="4"></div>
+        <div><label class="flabel">Patente *</label><input type="text" class="finput" id="oi-patente" maxlength="10" style="text-transform:uppercase;"></div>
+      </div>
+
+      <div style="margin-bottom:.8rem;"><label class="flabel">Trabajo a realizar *</label><textarea class="wr-textarea" id="oi-trabajo" style="height:90px;" maxlength="800" placeholder="Ej: Tratamiento ceramico Nivel 2 completo. Correccion de pintura en 2 pasos..."></textarea></div>
+      <div style="margin-bottom:.8rem;"><label class="flabel">Observaciones <span style="color:var(--muted);font-weight:400;">(estado del vehiculo, detalles, rayones existentes)</span></label><textarea class="wr-textarea" id="oi-obs" style="height:70px;" maxlength="600" placeholder="Ej: Rayon preexistente en puerta trasera derecha. Llanta delantera izquierda con marca..."></textarea></div>
+
+      <div class="fg" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:.8rem; margin-bottom:1rem;">
+        <div><label class="flabel">Precio total ($) *</label><input type="number" class="finput" id="oi-precio" min="0"></div>
+        <div><label class="flabel">Se&ntilde;a / dej&oacute; ($)</label><input type="number" class="finput" id="oi-sena" min="0" value="0"></div>
+        <div><label class="flabel">Fecha/hora salida estimada</label><input type="datetime-local" class="finput" id="oi-salida"></div>
+      </div>
+
+      <div style="margin-bottom:1rem;">
+        <label class="flabel">Fotos del ingreso <span style="color:var(--muted);font-weight:400;">(hasta 4, opcional)</span></label>
+        <div id="oi-fotos-grid" style="display:flex; flex-wrap:wrap; gap:.5rem; margin:.5rem 0;"></div>
+        <label style="display:inline-flex; align-items:center; gap:.5rem; cursor:pointer; background:rgba(0,200,117,.08); border:1px dashed rgba(0,200,117,.3); border-radius:8px; padding:.5rem 1rem; font-size:.8rem; color:#00c875;">
+          <input type="file" accept="image/*" multiple style="display:none;" onchange="oiAddFotos(this.files)">
+          &#128247; Agregar foto(s)
+        </label>
+      </div>
+
+      <button class="btn" onclick="generarOrdenPDF()" style="background:linear-gradient(135deg,#00c875,#009e5c);">&#128196; Generar Orden PDF</button>
+    </div>
+
     <!-- PANEL CUPONES -->
     <div id="cupones-panel" style="display:none; background:var(--g1); border:1px solid rgba(255,193,7,.25); border-radius:12px; padding:1.5rem; margin-bottom:1.5rem;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
@@ -2347,6 +2384,7 @@ src="https://www.facebook.com/tr?id=1446912083475161&ev=PageView&noscript=1"/>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 // ==========================================
 // FIREBASE CONFIG
@@ -6503,6 +6541,325 @@ function downloadCoupon() {
 // ==========================================
 // ADMIN - CUPONES
 // ==========================================
+// ==========================================
+// ORDEN DE INGRESO (admin)
+// ==========================================
+var _oiFotos = [];
+
+function toggleOrdenIngreso() {
+  var p = document.getElementById('orden-panel');
+  if (!p) return;
+  p.style.display = p.style.display === 'none' ? 'block' : 'none';
+}
+
+function oiAddFotos(files) {
+  for (var i = 0; i < files.length; i++) {
+    if (_oiFotos.length >= 4) { toast('Maximo 4 fotos'); break; }
+    (function(f) {
+      if (!f.type.startsWith('image/')) return;
+      compressImageHQ(f, function(data) {
+        _oiFotos.push(data);
+        oiRenderFotos();
+      });
+    })(files[i]);
+  }
+}
+
+function oiRenderFotos() {
+  var grid = document.getElementById('oi-fotos-grid');
+  if (!grid) return;
+  grid.innerHTML = _oiFotos.map(function(img, i) {
+    return '<div style="position:relative;width:70px;height:70px;">' +
+      '<img src="' + img + '" style="width:70px;height:70px;object-fit:cover;border-radius:6px;border:1px solid rgba(0,200,117,.4);">' +
+      '<button onclick="_oiFotos.splice(' + i + ',1);oiRenderFotos()" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:#e03c3c;border:none;color:#fff;font-size:.65rem;cursor:pointer;line-height:1;">x</button>' +
+      '</div>';
+  }).join('');
+}
+
+// Sello circular SunshineCars dibujado en canvas
+function drawSello(ctx, cx, cy, radius) {
+  ctx.save();
+  // circulo exterior
+  ctx.strokeStyle = '#CD7F32';
+  ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI * 2); ctx.stroke();
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(cx, cy, radius - 7, 0, Math.PI * 2); ctx.stroke();
+
+  // texto curvo superior: SUNSHINE CARS
+  ctx.fillStyle = '#CD7F32';
+  ctx.font = 'bold ' + Math.floor(radius * 0.19) + 'px monospace';
+  ctx.textAlign = 'center';
+  var textoTop = 'SUNSHINE CARS';
+  var arcoTop = Math.PI * 1.1;
+  var startTop = -Math.PI / 2 - arcoTop / 2;
+  for (var i = 0; i < textoTop.length; i++) {
+    var ang = startTop + (arcoTop / (textoTop.length - 1)) * i;
+    ctx.save();
+    ctx.translate(cx + Math.cos(ang) * (radius - 18), cy + Math.sin(ang) * (radius - 18));
+    ctx.rotate(ang + Math.PI / 2);
+    ctx.fillText(textoTop[i], 0, 0);
+    ctx.restore();
+  }
+
+  // texto curvo inferior: DETAIL - LA PLATA
+  var textoBot = 'DETAIL · LA PLATA';
+  var arcoBot = Math.PI * 0.9;
+  var startBot = Math.PI / 2 + arcoBot / 2;
+  for (var j = 0; j < textoBot.length; j++) {
+    var angB = startBot - (arcoBot / (textoBot.length - 1)) * j;
+    ctx.save();
+    ctx.translate(cx + Math.cos(angB) * (radius - 18), cy + Math.sin(angB) * (radius - 18));
+    ctx.rotate(angB - Math.PI / 2);
+    ctx.fillText(textoBot[j], 0, 0);
+    ctx.restore();
+  }
+
+  // sol central
+  ctx.font = Math.floor(radius * 0.42) + 'px serif';
+  ctx.fillText('\u2600', cx, cy + radius * 0.14);
+
+  // estrellas laterales
+  ctx.font = Math.floor(radius * 0.15) + 'px serif';
+  ctx.fillText('\u2605', cx - radius + 12, cy + 4);
+  ctx.fillText('\u2605', cx + radius - 12, cy + 4);
+  ctx.restore();
+}
+
+function generarOrdenPDF() {
+  if (!isAdminLogged) { toast('Solo el admin'); return; }
+  var nombre = sanitize(document.getElementById('oi-nombre').value.trim());
+  var tel = sanitize(document.getElementById('oi-tel').value.trim());
+  var marca = sanitize(document.getElementById('oi-marca').value.trim());
+  var modelo = sanitize(document.getElementById('oi-modelo').value.trim());
+  var patente = sanitize(document.getElementById('oi-patente').value.trim().toUpperCase());
+  var trabajo = sanitize(document.getElementById('oi-trabajo').value.trim());
+  var precio = parseFloat(document.getElementById('oi-precio').value) || 0;
+
+  if (!nombre || !tel || !marca || !modelo || !patente || !trabajo || !precio) {
+    toast('Completa los campos obligatorios (*)');
+    return;
+  }
+
+  var dom = sanitize(document.getElementById('oi-dom').value.trim());
+  var mail = sanitize(document.getElementById('oi-mail').value.trim());
+  var anio = sanitize(document.getElementById('oi-anio').value.trim());
+  var obs = sanitize(document.getElementById('oi-obs').value.trim());
+  var sena = parseFloat(document.getElementById('oi-sena').value) || 0;
+  var salidaRaw = document.getElementById('oi-salida').value;
+  var saldo = precio - sena;
+
+  var ahora = new Date();
+  var nroOrden = 'OI-' + ahora.getFullYear().toString().slice(2) + String(ahora.getMonth()+1).padStart(2,'0') + String(ahora.getDate()).padStart(2,'0') + '-' + String(Math.floor(Math.random()*900)+100);
+  var fechaIngreso = ahora.toLocaleDateString('es-AR') + ' ' + ahora.toLocaleTimeString('es-AR', {hour:'2-digit',minute:'2-digit'});
+  var fechaSalida = salidaRaw ? new Date(salidaRaw).toLocaleDateString('es-AR') + ' ' + new Date(salidaRaw).toLocaleTimeString('es-AR', {hour:'2-digit',minute:'2-digit'}) : 'A confirmar';
+
+  // Guardar en Firestore (historial)
+  try {
+    db.collection('ordenes').add({
+      nro: nroOrden, nombre: nombre, tel: tel, dom: dom || null, mail: mail || null,
+      marca: marca, modelo: modelo, anio: anio || null, patente: patente,
+      trabajo: trabajo, obs: obs || null,
+      precio: precio, sena: sena, saldo: saldo,
+      fechaIngreso: fechaIngreso, fechaSalida: fechaSalida,
+      fotos: _oiFotos.slice(0, 4),
+      createdAt: ahora.toISOString()
+    });
+  } catch(e) { console.error('Error guardando orden:', e); }
+
+  // ── DIBUJAR PDF EN CANVAS A4 ──
+  var cv = document.createElement('canvas');
+  cv.width = 1240; cv.height = 1754;
+  var ctx = cv.getContext('2d');
+  var W = 1240;
+
+  // fondo blanco
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, 1754);
+
+  // header azul marino
+  ctx.fillStyle = '#0A1128';
+  ctx.fillRect(0, 0, W, 160);
+  ctx.fillStyle = '#CD7F32';
+  ctx.font = 'bold 46px monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText('SUNSHINECARS', 60, 75);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '22px monospace';
+  ctx.fillText('D E T A I L', 60, 108);
+  ctx.fillStyle = 'rgba(255,255,255,.6)';
+  ctx.font = '15px monospace';
+  ctx.fillText('Calle 28 N 596, e/ Av. 44 y 43 - La Plata  |  +54 9 221 438-7138', 60, 138);
+
+  // nro orden
+  ctx.textAlign = 'right';
+  ctx.fillStyle = '#CD7F32';
+  ctx.font = 'bold 26px monospace';
+  ctx.fillText('ORDEN DE INGRESO', W - 60, 70);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 30px monospace';
+  ctx.fillText(nroOrden, W - 60, 108);
+  ctx.textAlign = 'left';
+
+  var y = 210;
+  function seccion(titulo) {
+    ctx.fillStyle = '#CD7F32';
+    ctx.font = 'bold 20px monospace';
+    ctx.fillText(titulo, 60, y);
+    ctx.strokeStyle = 'rgba(205,127,50,.4)';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(60, y + 8); ctx.lineTo(W - 60, y + 8); ctx.stroke();
+    y += 40;
+  }
+  function campo(label, valor, x, ancho) {
+    ctx.fillStyle = '#888';
+    ctx.font = '13px monospace';
+    ctx.fillText(label.toUpperCase(), x, y);
+    ctx.fillStyle = '#0A1128';
+    ctx.font = 'bold 19px sans-serif';
+    ctx.fillText(valor || '-', x, y + 25);
+  }
+  function wrapText(text, x, maxW, lineH, font, color) {
+    ctx.font = font; ctx.fillStyle = color;
+    var words = text.split(' ');
+    var line = '';
+    words.forEach(function(w) {
+      if (ctx.measureText(line + w).width > maxW) {
+        ctx.fillText(line, x, y); y += lineH; line = w + ' ';
+      } else line += w + ' ';
+    });
+    if (line.trim()) { ctx.fillText(line, x, y); y += lineH; }
+  }
+
+  // DATOS DEL CLIENTE
+  seccion('DATOS DEL CLIENTE');
+  campo('Nombre y Apellido', nombre, 60); campo('Telefono', tel, 660);
+  y += 55;
+  if (dom || mail) {
+    if (dom) campo('Domicilio', dom, 60);
+    if (mail) campo('Email', mail, 660);
+    y += 55;
+  }
+  y += 10;
+
+  // DATOS DEL VEHICULO
+  seccion('DATOS DEL VEHICULO');
+  campo('Marca', marca, 60); campo('Modelo', modelo, 400); campo('Anio', anio || '-', 740); campo('Patente', patente, 950);
+  y += 65;
+
+  // TRABAJO
+  seccion('TRABAJO A REALIZAR');
+  wrapText(trabajo, 60, W - 120, 26, '17px sans-serif', '#0A1128');
+  y += 15;
+
+  // OBSERVACIONES
+  if (obs) {
+    seccion('OBSERVACIONES');
+    wrapText(obs, 60, W - 120, 26, '17px sans-serif', '#444');
+    y += 15;
+  }
+
+  // FECHAS
+  seccion('FECHAS');
+  campo('Ingreso', fechaIngreso, 60); campo('Salida estimada', fechaSalida, 660);
+  y += 70;
+
+  // RESUMEN ECONOMICO
+  ctx.fillStyle = 'rgba(205,127,50,.08)';
+  ctx.fillRect(60, y - 20, W - 120, 110);
+  ctx.strokeStyle = '#CD7F32';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(60, y - 20, W - 120, 110);
+  y += 15;
+  ctx.fillStyle = '#888'; ctx.font = '14px monospace';
+  ctx.fillText('PRECIO TOTAL', 100, y);
+  ctx.fillText('SENA / ADELANTO', 500, y);
+  ctx.fillText('SALDO A PAGAR', 880, y);
+  y += 38;
+  ctx.font = 'bold 32px monospace';
+  ctx.fillStyle = '#0A1128';
+  ctx.fillText('$' + precio.toLocaleString('es-AR'), 100, y);
+  ctx.fillStyle = '#00875c';
+  ctx.fillText('$' + sena.toLocaleString('es-AR'), 500, y);
+  ctx.fillStyle = '#c0392b';
+  ctx.fillText('$' + saldo.toLocaleString('es-AR'), 880, y);
+  y += 70;
+
+  // SELLO + FIRMA
+  drawSello(ctx, 220, y + 90, 95);
+  ctx.strokeStyle = '#999';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(700, y + 150); ctx.lineTo(1100, y + 150); ctx.stroke();
+  ctx.fillStyle = '#888';
+  ctx.font = '14px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('Firma del cliente', 900, y + 175);
+  ctx.textAlign = 'left';
+
+  // FOOTER con redes
+  ctx.fillStyle = '#0A1128';
+  ctx.fillRect(0, 1674, W, 80);
+  ctx.fillStyle = 'rgba(255,255,255,.75)';
+  ctx.font = '15px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('IG @sunshinecars.arg  |  TikTok @sunshine_cars.arg  |  www.sunshinecarsdetail.com', W / 2, 1712);
+  ctx.fillStyle = '#CD7F32';
+  ctx.font = '13px monospace';
+  ctx.fillText('Gracias por confiar en SunshineCars Detail', W / 2, 1738);
+  ctx.textAlign = 'left';
+
+  // ── GENERAR PDF con jsPDF ──
+  var jsPDFLib = window.jspdf ? window.jspdf.jsPDF : null;
+  if (!jsPDFLib) { toast('Error: libreria PDF no cargada. Recarga la pagina.'); return; }
+  var pdf = new jsPDFLib({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  pdf.addImage(cv.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 210, 297);
+
+  // Pagina 2: fotos del ingreso
+  if (_oiFotos.length) {
+    pdf.addPage();
+    var cv2 = document.createElement('canvas');
+    cv2.width = 1240; cv2.height = 1754;
+    var c2 = cv2.getContext('2d');
+    c2.fillStyle = '#fff'; c2.fillRect(0, 0, 1240, 1754);
+    c2.fillStyle = '#0A1128'; c2.fillRect(0, 0, 1240, 100);
+    c2.fillStyle = '#CD7F32'; c2.font = 'bold 30px monospace';
+    c2.fillText('FOTOS DEL INGRESO - ' + nroOrden, 60, 62);
+
+    var done = 0;
+    _oiFotos.forEach(function(src, idx) {
+      var img = new Image();
+      img.onload = function() {
+        var px = 60 + (idx % 2) * 580;
+        var py = 140 + Math.floor(idx / 2) * 620;
+        var ratio = Math.min(540 / img.width, 560 / img.height);
+        c2.drawImage(img, px, py, img.width * ratio, img.height * ratio);
+        done++;
+        if (done === _oiFotos.length) {
+          pdf.addImage(cv2.toDataURL('image/jpeg', 0.88), 'JPEG', 0, 0, 210, 297);
+          pdf.save('Orden_' + nroOrden + '_' + patente + '.pdf');
+          toast('Orden ' + nroOrden + ' generada!');
+          limpiarOrdenForm();
+        }
+      };
+      img.src = src;
+    });
+  } else {
+    pdf.save('Orden_' + nroOrden + '_' + patente + '.pdf');
+    toast('Orden ' + nroOrden + ' generada!');
+    limpiarOrdenForm();
+  }
+}
+
+function limpiarOrdenForm() {
+  ['oi-nombre','oi-tel','oi-dom','oi-mail','oi-marca','oi-modelo','oi-anio','oi-patente','oi-trabajo','oi-obs','oi-precio','oi-salida'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('oi-sena').value = '0';
+  _oiFotos = [];
+  oiRenderFotos();
+}
+
 // ==========================================
 // SITIOS AMIGOS
 // ==========================================
