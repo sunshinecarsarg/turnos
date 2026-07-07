@@ -5918,16 +5918,20 @@ setTimeout(function() {
 // ==========================================
 function checkSecretHash() {
   if (window.location.hash === '#admin-sc2024') {
-    window.location.hash = '';
+    try { history.replaceState(null, '', window.location.pathname); } catch(e) { window.location.hash = ''; }
     if (isAdminLogged) {
       showView('admin');
     } else {
       showView('admin-login');
-      clearAdminBadge && clearAdminBadge();
+      if (typeof clearAdminBadge === 'function') clearAdminBadge();
     }
   }
 }
 window.addEventListener('hashchange', checkSecretHash);
+// Ejecutar DESPUES de que todo cargue (para que el init no lo pise)
+window.addEventListener('load', function() {
+  setTimeout(checkSecretHash, 800);
+});
 checkSecretHash();
 
 // ==========================================
