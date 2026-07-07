@@ -1334,6 +1334,7 @@ body.light-mode .res-card-meta { color:#3a4a5c !important; }
         <div><label class="flabel">Modelo *</label><input type="text" class="finput" id="oi-modelo" maxlength="40"></div>
         <div><label class="flabel">A&ntilde;o</label><input type="text" class="finput" id="oi-anio" maxlength="4"></div>
         <div><label class="flabel">Patente *</label><input type="text" class="finput" id="oi-patente" maxlength="10" style="text-transform:uppercase;"></div>
+        <div><label class="flabel">Kilometraje</label><input type="number" class="finput" id="oi-km" min="0" placeholder="Ej: 85400"></div>
       </div>
 
       <div style="margin-bottom:.8rem;"><label class="flabel">Trabajo a realizar *</label><textarea class="wr-textarea" id="oi-trabajo" style="height:90px;" maxlength="800" placeholder="Ej: Tratamiento ceramico Nivel 2 completo. Correccion de pintura en 2 pasos..."></textarea></div>
@@ -6649,6 +6650,7 @@ function generarOrdenPDF() {
   var mail = sanitize(document.getElementById('oi-mail').value.trim());
   var anio = sanitize(document.getElementById('oi-anio').value.trim());
   var obs = sanitize(document.getElementById('oi-obs').value.trim());
+  var km = document.getElementById('oi-km').value ? parseInt(document.getElementById('oi-km').value) : null;
   var sena = parseFloat(document.getElementById('oi-sena').value) || 0;
   var salidaRaw = document.getElementById('oi-salida').value;
   var saldo = precio - sena;
@@ -6662,7 +6664,7 @@ function generarOrdenPDF() {
   try {
     db.collection('ordenes').add({
       nro: nroOrden, nombre: nombre, tel: tel, dom: dom || null, mail: mail || null,
-      marca: marca, modelo: modelo, anio: anio || null, patente: patente,
+      marca: marca, modelo: modelo, anio: anio || null, patente: patente, km: km,
       trabajo: trabajo, obs: obs || null,
       precio: precio, sena: sena, saldo: saldo,
       fechaIngreso: fechaIngreso, fechaSalida: fechaSalida,
@@ -6748,7 +6750,7 @@ function generarOrdenPDF() {
 
   // DATOS DEL VEHICULO
   seccion('DATOS DEL VEHICULO');
-  campo('Marca', marca, 60); campo('Modelo', modelo, 400); campo('Anio', anio || '-', 740); campo('Patente', patente, 950);
+  campo('Marca', marca, 60); campo('Modelo', modelo, 340); campo('Anio', anio || '-', 620); campo('Patente', patente, 780); campo('Kilometraje', km ? km.toLocaleString('es-AR') + ' km' : '-', 990);
   y += 65;
 
   // TRABAJO
@@ -6855,7 +6857,7 @@ function generarOrdenPDF() {
 }
 
 function limpiarOrdenForm() {
-  ['oi-nombre','oi-tel','oi-dom','oi-mail','oi-marca','oi-modelo','oi-anio','oi-patente','oi-trabajo','oi-obs','oi-precio','oi-salida'].forEach(function(id) {
+  ['oi-nombre','oi-tel','oi-dom','oi-mail','oi-marca','oi-modelo','oi-anio','oi-patente','oi-km','oi-trabajo','oi-obs','oi-precio','oi-salida'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.value = '';
   });
