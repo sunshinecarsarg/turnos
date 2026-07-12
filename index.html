@@ -45,6 +45,7 @@
   --g2: #243050;
   --g3: #2D3A5C;
   --muted: #7A8BA8;
+  --card-bg: #0A1128;
   --green: #00c875;
   --orange: #f5a623;
   --red: #e03c3c;
@@ -513,6 +514,172 @@ body.light-mode .res-card-text { color:#1a1a2e !important; opacity:1 !important;
 body.light-mode .res-card-name { color:#0d1b2a !important; }
 body.light-mode .res-card-meta { color:#3a4a5c !important; }
 
+/* ======== ANUNCIO DE SERVICIO - OPCIONES ======== */
+.svc-badge-x {
+  position:absolute; top:.6rem; left:.6rem; z-index:3;
+  font-size:.58rem; font-weight:800; letter-spacing:1.4px; text-transform:uppercase;
+  padding:.22rem .6rem; border-radius:50px; color:#fff;
+  box-shadow:0 2px 10px rgba(0,0,0,.35);
+}
+.svc-card.featured {
+  border-color:rgba(205,127,50,.55);
+  box-shadow:0 0 0 1px rgba(205,127,50,.18), 0 10px 34px rgba(205,127,50,.18);
+}
+.svc-card.featured .svc-card-bg { opacity:.2; }
+.svc-price-old {
+  font-size:.8rem; color:var(--muted); text-decoration:line-through;
+  margin-right:.5rem; font-weight:500;
+}
+.svc-off {
+  display:inline-block; font-size:.6rem; font-weight:800; letter-spacing:1px;
+  background:#e03c3c; color:#fff; padding:.1rem .4rem; border-radius:4px;
+  margin-left:.4rem; vertical-align:middle;
+}
+.adv-box {
+  grid-column:1/-1; border:1px dashed rgba(205,127,50,.3); border-radius:10px;
+  padding:0; overflow:hidden; margin-top:.5rem; background:rgba(205,127,50,.03);
+}
+.adv-head {
+  width:100%; text-align:left; cursor:pointer; padding:.7rem 1rem;
+  background:none; border:none; color:var(--m); font-family:'Inter',sans-serif;
+  font-size:.78rem; font-weight:800; letter-spacing:.5px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.adv-cnt { display:none; padding:0 1rem 1rem; }
+.adv-cnt.open { display:block; }
+.adv-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:.7rem; margin-bottom:.7rem; }
+.adv-lbl { display:block; font-size:.68rem; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-bottom:.3rem; font-weight:700; }
+/* Modal: extras */
+.sd-meta { display:flex; gap:.6rem; flex-wrap:wrap; margin-bottom:1rem; }
+.sd-chip {
+  display:inline-flex; align-items:center; gap:.4rem; font-size:.75rem;
+  background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1);
+  border-radius:50px; padding:.35rem .8rem; color:var(--white);
+}
+.sd-steps { list-style:none; counter-reset:sdstep; }
+.sd-steps li {
+  counter-increment:sdstep; position:relative; padding:.65rem 0 .65rem 2.6rem;
+  font-size:.89rem; line-height:1.6; color:var(--white); opacity:.88;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.sd-steps li:last-child { border-bottom:none; }
+.sd-steps li::before {
+  content:counter(sdstep); position:absolute; left:0; top:.6rem;
+  width:26px; height:26px; border-radius:50%;
+  background:rgba(205,127,50,.16); border:1px solid rgba(205,127,50,.45);
+  color:var(--m); font-size:.72rem; font-weight:800;
+  display:flex; align-items:center; justify-content:center;
+}
+.sd-warn {
+  display:flex; gap:.7rem; align-items:flex-start;
+  background:rgba(245,166,35,.08); border:1px solid rgba(245,166,35,.3);
+  border-radius:10px; padding:.85rem 1rem; margin-top:1rem;
+  font-size:.83rem; line-height:1.6; color:var(--white); opacity:.9; white-space:pre-line;
+}
+.sd-gal { display:flex; gap:.6rem; overflow-x:auto; padding-bottom:.3rem; }
+.sd-gal img {
+  height:110px; border-radius:10px; cursor:pointer; flex-shrink:0;
+  border:1px solid rgba(205,127,50,.25); transition:transform .2s, border-color .2s;
+  object-fit:cover;
+}
+.sd-gal img:hover { transform:scale(1.04); border-color:var(--m); }
+body.light-mode .sd-chip { background:rgba(0,0,0,.04) !important; color:#0d1b2a !important; }
+body.light-mode .sd-steps li { color:#0d1b2a !important; }
+body.light-mode .sd-warn { color:#3a2a10 !important; }
+
+/* ======== MODAL DETALLE DE SERVICIO ======== */
+.sd-overlay {
+  position:fixed; inset:0; z-index:950; background:rgba(5,8,20,.88);
+  backdrop-filter:blur(6px); display:none; align-items:center; justify-content:center;
+  padding:1.5rem; overflow-y:auto;
+}
+.sd-overlay.open { display:flex; }
+.sd-modal {
+  background:var(--g1); border:1px solid rgba(205,127,50,.3); border-radius:18px;
+  max-width:820px; width:100%; max-height:92vh; overflow-y:auto; position:relative;
+  box-shadow:0 24px 80px rgba(0,0,0,.6); animation:sdIn .35s cubic-bezier(.2,.9,.3,1);
+}
+@keyframes sdIn { from{opacity:0;transform:translateY(28px) scale(.97)} to{opacity:1;transform:none} }
+.sd-hero { height:220px; position:relative; overflow:hidden; border-radius:18px 18px 0 0; background:var(--g2); }
+.sd-hero-img { position:absolute; inset:0; background-size:cover; background-position:center; opacity:.45; }
+.sd-hero-grad { position:absolute; inset:0; background:linear-gradient(to top, var(--g1) 4%, rgba(28,37,65,.3) 60%, transparent 100%); }
+.sd-hero-txt { position:absolute; bottom:1.2rem; left:2rem; right:2rem; z-index:2; }
+.sd-close {
+  position:absolute; top:1rem; right:1rem; z-index:5;
+  width:38px; height:38px; border-radius:50%; border:none; cursor:pointer;
+  background:rgba(0,0,0,.55); color:#fff; font-size:1.2rem; line-height:1;
+  display:flex; align-items:center; justify-content:center; transition:background .2s;
+}
+.sd-close:hover { background:rgba(224,60,60,.85); }
+.sd-body { padding:1.8rem 2rem 2rem; }
+.sd-title { font-family:'JetBrains Mono',monospace; font-size:1.7rem; letter-spacing:1px; color:#fff; margin-bottom:.3rem; }
+.sd-sub { font-size:.85rem; color:var(--muted); }
+.sd-prices { display:flex; gap:.8rem; flex-wrap:wrap; margin:1.2rem 0 1.5rem; }
+.sd-price-box {
+  flex:1; min-width:150px; background:rgba(205,127,50,.07);
+  border:1px solid rgba(205,127,50,.28); border-radius:12px; padding:.9rem 1.1rem;
+}
+.sd-price-lbl { font-size:.65rem; letter-spacing:1.5px; color:var(--muted); text-transform:uppercase; margin-bottom:.2rem; }
+.sd-price-val { font-family:'JetBrains Mono',monospace; font-size:1.35rem; font-weight:700; color:var(--m); }
+.sd-sect-t {
+  font-size:.7rem; letter-spacing:2px; text-transform:uppercase; color:var(--m);
+  font-weight:800; margin:1.5rem 0 .7rem; display:flex; align-items:center; gap:.6rem;
+}
+.sd-sect-t::after { content:''; flex:1; height:1px; background:linear-gradient(to right, rgba(205,127,50,.35), transparent); }
+.sd-text { font-size:.92rem; line-height:1.75; color:var(--white); opacity:.85; white-space:pre-line; }
+.sd-inc { list-style:none; display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:.5rem; }
+.sd-inc li {
+  display:flex; align-items:flex-start; gap:.6rem; font-size:.87rem;
+  color:var(--white); opacity:.9; padding:.5rem .7rem;
+  background:rgba(255,255,255,.03); border-radius:8px; border-left:2px solid var(--m);
+}
+.sd-inc li::before { content:'\2713'; color:var(--m); font-weight:800; flex-shrink:0; }
+.sd-cta {
+  width:100%; margin-top:1.8rem; padding:1rem;
+  background:linear-gradient(135deg,var(--m),var(--deep)); color:#fff; border:none;
+  border-radius:12px; font-family:'Inter',sans-serif; font-weight:800; font-size:.95rem;
+  letter-spacing:.5px; cursor:pointer; transition:transform .2s, box-shadow .2s;
+  box-shadow:0 6px 22px rgba(205,127,50,.32);
+}
+.sd-cta:hover { transform:translateY(-2px); box-shadow:0 10px 30px rgba(205,127,50,.45); }
+.sd-cta.wa { background:linear-gradient(135deg,#25D366,#128C7E); box-shadow:0 6px 22px rgba(37,211,102,.3); }
+.svc-more {
+  margin-top:.9rem; width:100%; padding:.55rem; cursor:pointer;
+  background:rgba(255,255,255,.04); border:1px solid rgba(205,127,50,.3);
+  border-radius:8px; color:var(--m); font-family:'Inter',sans-serif;
+  font-size:.75rem; font-weight:700; letter-spacing:.5px; transition:all .25s;
+}
+.svc-more:hover { background:rgba(205,127,50,.14); border-color:var(--m); }
+
+/* ======== RESENAS GOOGLE ======== */
+.gr-wrap { padding:3.5rem 5%; max-width:1150px; margin:0 auto; }
+.gr-head { display:flex; align-items:center; justify-content:center; gap:1.5rem; flex-wrap:wrap; margin-bottom:2rem; }
+.gr-score {
+  display:flex; align-items:center; gap:1rem; background:var(--g1);
+  border:1px solid rgba(205,127,50,.25); border-radius:14px; padding:1rem 1.6rem;
+}
+.gr-score-num { font-family:'JetBrains Mono',monospace; font-size:2.6rem; font-weight:800; color:var(--m); line-height:1; }
+.gr-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:1rem; }
+.gr-card {
+  background:var(--g1); border:1px solid rgba(255,255,255,.07); border-radius:14px;
+  padding:1.2rem; position:relative; transition:transform .25s, border-color .25s;
+}
+.gr-card:hover { transform:translateY(-4px); border-color:rgba(205,127,50,.35); }
+.gr-av {
+  width:42px; height:42px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:800; font-size:1.05rem; color:#fff; background-size:cover; background-position:center;
+}
+.gr-name { font-weight:700; font-size:.9rem; color:var(--white); }
+.gr-date { font-size:.7rem; color:var(--muted); }
+.gr-txt { font-size:.86rem; line-height:1.6; color:var(--white); opacity:.8; margin-top:.7rem; }
+.gr-g { position:absolute; top:1rem; right:1rem; width:18px; height:18px; opacity:.75; }
+body.light-mode .sd-modal { background:#fff !important; }
+body.light-mode .sd-title, body.light-mode .sd-text, body.light-mode .sd-inc li { color:#0d1b2a !important; }
+body.light-mode .gr-card { background:#fff !important; border-color:rgba(0,0,0,.09) !important; }
+body.light-mode .gr-name, body.light-mode .gr-txt { color:#0d1b2a !important; }
+body.light-mode .gr-score { background:#fff !important; }
+
 /* ======== ANIMACIONES SCROLL REVEAL ======== */
 .reveal { opacity:0; transform:translateY(30px); transition:opacity .7s ease, transform .7s ease; }
 .reveal.visible { opacity:1; transform:translateY(0); }
@@ -582,6 +749,66 @@ body.light-mode .rv-card-meta { color:#3a4a5c !important; }
 body.light-mode .res-card-text { color:#1a1a2e !important; opacity:1 !important; }
 body.light-mode .res-card-name { color:#0d1b2a !important; }
 body.light-mode .res-card-meta { color:#3a4a5c !important; }
+
+/* ======== SERVICE CARD: FOTO GRANDE (override) ======== */
+body.light-mode { --card-bg:#ffffff; }
+
+.svc-card {
+  background:var(--card-bg) !important;
+  padding:1.6rem 1.4rem !important;
+  border-radius:16px !important;
+  border:2px solid rgba(255,255,255,.07);
+  display:flex; flex-direction:column;
+  overflow:hidden;
+}
+body.light-mode .svc-card { border-color:rgba(0,0,0,.09); }
+
+/* La foto pasa a ser un bloque real arriba de la card */
+.svc-card-bg {
+  position:relative !important;
+  inset:auto !important;
+  height:190px !important;
+  margin:-1.6rem -1.4rem 1.1rem !important;
+  opacity:1 !important;
+  background-size:cover !important;
+  background-position:center !important;
+  transition:transform .55s ease !important;
+  pointer-events:none;
+  flex-shrink:0;
+}
+/* Degradado que funde la foto con la card */
+.svc-card-bg::after {
+  content:''; position:absolute; inset:0;
+  background:
+    linear-gradient(to top, var(--card-bg) 1%, rgba(10,17,40,0) 55%),
+    linear-gradient(to bottom, rgba(0,0,0,.38) 0%, rgba(0,0,0,0) 38%);
+}
+body.light-mode .svc-card-bg::after {
+  background:
+    linear-gradient(to top, var(--card-bg) 1%, rgba(255,255,255,0) 55%),
+    linear-gradient(to bottom, rgba(0,0,0,.28) 0%, rgba(0,0,0,0) 38%);
+}
+/* Placeholder si el servicio no tiene foto */
+.svc-noimg {
+  background:linear-gradient(135deg, var(--g2), var(--g3)) !important;
+  display:flex; align-items:center; justify-content:center;
+}
+.svc-noimg::before {
+  content:'\1F697'; font-size:3rem; opacity:.28;
+}
+
+.svc-card:hover .svc-card-bg,
+.svc-card.sel .svc-card-bg { opacity:1 !important; transform:scale(1.06) !important; }
+.svc-card:hover { background:var(--card-bg) !important; border-color:rgba(205,127,50,.45); }
+.svc-card.sel { background:var(--card-bg) !important; border-color:var(--m) !important; }
+.svc-card.featured { border-color:rgba(205,127,50,.6) !important; }
+
+/* Botones/badges por encima de la foto */
+.svc-badge-x, .svc-card::after { z-index:4 !important; }
+
+/* El boton Ver detalles siempre abajo del todo */
+.svc-more { margin-top:auto !important; }
+.svc-name { font-size:1.15rem !important; }
 
 </style>
 <link rel="manifest"  id="pwa-manifest">
@@ -1471,7 +1698,7 @@ body.light-mode .res-card-meta { color:#3a4a5c !important; }
         <div style="position:relative;border:2px dashed rgba(100,180,255,.3);border-radius:8px;padding:1.2rem;text-align:center;cursor:pointer;margin-bottom:1rem;overflow:hidden;background:rgba(100,180,255,.03);">
           <input type="file" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;" onchange="svFilePick(this.files[0])">
           <div style="font-size:1.5rem;margin-bottom:.3rem;">&#128444;</div>
-          <div style="font-size:.82rem;color:var(--muted);">Foto de fondo <strong style="color:#fff;">(marca de agua)</strong> — opcional</div>
+          <div style="font-size:.82rem;color:var(--muted);">Foto principal del servicio <strong style="color:#fff;">(se muestra grande arriba)</strong></div>
           <img id="sv-img-preview" style="max-height:100px;border-radius:6px;margin-top:.6rem;display:none;" src="" alt="">
         </div>
 
@@ -1495,6 +1722,76 @@ body.light-mode .res-card-meta { color:#3a4a5c !important; }
           <div class="fi full">
             <label class="flabel">Tags (separados por coma)</label>
             <input type="text" class="finput" id="sv-tags" placeholder="Cera protectora, Aspirado profundo, Revitalizado plasticos">
+          </div>
+          <div class="fi">
+            <label class="flabel">Duracion aprox.</label>
+            <input type="text" class="finput" id="sv-duracion" placeholder="Ej: 3 a 4 horas">
+          </div>
+          <div class="fi full">
+            <label class="flabel">Descripcion DETALLADA <span style="color:var(--muted);font-weight:400;">(se ve al abrir el servicio)</span></label>
+            <textarea class="wr-textarea" id="sv-detalle" style="height:100px;" maxlength="1200" placeholder="Explica en detalle el proceso, los productos, los pasos y el resultado. Este texto aparece cuando el cliente hace click en Ver detalles."></textarea>
+          </div>
+          <div class="fi full">
+            <label class="flabel">Que incluye <span style="color:var(--muted);font-weight:400;">(uno por linea)</span></label>
+            <textarea class="wr-textarea" id="sv-incluye" style="height:100px;" maxlength="900" placeholder="Lavado de prelavado con espuma activa&#10;Descontaminacion ferrosa&#10;Aspirado profundo de interior&#10;Sellado de llantas"></textarea>
+          </div>
+
+          <div class="adv-box">
+            <button type="button" class="adv-head" onclick="var c=this.nextElementSibling;c.classList.toggle('open');this.querySelector('span').textContent=c.classList.contains('open')?'\u2212':'+';">
+              <span style="display:flex;align-items:center;gap:.5rem;">&#9881;&#65039; OPCIONES AVANZADAS DEL ANUNCIO</span><span>+</span>
+            </button>
+            <div class="adv-cnt">
+
+              <div class="adv-row">
+                <div>
+                  <label class="adv-lbl">Etiqueta destacada</label>
+                  <input type="text" class="finput" id="sv-badge" maxlength="18" placeholder="MAS ELEGIDO / NUEVO / PROMO">
+                </div>
+                <div>
+                  <label class="adv-lbl">Color de la etiqueta</label>
+                  <input type="color" id="sv-badge-color" value="#CD7F32" style="width:100%;height:44px;border:none;border-radius:8px;cursor:pointer;background:none;">
+                </div>
+                <div>
+                  <label class="adv-lbl">Precio anterior (tachado)</label>
+                  <input type="number" class="finput" id="sv-precio-old" min="0" placeholder="Solo si hay promo">
+                </div>
+              </div>
+
+              <div class="adv-row">
+                <div>
+                  <label class="adv-lbl">Ideal para</label>
+                  <input type="text" class="finput" id="sv-ideal" maxlength="80" placeholder="Ej: Autos con pintura opaca o rayada">
+                </div>
+                <div>
+                  <label class="adv-lbl">Proteccion / garantia</label>
+                  <input type="text" class="finput" id="sv-proteccion" maxlength="50" placeholder="Ej: Hasta 12 meses de proteccion">
+                </div>
+              </div>
+
+              <label style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;cursor:pointer;margin-bottom:.8rem;">
+                <input type="checkbox" id="sv-featured"> &#11088; Servicio DESTACADO (borde brillante)
+              </label>
+
+              <div style="margin-bottom:.7rem;">
+                <label class="adv-lbl">Proceso paso a paso <span style="text-transform:none;letter-spacing:0;font-weight:400;">(uno por linea, se numera solo)</span></label>
+                <textarea class="wr-textarea" id="sv-proceso" style="height:100px;" maxlength="1200" placeholder="Prelavado con espuma activa y pH neutro&#10;Descontaminacion quimica y mecanica con clay bar&#10;Correccion de pintura en 2 pasos&#10;Aplicacion del sellador ceramico&#10;Curado y control de calidad"></textarea>
+              </div>
+
+              <div style="margin-bottom:.7rem;">
+                <label class="adv-lbl">Aclaraciones importantes</label>
+                <textarea class="wr-textarea" id="sv-aclara" style="height:70px;" maxlength="400" placeholder="Ej: El vehiculo debe permanecer 24hs en el taller. No exponer a lluvia las primeras 48hs."></textarea>
+              </div>
+
+              <div>
+                <label class="adv-lbl">Fotos extra del servicio <span style="text-transform:none;letter-spacing:0;font-weight:400;">(hasta 3, se ven en el detalle)</span></label>
+                <div id="sv-fotos-grid" style="display:flex;flex-wrap:wrap;gap:.5rem;margin:.4rem 0;"></div>
+                <label style="display:inline-flex;align-items:center;gap:.5rem;cursor:pointer;background:rgba(205,127,50,.08);border:1px dashed rgba(205,127,50,.3);border-radius:8px;padding:.45rem .9rem;font-size:.75rem;color:var(--m);">
+                  <input type="file" accept="image/*" multiple style="display:none;" onchange="svcFotosAdd('', this.files)">
+                  &#128247; Agregar foto(s)
+                </label>
+              </div>
+
+            </div>
           </div>
         </div>
 
@@ -2261,7 +2558,7 @@ body.light-mode .res-card-meta { color:#3a4a5c !important; }
     <!-- Foto -->
     <div style="position:relative;border:2px dashed rgba(100,180,255,.3);border-radius:8px;padding:1rem;text-align:center;cursor:pointer;margin-bottom:1rem;overflow:hidden;background:rgba(100,180,255,.03);">
       <input type="file" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;" onchange="editSvcFilePick(this.files[0])">
-      <div style="font-size:.82rem;color:var(--muted);">Click para cambiar foto de fondo <span style="color:rgba(255,255,255,.4)">(dejar vacio para mantener la actual)</span></div>
+      <div style="font-size:.82rem;color:var(--muted);">Click para cambiar la foto principal <span style="color:rgba(255,255,255,.4)">(dejar vacio para mantener la actual)</span></div>
       <img id="edit-svc-preview" style="max-height:80px;border-radius:4px;margin-top:.5rem;display:none;" src="" alt="">
     </div>
 
@@ -2286,6 +2583,76 @@ body.light-mode .res-card-meta { color:#3a4a5c !important; }
         <label class="flabel">Tags (separados por coma)</label>
         <input type="text" class="finput" id="edit-sv-tags">
       </div>
+      <div class="fi">
+        <label class="flabel">Duracion aprox.</label>
+        <input type="text" class="finput" id="edit-sv-duracion" placeholder="Ej: 3 a 4 horas">
+      </div>
+      <div class="fi full">
+        <label class="flabel">Descripcion DETALLADA <span style="color:var(--muted);font-weight:400;">(se ve al abrir el servicio)</span></label>
+        <textarea class="wr-textarea" id="edit-sv-detalle" style="height:100px;" maxlength="1200"></textarea>
+      </div>
+      <div class="fi full">
+        <label class="flabel">Que incluye <span style="color:var(--muted);font-weight:400;">(uno por linea)</span></label>
+        <textarea class="wr-textarea" id="edit-sv-incluye" style="height:100px;" maxlength="900"></textarea>
+      </div>
+
+          <div class="adv-box">
+            <button type="button" class="adv-head" onclick="var c=this.nextElementSibling;c.classList.toggle('open');this.querySelector('span').textContent=c.classList.contains('open')?'\u2212':'+';">
+              <span style="display:flex;align-items:center;gap:.5rem;">&#9881;&#65039; OPCIONES AVANZADAS DEL ANUNCIO</span><span>+</span>
+            </button>
+            <div class="adv-cnt">
+
+              <div class="adv-row">
+                <div>
+                  <label class="adv-lbl">Etiqueta destacada</label>
+                  <input type="text" class="finput" id="edit-sv-badge" maxlength="18" placeholder="MAS ELEGIDO / NUEVO / PROMO">
+                </div>
+                <div>
+                  <label class="adv-lbl">Color de la etiqueta</label>
+                  <input type="color" id="edit-sv-badge-color" value="#CD7F32" style="width:100%;height:44px;border:none;border-radius:8px;cursor:pointer;background:none;">
+                </div>
+                <div>
+                  <label class="adv-lbl">Precio anterior (tachado)</label>
+                  <input type="number" class="finput" id="edit-sv-precio-old" min="0" placeholder="Solo si hay promo">
+                </div>
+              </div>
+
+              <div class="adv-row">
+                <div>
+                  <label class="adv-lbl">Ideal para</label>
+                  <input type="text" class="finput" id="edit-sv-ideal" maxlength="80" placeholder="Ej: Autos con pintura opaca o rayada">
+                </div>
+                <div>
+                  <label class="adv-lbl">Proteccion / garantia</label>
+                  <input type="text" class="finput" id="edit-sv-proteccion" maxlength="50" placeholder="Ej: Hasta 12 meses de proteccion">
+                </div>
+              </div>
+
+              <label style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;cursor:pointer;margin-bottom:.8rem;">
+                <input type="checkbox" id="edit-sv-featured"> &#11088; Servicio DESTACADO (borde brillante)
+              </label>
+
+              <div style="margin-bottom:.7rem;">
+                <label class="adv-lbl">Proceso paso a paso <span style="text-transform:none;letter-spacing:0;font-weight:400;">(uno por linea, se numera solo)</span></label>
+                <textarea class="wr-textarea" id="edit-sv-proceso" style="height:100px;" maxlength="1200" placeholder="Prelavado con espuma activa y pH neutro&#10;Descontaminacion quimica y mecanica con clay bar&#10;Correccion de pintura en 2 pasos&#10;Aplicacion del sellador ceramico&#10;Curado y control de calidad"></textarea>
+              </div>
+
+              <div style="margin-bottom:.7rem;">
+                <label class="adv-lbl">Aclaraciones importantes</label>
+                <textarea class="wr-textarea" id="edit-sv-aclara" style="height:70px;" maxlength="400" placeholder="Ej: El vehiculo debe permanecer 24hs en el taller. No exponer a lluvia las primeras 48hs."></textarea>
+              </div>
+
+              <div>
+                <label class="adv-lbl">Fotos extra del servicio <span style="text-transform:none;letter-spacing:0;font-weight:400;">(hasta 3, se ven en el detalle)</span></label>
+                <div id="edit-sv-fotos-grid" style="display:flex;flex-wrap:wrap;gap:.5rem;margin:.4rem 0;"></div>
+                <label style="display:inline-flex;align-items:center;gap:.5rem;cursor:pointer;background:rgba(205,127,50,.08);border:1px dashed rgba(205,127,50,.3);border-radius:8px;padding:.45rem .9rem;font-size:.75rem;color:var(--m);">
+                  <input type="file" accept="image/*" multiple style="display:none;" onchange="svcFotosAdd('edit-', this.files)">
+                  &#128247; Agregar foto(s)
+                </label>
+              </div>
+
+            </div>
+          </div>
     </div>
     <div style="display:flex;gap:1.5rem;margin:1rem 0;flex-wrap:wrap;">
       <label style="display:flex;align-items:center;gap:.5rem;font-size:.85rem;cursor:pointer;">
@@ -2698,8 +3065,16 @@ function publishServicio() {
     isExtra: isExtra,
     activo: true,
     img: window.svImgData || null,
+    detalle: (document.getElementById('sv-detalle') ? document.getElementById('sv-detalle').value.trim() : ''),
+    incluye: (document.getElementById('sv-incluye') && document.getElementById('sv-incluye').value.trim())
+      ? document.getElementById('sv-incluye').value.trim().split('\n').map(function(l){return l.trim();}).filter(Boolean)
+      : [],
+    duracion: (document.getElementById('sv-duracion') ? document.getElementById('sv-duracion').value.trim() : ''),
     orden: Date.now()
   };
+  var _adv = readAdvFields('');
+  for (var _k in _adv) { if (_adv.hasOwnProperty(_k)) svc[_k] = _adv[_k]; }
+  if (JSON.stringify(svc).length > 950000) { toast('Fotos muy pesadas. Usa menos o mas chicas.'); return; }
 
   db.collection('servicios').add(svc).then(function() {
     toast('Servicio publicado!');
@@ -2707,6 +3082,8 @@ function publishServicio() {
     document.getElementById('sv-precio-sedan').value = '';
     document.getElementById('sv-precio-suv').value = '';
     document.getElementById('sv-desc').value = '';
+    ['sv-detalle','sv-incluye','sv-duracion'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+    clearAdvFields('');
     document.getElementById('sv-tags').value = '';
     document.getElementById('sv-allday').checked = false;
     document.getElementById('sv-lavado').checked = false;
@@ -2834,14 +3211,27 @@ function renderSvcs() {
       ? 'onclick="window.open(\'https://wa.me/5492214387138?text=\' + encodeURIComponent(\'Hola! Me interesa consultar por el servicio: \' + s.name), \'_blank\')\"'
       : 'onclick="pickSvc(\'' + s.id + '\')\"';
     var extraBadge = s.isExtra ? '<div style="position:absolute;top:.5rem;right:.5rem;background:rgba(100,180,255,.15);border:1px solid rgba(100,180,255,.4);color:#64b4ff;font-size:.6rem;font-weight:700;letter-spacing:1.5px;padding:.15rem .5rem;border-radius:50px;text-transform:uppercase;">Consultar</div>' : '';
-    html += '<div class="svc-card' + (sel && !s.isExtra ? ' sel' : '') + '" ' + cardOnclick + ' style="' + (s.isExtra ? 'border-color:rgba(100,180,255,.25);' : '') + '">';
+    var cls = 'svc-card' + (sel && !s.isExtra ? ' sel' : '') + (s.featured ? ' featured' : '');
+    html += '<div class="' + cls + '" ' + cardOnclick + ' style="' + (s.isExtra ? 'border-color:rgba(100,180,255,.25);' : '') + '">';
     html += extraBadge;
-    if (s.img) { html += '<div class="svc-card-bg" style="background-image:url(' + s.img + ')"></div>'; }
+    if (s.badge) {
+      html += '<div class="svc-badge-x" style="background:' + (s.badgeColor || '#CD7F32') + ';">' + s.badge + '</div>';
+    }
+    html += s.img
+      ? '<div class="svc-card-bg" style="background-image:url(' + s.img + ')"></div>'
+      : '<div class="svc-card-bg svc-noimg"></div>';
     html += '<div class="svc-name">' + s.name + '</div>';
     var displayPrice = (S.tipo) 
       ? '$' + (S.tipo === 'Camioneta / SUV' && s.rawSuv ? s.rawSuv : s.raw).toLocaleString('es-AR')
       : s.price;
-    html += '<div class="svc-price">' + displayPrice + '</div>';
+    var priceHtml = '';
+    if (s.precioOld && !s.isExtra) {
+      var base = (S.tipo === 'Camioneta / SUV' && s.rawSuv) ? s.rawSuv : s.raw;
+      priceHtml += '<span class="svc-price-old">$' + s.precioOld.toLocaleString('es-AR') + '</span>';
+      var offPct = Math.round((1 - (base / s.precioOld)) * 100);
+      if (offPct > 0) priceHtml += '<span class="svc-off">-' + offPct + '%</span>';
+    }
+    html += '<div class="svc-price">' + (s.precioOld && !s.isExtra ? priceHtml + '<br>' : '') + displayPrice + '</div>';
     if (s.allDay) {
       html += '<div class="svc-allday">Todo el dia - Solo turno 08:00</div>';
     }
@@ -2851,7 +3241,9 @@ function renderSvcs() {
     for (var j = 0; j < s.tags.length; j++) {
       html += '<span class="svc-tag">' + s.tags[j] + '</span>';
     }
-    html += '</div></div>';
+    html += '</div>';
+    html += '<button class="svc-more" onclick="event.stopPropagation();openSvcDetail(\'' + s.id + '\')">&#8505; VER DETALLES</button>';
+    html += '</div>';
   }
   // Admin: panel is in admin section, nothing needed here
 
@@ -2875,6 +3267,10 @@ function editSvcEl(btn) {
   document.getElementById('edit-sv-suv').value = svc.rawSuv || '';
   document.getElementById('edit-sv-desc').value = svc.desc || '';
   document.getElementById('edit-sv-tags').value = svc.tags ? svc.tags.join(', ') : '';
+  var _ed = document.getElementById('edit-sv-detalle'); if (_ed) _ed.value = svc.detalle || '';
+  var _ei = document.getElementById('edit-sv-incluye'); if (_ei) _ei.value = (svc.incluye && svc.incluye.length) ? svc.incluye.join('\n') : '';
+  var _edu = document.getElementById('edit-sv-duracion'); if (_edu) _edu.value = svc.duracion || '';
+  fillAdvFields('edit-', svc);
   document.getElementById('edit-sv-allday').checked = !!svc.allDay;
   document.getElementById('edit-sv-lavado').checked = !!svc.isLavado;
   document.getElementById('edit-sv-extra').checked = !!svc.isExtra;
@@ -2921,11 +3317,19 @@ function saveEditSvc() {
     tags: tags ? tags.split(',').map(function(t){ return t.trim(); }) : [],
     allDay: document.getElementById('edit-sv-allday').checked,
     isLavado: document.getElementById('edit-sv-lavado').checked,
-    isExtra: isExtraEdit
+    isExtra: isExtraEdit,
+    detalle: (document.getElementById('edit-sv-detalle') ? document.getElementById('edit-sv-detalle').value.trim() : ''),
+    incluye: (document.getElementById('edit-sv-incluye') && document.getElementById('edit-sv-incluye').value.trim())
+      ? document.getElementById('edit-sv-incluye').value.trim().split('\n').map(function(l){return l.trim();}).filter(Boolean)
+      : [],
+    duracion: (document.getElementById('edit-sv-duracion') ? document.getElementById('edit-sv-duracion').value.trim() : '')
   };
+  var _advE = readAdvFields('edit-');
+  for (var _ke in _advE) { if (_advE.hasOwnProperty(_ke)) updates[_ke] = _advE[_ke]; }
 
   // Only update image if a new one was picked
   if (editSvcNewImg) updates.img = editSvcNewImg;
+  if (JSON.stringify(updates).length > 950000) { toast('Fotos muy pesadas. Usa menos o mas chicas.'); return; }
 
   db.collection('servicios').doc(editSvcId).update(updates).then(function() {
     toast('Servicio actualizado!');
@@ -6547,6 +6951,292 @@ function downloadCoupon() {
 // ADMIN - CUPONES
 // ==========================================
 // ==========================================
+// FOTOS EXTRA DEL SERVICIO (admin)
+// ==========================================
+var _svcFotos = { '': [], 'edit-': [] };
+
+function svcFotosAdd(p, files) {
+  for (var i = 0; i < files.length; i++) {
+    if (_svcFotos[p].length >= 3) { toast('Maximo 3 fotos extra'); break; }
+    (function(f) {
+      if (!f.type.startsWith('image/')) return;
+      compressImage(f, function(data) {
+        _svcFotos[p].push(data);
+        svcFotosRender(p);
+      });
+    })(files[i]);
+  }
+}
+
+function svcFotosRender(p) {
+  var grid = document.getElementById(p + 'sv-fotos-grid');
+  if (!grid) return;
+  grid.innerHTML = _svcFotos[p].map(function(img, i) {
+    return '<div style="position:relative;width:62px;height:62px;">' +
+      '<img src="' + img + '" style="width:62px;height:62px;object-fit:cover;border-radius:6px;border:1px solid rgba(205,127,50,.4);">' +
+      '<button type="button" onclick="_svcFotos[\'' + p + '\'].splice(' + i + ',1);svcFotosRender(\'' + p + '\')" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:#e03c3c;border:none;color:#fff;font-size:.62rem;cursor:pointer;line-height:1;">x</button>' +
+      '</div>';
+  }).join('');
+}
+
+// Lee todos los campos avanzados de un form ('' o 'edit-')
+function readAdvFields(p) {
+  function v(id) { var e = document.getElementById(p + id); return e ? e.value.trim() : ''; }
+  function c(id) { var e = document.getElementById(p + id); return e ? e.checked : false; }
+  function lines(id) {
+    var t = v(id);
+    return t ? t.split('\n').map(function(l){ return l.trim(); }).filter(Boolean) : [];
+  }
+  var precioOld = parseInt(v('sv-precio-old')) || 0;
+  return {
+    badge: v('sv-badge'),
+    badgeColor: document.getElementById(p + 'sv-badge-color') ? document.getElementById(p + 'sv-badge-color').value : '#CD7F32',
+    precioOld: precioOld,
+    ideal: v('sv-ideal'),
+    proteccion: v('sv-proteccion'),
+    featured: c('sv-featured'),
+    proceso: lines('sv-proceso'),
+    aclara: v('sv-aclara'),
+    fotos: _svcFotos[p].slice(0, 3)
+  };
+}
+
+function fillAdvFields(p, svc) {
+  function set(id, val) { var e = document.getElementById(p + id); if (e) e.value = val || ''; }
+  set('sv-badge', svc.badge);
+  var bc = document.getElementById(p + 'sv-badge-color');
+  if (bc) bc.value = svc.badgeColor || '#CD7F32';
+  set('sv-precio-old', svc.precioOld || '');
+  set('sv-ideal', svc.ideal);
+  set('sv-proteccion', svc.proteccion);
+  var fe = document.getElementById(p + 'sv-featured');
+  if (fe) fe.checked = !!svc.featured;
+  set('sv-proceso', (svc.proceso && svc.proceso.length) ? svc.proceso.join('\n') : '');
+  set('sv-aclara', svc.aclara);
+  _svcFotos[p] = (svc.fotos && svc.fotos.length) ? svc.fotos.slice() : [];
+  svcFotosRender(p);
+}
+
+function clearAdvFields(p) {
+  ['sv-badge','sv-precio-old','sv-ideal','sv-proteccion','sv-proceso','sv-aclara'].forEach(function(id) {
+    var e = document.getElementById(p + id); if (e) e.value = '';
+  });
+  var fe = document.getElementById(p + 'sv-featured'); if (fe) fe.checked = false;
+  _svcFotos[p] = [];
+  svcFotosRender(p);
+}
+
+// ==========================================
+// MODAL DETALLE DE SERVICIO
+// ==========================================
+var _sdSvcId = null;
+
+function openSvcDetail(id) {
+  var s = null;
+  for (var i = 0; i < SVCS.length; i++) { if (SVCS[i].id === id) { s = SVCS[i]; break; } }
+  if (!s) return;
+  _sdSvcId = id;
+
+  document.getElementById('sd-title').textContent = s.name;
+  document.getElementById('sd-sub').textContent = s.desc || '';
+
+  var badge = document.getElementById('sd-badge');
+  if (s.badge) {
+    badge.textContent = s.badge;
+    badge.style.background = (s.badgeColor || '#CD7F32');
+    badge.style.borderColor = 'transparent';
+    badge.style.color = '#fff';
+  } else {
+    badge.textContent = s.isExtra ? 'Servicio a coordinar' : (s.allDay ? 'Todo el dia' : 'Servicio de detailing');
+    badge.style.background = '';
+    badge.style.borderColor = '';
+    badge.style.color = '';
+  }
+
+  var imgEl = document.getElementById('sd-img');
+  imgEl.style.backgroundImage = s.img ? 'url(' + s.img + ')' : 'none';
+
+  // Precios
+  var pw = document.getElementById('sd-prices');
+  if (s.isExtra) {
+    pw.innerHTML = '<div class="sd-price-box" style="flex-basis:100%;"><div class="sd-price-lbl">Precio</div><div class="sd-price-val">A coordinar</div></div>';
+  } else {
+    var oldTag = s.precioOld ? '<div class="svc-price-old" style="display:block;margin-bottom:.1rem;">$' + s.precioOld.toLocaleString('es-AR') + '</div>' : '';
+    var pv = '<div class="sd-price-box"><div class="sd-price-lbl">Sedan / Hatchback</div>' + oldTag + '<div class="sd-price-val">$' + (s.raw || 0).toLocaleString('es-AR') + '</div></div>';
+    pv += '<div class="sd-price-box"><div class="sd-price-lbl">SUV / Camioneta</div>' + oldTag + '<div class="sd-price-val">$' + (s.rawSuv || s.raw || 0).toLocaleString('es-AR') + '</div></div>';
+    pw.innerHTML = pv;
+  }
+
+  // Detalle
+  var dw = document.getElementById('sd-detalle-wrap');
+  var detalle = s.detalle || s.desc || '';
+  if (detalle) { dw.style.display = 'block'; document.getElementById('sd-detalle').textContent = detalle; }
+  else dw.style.display = 'none';
+
+  // Incluye (usa incluye[] o cae a tags)
+  var lista = (s.incluye && s.incluye.length) ? s.incluye : (s.tags || []);
+  var iw = document.getElementById('sd-incluye-wrap');
+  if (lista.length) {
+    iw.style.display = 'block';
+    document.getElementById('sd-incluye').innerHTML = lista.map(function(t){ return '<li>' + t + '</li>'; }).join('');
+  } else iw.style.display = 'none';
+
+  // Chips (ideal para / proteccion / duracion)
+  var chips = '';
+  if (s.ideal)      chips += '<div class="sd-chip">&#127919; <strong>Ideal para:</strong> ' + s.ideal + '</div>';
+  if (s.proteccion) chips += '<div class="sd-chip">&#128737;&#65039; ' + s.proteccion + '</div>';
+  if (s.duracion)   chips += '<div class="sd-chip">&#9201;&#65039; ' + s.duracion + '</div>';
+  if (s.allDay)     chips += '<div class="sd-chip">&#128197; Ocupa todo el dia</div>';
+  var mw = document.getElementById('sd-meta');
+  mw.innerHTML = chips;
+  mw.style.display = chips ? 'flex' : 'none';
+
+  // Proceso paso a paso
+  var pw2 = document.getElementById('sd-proceso-wrap');
+  if (s.proceso && s.proceso.length) {
+    pw2.style.display = 'block';
+    document.getElementById('sd-proceso').innerHTML = s.proceso.map(function(t){ return '<li>' + t + '</li>'; }).join('');
+  } else pw2.style.display = 'none';
+
+  // Galeria de fotos extra
+  var gw = document.getElementById('sd-gal-wrap');
+  if (s.fotos && s.fotos.length) {
+    gw.style.display = 'block';
+    document.getElementById('sd-gal').innerHTML = s.fotos.map(function(f){
+      return '<img src="' + f + '" onclick="window.open(this.src,\'_blank\')" alt="Foto del servicio">';
+    }).join('');
+  } else gw.style.display = 'none';
+
+  // Aclaraciones
+  var ww = document.getElementById('sd-warn');
+  if (s.aclara) { ww.style.display = 'flex'; document.getElementById('sd-warn-txt').textContent = s.aclara; }
+  else ww.style.display = 'none';
+
+  // CTA
+  var cta = document.getElementById('sd-cta');
+  if (s.isExtra) {
+    cta.className = 'sd-cta wa';
+    cta.innerHTML = 'Consultar por WhatsApp';
+  } else {
+    cta.className = 'sd-cta';
+    cta.innerHTML = 'Reservar ' + s.name;
+  }
+
+  document.getElementById('sd-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  if (typeof fbq !== 'undefined') fbq('track', 'ViewContent', { content_name: s.name, content_category: 'Servicio' });
+}
+
+function closeSvcDetail() {
+  document.getElementById('sd-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function reservarDesdeDetalle() {
+  var s = null;
+  for (var i = 0; i < SVCS.length; i++) { if (SVCS[i].id === _sdSvcId) { s = SVCS[i]; break; } }
+  if (!s) return;
+  closeSvcDetail();
+  if (s.isExtra) {
+    window.open('https://wa.me/5492214387138?text=' + encodeURIComponent('Hola! Me interesa consultar por el servicio: ' + s.name), '_blank');
+    return;
+  }
+  showView('booking');
+  setTimeout(function(){ pickSvc(s.id); }, 150);
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeSvcDetail();
+});
+
+// ==========================================
+// RESENAS DE GOOGLE (admin-managed)
+// ==========================================
+function starsHtml(n) {
+  var out = '';
+  for (var i = 0; i < 5; i++) out += (i < n) ? '\u2605' : '\u2606';
+  return out;
+}
+
+function publishGoogleReview() {
+  if (!isAdminLogged) { toast('Solo el admin'); return; }
+  var nombre = sanitize(document.getElementById('gr-in-nombre').value.trim());
+  var texto = sanitize(document.getElementById('gr-in-texto').value.trim());
+  var fecha = sanitize(document.getElementById('gr-in-fecha').value.trim());
+  var stars = parseInt(document.getElementById('gr-in-stars').value) || 5;
+  var color = document.getElementById('gr-in-color').value || '#CD7F32';
+
+  if (!nombre) { toast('Ingresa el nombre'); return; }
+  if (!texto) { toast('Ingresa el texto de la resena'); return; }
+
+  db.collection('google_reviews').add({
+    nombre: nombre, texto: texto, fecha: fecha || 'Reciente',
+    stars: stars, color: color,
+    createdAt: new Date().toISOString()
+  }).then(function() {
+    toast('Resena de Google publicada!');
+    document.getElementById('gr-in-nombre').value = '';
+    document.getElementById('gr-in-texto').value = '';
+    document.getElementById('gr-in-fecha').value = '';
+    loadGoogleReviews();
+  }).catch(function(e) { console.error(e); toast('Error al publicar'); });
+}
+
+function deleteGoogleReview(docId) {
+  if (!confirm('Eliminar esta resena de Google?')) return;
+  db.collection('google_reviews').doc(docId).delete().then(function() {
+    toast('Resena eliminada');
+    loadGoogleReviews();
+  }).catch(function(e) { console.error(e); toast('Error'); });
+}
+
+function loadGoogleReviews() {
+  var grid = document.getElementById('gr-grid');
+  var section = document.getElementById('gr-section');
+  if (!grid || !section) return;
+
+  var form = document.getElementById('gr-admin-form');
+  if (form) form.style.display = isAdminLogged ? 'block' : 'none';
+
+  db.collection('google_reviews').orderBy('createdAt', 'desc').get().then(function(snap) {
+    if (snap.empty) {
+      grid.innerHTML = '';
+      section.style.display = isAdminLogged ? 'block' : 'none';
+      return;
+    }
+    section.style.display = 'block';
+
+    var total = 0, count = 0, out = '';
+    snap.forEach(function(d) {
+      var r = d.data();
+      total += (r.stars || 5); count++;
+      var inicial = (r.nombre || '?').charAt(0).toUpperCase();
+      out += '<div class="gr-card">' +
+        '<svg class="gr-g" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.65l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0012 23z"/><path fill="#FBBC05" d="M5.84 14.09a6.6 6.6 0 010-4.18V7.07H2.18a11 11 0 000 9.86l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1a11 11 0 00-9.82 6.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>' +
+        '<div style="display:flex; align-items:center; gap:.7rem;">' +
+          '<div class="gr-av" style="background:' + (r.color || '#CD7F32') + ';">' + inicial + '</div>' +
+          '<div>' +
+            '<div class="gr-name">' + r.nombre + '</div>' +
+            '<div class="gr-date">' + (r.fecha || '') + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="color:#fbbc04; font-size:.9rem; letter-spacing:1px; margin-top:.6rem;">' + starsHtml(r.stars || 5) + '</div>' +
+        '<div class="gr-txt">' + r.texto + '</div>' +
+        (isAdminLogged ? '<button class="abtn no" style="font-size:.62rem; margin-top:.7rem;" onclick="deleteGoogleReview(\'' + d.id + '\')">Eliminar</button>' : '') +
+      '</div>';
+    });
+
+    grid.innerHTML = out;
+    var avg = (total / count).toFixed(1);
+    document.getElementById('gr-avg').textContent = avg.replace('.', ',');
+    document.getElementById('gr-count').textContent = count;
+    document.getElementById('gr-stars').innerHTML = starsHtml(Math.round(total / count));
+  }).catch(function(e) { console.error('Google reviews:', e); });
+}
+
+setTimeout(loadGoogleReviews, 1600);
+
+// ==========================================
 // ORDEN DE INGRESO (admin)
 // ==========================================
 var _oiFotos = [];
@@ -7120,6 +7810,48 @@ loadVtvCard();
 
 <!-- FOOTER -->
 
+<!-- ======== RESENAS GOOGLE ======== -->
+<div class="gr-wrap" id="gr-section">
+  <div style="text-align:center; margin-bottom:1.8rem;">
+    <div class="badge" style="margin-bottom:1rem;">&#11088; Opiniones verificadas</div>
+    <h2 style="font-family:'JetBrains Mono',monospace; font-size:clamp(1.5rem,4vw,2.2rem); letter-spacing:1px;">LO QUE DICEN EN <span style="color:var(--m);">GOOGLE</span></h2>
+  </div>
+
+  <div class="gr-head">
+    <div class="gr-score">
+      <div class="gr-score-num" id="gr-avg">-</div>
+      <div>
+        <div id="gr-stars" style="color:#fbbc04; font-size:1rem; letter-spacing:2px;"></div>
+        <div style="font-size:.72rem; color:var(--muted); margin-top:.2rem;"><span id="gr-count">0</span> rese&ntilde;as en Google</div>
+      </div>
+    </div>
+    <a href="https://www.google.com/maps/place/Sunshine+Cars+-+Detail+-+Est%C3%A9tica+Vehicular/@-34.9300407,-57.9770494,17z/data=!4m8!3m7!1s0x95a2e7003c135073:0x2b545a1da8f0bd91!8m2!3d-34.9300407!4d-57.9770494!9m1!1b1!16s%2Fg%2F11nprh12fc" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; gap:.5rem; background:linear-gradient(135deg,#4285F4,#34A853); color:#fff; padding:.85rem 1.5rem; border-radius:50px; text-decoration:none; font-size:.85rem; font-weight:700; box-shadow:0 4px 16px rgba(66,133,244,.35);">
+      &#11088; Dejanos tu rese&ntilde;a
+    </a>
+  </div>
+
+  <!-- Admin: cargar resena de Google -->
+  <div id="gr-admin-form" style="display:none; background:var(--g1); border:1px solid rgba(66,133,244,.25); border-radius:12px; padding:1.3rem; margin-bottom:1.8rem; max-width:620px; margin-left:auto; margin-right:auto;">
+    <div style="font-weight:700; font-size:.85rem; color:#6fa8ff; margin-bottom:.9rem;">&#10133; Cargar rese&ntilde;a de Google Maps</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:.6rem; margin-bottom:.6rem;">
+      <input type="text" class="finput" id="gr-in-nombre" placeholder="Nombre del cliente" maxlength="50">
+      <input type="text" class="finput" id="gr-in-fecha" placeholder="Ej: Hace 2 meses" maxlength="30">
+    </div>
+    <div style="display:flex; gap:.6rem; align-items:center; margin-bottom:.6rem;">
+      <select class="finput" id="gr-in-stars" style="flex:1;">
+        <option value="5">&#11088; 5 estrellas</option>
+        <option value="4">&#11088; 4 estrellas</option>
+        <option value="3">&#11088; 3 estrellas</option>
+      </select>
+      <input type="color" id="gr-in-color" value="#CD7F32" style="width:48px; height:44px; border:none; border-radius:8px; cursor:pointer; background:none;" title="Color del avatar">
+    </div>
+    <textarea class="wr-textarea" id="gr-in-texto" placeholder="Texto de la rese&ntilde;a (copialo de Google Maps)" maxlength="600" style="height:80px; margin-bottom:.8rem;"></textarea>
+    <button class="btn" onclick="publishGoogleReview()" style="padding:.6rem 1.4rem; font-size:.82rem;">Publicar rese&ntilde;a</button>
+  </div>
+
+  <div class="gr-grid" id="gr-grid"></div>
+</div>
+
 <!-- ======== SITIOS AMIGOS ======== -->
 <div style="padding:3rem 5% 1rem; max-width:1100px; margin:0 auto;">
   <div style="text-align:center; margin-bottom:1.5rem;">
@@ -7229,6 +7961,44 @@ loadVtvCard();
 }
 </style>
 
+
+<!-- ======== MODAL DETALLE SERVICIO ======== -->
+<div class="sd-overlay" id="sd-overlay" onclick="if(event.target===this)closeSvcDetail()">
+  <div class="sd-modal">
+    <button class="sd-close" onclick="closeSvcDetail()">&#10005;</button>
+    <div class="sd-hero">
+      <div class="sd-hero-img" id="sd-img"></div>
+      <div class="sd-hero-grad"></div>
+      <div class="sd-hero-txt">
+        <div id="sd-badge" class="badge" style="margin-bottom:.6rem;"></div>
+        <div class="sd-title" id="sd-title"></div>
+        <div class="sd-sub" id="sd-sub"></div>
+      </div>
+    </div>
+    <div class="sd-body">
+      <div class="sd-meta" id="sd-meta"></div>
+      <div class="sd-prices" id="sd-prices"></div>
+      <div id="sd-detalle-wrap">
+        <div class="sd-sect-t">El servicio</div>
+        <div class="sd-text" id="sd-detalle"></div>
+      </div>
+      <div id="sd-incluye-wrap">
+        <div class="sd-sect-t">Qu&eacute; incluye</div>
+        <ul class="sd-inc" id="sd-incluye"></ul>
+      </div>
+      <div id="sd-proceso-wrap">
+        <div class="sd-sect-t">Proceso de trabajo</div>
+        <ol class="sd-steps" id="sd-proceso"></ol>
+      </div>
+      <div id="sd-gal-wrap">
+        <div class="sd-sect-t">Fotos del servicio</div>
+        <div class="sd-gal" id="sd-gal"></div>
+      </div>
+      <div class="sd-warn" id="sd-warn" style="display:none;"><span>&#9888;&#65039;</span><span id="sd-warn-txt"></span></div>
+      <button class="sd-cta" id="sd-cta" onclick="reservarDesdeDetalle()"></button>
+    </div>
+  </div>
+</div>
 
 <!-- ======== JUEGO SUNSHINE RUN ======== -->
 <div id="game-modal">
