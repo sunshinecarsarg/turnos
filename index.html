@@ -991,9 +991,11 @@ body.light-mode .sponsor-t { color:#0d1b2a; }
 .bk-header > *:nth-child(5) { animation-delay:.52s; }
 .steps-bar { animation-delay:.62s; }
 
-/* Transicion suave al cambiar de vista */
-.view.active { animation:viewIn .45s ease both; }
-@keyframes viewIn { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+/* Nota: no animar .view.active con fill "both" — si el navegador congela
+   animaciones (ventana minimizada, ahorro de bateria) la vista queda invisible */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration:.01s !important; animation-delay:0s !important; }
+}
 
 /* Particulas de polvo bronce flotando en el hero */
 .hero-dust { position:absolute; top:0; left:0; right:0; height:100vh; pointer-events:none; overflow:hidden; z-index:1; }
@@ -4120,7 +4122,12 @@ function doLogin() {
     .catch(function(e) {
       console.error('Login error:', e);
       errEl.style.display = 'block';
-      errEl.textContent = 'Email o contrasena incorrectos';
+      var code = (e && e.code) || '';
+      if (code === 'auth/network-request-failed') errEl.textContent = 'Sin conexion a internet. Proba de nuevo.';
+      else if (code === 'auth/unauthorized-domain') errEl.textContent = 'Dominio no autorizado en Firebase (avisale a Claude).';
+      else if (code === 'auth/too-many-requests') errEl.textContent = 'Demasiados intentos. Espera unos minutos y proba de nuevo.';
+      else if (code === 'auth/invalid-email') errEl.textContent = 'El email no tiene formato valido.';
+      else errEl.textContent = 'Email o contrasena incorrectos (' + code.replace('auth/','') + ')';
       if (btn) { btn.textContent = 'Ingresar'; btn.disabled = false; }
     });
 }
