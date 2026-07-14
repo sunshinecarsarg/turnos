@@ -529,9 +529,14 @@ input.finput:focus, select.finput:focus { border-color:var(--m); }
 
 /* ======== LIGHT MODE OVERRIDES ======== */
 body.light-mode .badge {
-  background:rgba(160,90,16,.15) !important;
-  border-color:rgba(160,90,16,.45) !important;
+  background:none !important;
   color:#7a4008 !important;
+}
+body.light-mode .badge::before, body.light-mode .badge::after {
+  background:linear-gradient(90deg, transparent, rgba(160,90,16,.7)) !important;
+}
+body.light-mode .badge::after {
+  background:linear-gradient(90deg, rgba(160,90,16,.7), transparent) !important;
 }
 body.light-mode .svc-tag {
   background:rgba(160,90,16,.15) !important;
@@ -908,6 +913,72 @@ input.finput:focus, select.finput:focus, .wr-textarea:focus, .code-digit:focus {
 
 /* Titulo hero con halo suave */
 .bk-title { text-shadow:0 12px 60px rgba(205,127,50,.25); }
+
+/* ======== MARCOS DE CARDS: grosor medio en ambos modos ======== */
+.svc-card { border-width:1.5px !important; border-color:rgba(224,225,226,.16); }
+.prod-card, .gr-card, .rv-card, .res-card, .gal-item {
+  border-width:1.5px !important; border-style:solid !important;
+}
+.prod-card { border-color:rgba(205,127,50,.28) !important; }
+.gr-card { border-color:rgba(224,225,226,.14) !important; }
+.gal-item { border-color:rgba(205,127,50,.3) !important; }
+.res-card { border-color:rgba(205,127,50,.24) !important; }
+.rv-card { border-color:rgba(205,127,50,.22) !important; }
+
+/* ======== MODO DIA: FIXES ======== */
+/* Marcos de cards visibles sobre fondo claro */
+body.light-mode .svc-card { border-color:rgba(122,64,8,.4) !important; }
+body.light-mode .prod-card, body.light-mode .gr-card, body.light-mode .rv-card,
+body.light-mode .res-card, body.light-mode .gal-item {
+  border-color:rgba(122,64,8,.4) !important;
+}
+/* Pasos del wizard: fichas y conectores visibles */
+body.light-mode .sdot .dot {
+  background:#fff; border-color:rgba(122,64,8,.45); color:#5a4632;
+}
+body.light-mode .sdot.active .dot {
+  border-color:#a05a10; color:#a05a10; background:rgba(160,90,16,.1);
+  box-shadow:0 0 16px rgba(160,90,16,.25);
+}
+body.light-mode .sdot.done .dot {
+  background:linear-gradient(135deg,#a05a10,#c07018); border-color:#a05a10; color:#fff;
+}
+body.light-mode .sdot .lbl { color:#6b5e4e; }
+body.light-mode .sdot.active .lbl { color:#a05a10; }
+body.light-mode .sline { background:rgba(122,64,8,.3); }
+body.light-mode .sline.done { background:#a05a10; }
+/* Marquee legible sobre fondo claro */
+body.light-mode .svc-marquee span { color:rgba(58,42,16,.55); }
+body.light-mode .svc-marquee span::after { color:rgba(160,90,16,.75); }
+/* Marco del hero y foto en claro */
+body.light-mode .hero::after { border-color:rgba(160,90,16,.28); }
+body.light-mode .hero [style*="backdrop-filter"] { background:rgba(255,255,255,.55) !important; border-color:rgba(122,64,8,.4) !important; }
+body.light-mode [style*="rgba(224,225,226,.2)"] { color:#3a4a5c !important; border-color:rgba(0,0,0,.3) !important; }
+body.light-mode .hero-photo { opacity:.07; }
+body.light-mode .hero-dust { opacity:.45; }
+
+/* ======== ESPACIO SPONSOR ======== */
+.sponsor-strip { padding:1.5rem 5% 4.5rem; }
+.sponsor-box {
+  max-width:760px; margin:0 auto; text-align:center;
+  border:1.5px dashed rgba(205,127,50,.45); padding:2.6rem 2rem;
+  background:linear-gradient(165deg, rgba(205,127,50,.05), transparent 60%);
+}
+.sponsor-t {
+  font-family:'JetBrains Mono',monospace; font-size:clamp(1.3rem,3.5vw,1.9rem);
+  letter-spacing:1px; margin-bottom:.6rem; font-weight:800;
+}
+.sponsor-t span { color:var(--m); font-style:italic; text-transform:lowercase; }
+.sponsor-p { color:var(--muted); font-size:.9rem; max-width:460px; margin:0 auto 1.6rem; line-height:1.7; }
+.sponsor-cta {
+  display:inline-flex; align-items:center; gap:.6rem; background:none;
+  border:1px solid rgba(205,127,50,.55); color:var(--m);
+  padding:.75rem 1.6rem; text-decoration:none; font-size:.72rem; font-weight:600;
+  letter-spacing:2.5px; text-transform:uppercase; transition:all .3s;
+}
+.sponsor-cta:hover { background:var(--m); color:#0A1128; }
+body.light-mode .sponsor-box { border-color:rgba(122,64,8,.5); }
+body.light-mode .sponsor-t { color:#0d1b2a; }
 
 /* ======== ANIMACIONES PRO ======== */
 /* Entrada orquestada del hero: cada elemento aparece en secuencia */
@@ -8193,6 +8264,16 @@ loadVtvCard();
     <a href="https://www.google.com/maps/dir/?api=1&destination=Sunshine+Cars+-+Detail+-+Est%C3%A9tica+Vehicular,+Calle+28+596,+La+Plata" target="_blank" style="display:inline-flex; align-items:center; gap:.5rem; background:var(--m); color:#0A1128; padding:.75rem 1.6rem; text-decoration:none; font-size:.72rem; font-weight:700; letter-spacing:2.5px; text-transform:uppercase;">C&oacute;mo llegar &rarr;</a>
     <a href="https://www.google.com/maps/place/Sunshine+Cars+-+Detail+-+Est%C3%A9tica+Vehicular/@-34.9300407,-57.9770494,17z/data=!4m8!3m7!1s0x95a2e7003c135073:0x2b545a1da8f0bd91!8m2!3d-34.9300407!4d-57.9770494!9m1!1b1!16s%2Fg%2F11nprh12fc" target="_blank" style="display:inline-flex; align-items:center; gap:.5rem; background:none; border:1px solid rgba(224,225,226,.2); color:rgba(224,225,226,.75); padding:.75rem 1.6rem; text-decoration:none; font-size:.72rem; font-weight:600; letter-spacing:2.5px; text-transform:uppercase;">Rese&ntilde;as en Google</a>
     <button onclick="openGame()" style="display:inline-flex; align-items:center; gap:.5rem; background:none; border:1px solid rgba(205,127,50,.45); color:var(--m); padding:.75rem 1.6rem; font-size:.72rem; font-weight:600; letter-spacing:2.5px; text-transform:uppercase; cursor:pointer; font-family:'Inter',sans-serif;">Jug&aacute; y gan&aacute; descuentos</button>
+  </div>
+</div>
+
+<!-- ======== ESPACIO SPONSOR ======== -->
+<div class="sponsor-strip">
+  <div class="sponsor-box">
+    <div class="badge">Espacio disponible</div>
+    <h2 class="sponsor-t">TU MARCA <span>ac&aacute;</span></h2>
+    <p class="sponsor-p">Reservamos este lugar para marcas del mundo automotor que quieran acompa&ntilde;ar a SunshineCars Detail.</p>
+    <a class="sponsor-cta" href="https://wa.me/5492214387138?text=Hola!%20Quiero%20anunciar%20mi%20marca%20en%20sunshinecarsdetail.com" target="_blank">Proponer alianza &rarr;</a>
   </div>
 </div>
 
