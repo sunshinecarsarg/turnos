@@ -1070,6 +1070,18 @@ body::after {
 }
 .svc-marquee span::after { content:'\2726'; color:rgba(205,127,50,.6); font-size:.6rem; }
 @keyframes marqueeMove { from { transform:translateX(0); } to { transform:translateX(-50%); } }
+
+/* ======== SLIDER SITIOS AMIGOS ======== */
+.sitios-marquee {
+  overflow:hidden; position:relative; width:100%;
+  -webkit-mask-image:linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+  mask-image:linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+}
+.sitios-marquee-track {
+  display:flex; gap:1.2rem; width:max-content;
+  animation:marqueeMove 30s linear infinite;
+}
+.sitios-marquee:hover .sitios-marquee-track { animation-play-state:paused; }
 .bk-header > *:nth-child(6) { animation-delay:.64s; }
 
 /* ======== RESENAS REDISENADAS ======== */
@@ -6760,7 +6772,8 @@ function genCouponCode(pct) {
 var GAME_CARS = [
   { name: 'Audi A5',   body1:'#d8dce2', body2:'#ffffff', body3:'#c8ccd4', roof:'#0d0d0d', carbon:false },
   { name: 'BMW M2',    body1:'#5a5f66', body2:'#767b83', body3:'#4a4f56', roof:'#141414', carbon:true },
-  { name: 'Audi RS4',  body1:'#0a2f73', body2:'#1a52b8', body3:'#082450', roof:'#0a2f73', carbon:false }
+  { name: 'Audi RS4',  body1:'#0a2f73', body2:'#1a52b8', body3:'#082450', roof:'#0a2f73', carbon:false },
+  { name: 'Ford Focus Mk3', body1:'#8d9299', body2:'#aeb3b9', body3:'#787d84', roof:'#787d84', carbon:false }
 ];
 
 // ── AUDIO RETRO (Web Audio API) ──
@@ -6887,7 +6900,7 @@ function showCarSelect() {
   if (_game) { _game.running = false; _game = null; }
   // dibujar previews
   setTimeout(function() {
-    for (var i = 0; i < 3; i++) {
+    for (var i = 0; i < 4; i++) {
       var pcv = document.getElementById('car-prev-' + i);
       if (!pcv) continue;
       var pctx = pcv.getContext('2d');
@@ -7024,7 +7037,8 @@ function startGame() {
     running: true, lane: 1, laneX: laneW * 1.5,
     obstacles: [], score: 0, speed: 3.8, frame: 0,
     turbo: 0, turboMax: 100, turboOn: false,
-    dirt: [], couponsWon: [], lastCouponIdx: -1
+    dirt: [], couponsWon: [], lastCouponIdx: -1,
+    distance: 0, fuel: 100, fuelMax: 100
   };
   var g = _game;
   startEngine();
@@ -7189,6 +7203,13 @@ function startGame() {
     g.score += g.turboOn ? 0.14 : 0.05;
     g.speed += 0.0024;
 
+    // distancia recorrida
+    g.distance += effSpeed * 0.45;
+
+    // combustible: se consume solo, mas rapido con turbo
+    g.fuel -= g.turboOn ? 0.09 : 0.045;
+    if (g.fuel <= 0) { g.fuel = 0; gameOver('fuel'); return; }
+
     // HUD
     ctx.fillStyle = 'rgba(0,0,0,.45)';
     ctx.beginPath(); ctx.roundRect(8, 8, 130, 30, 8); ctx.fill();
@@ -7208,6 +7229,39 @@ function startGame() {
     ctx.fillStyle = '#fff';
     ctx.font = 'bold 9px monospace';
     ctx.fillText('TURBO', W - 96, 26);
+
+    // marcador de distancia (estilo Road Fighter)
+    var distTxt = g.distance >= 1000 ? (g.distance / 1000).toFixed(2) + ' km' : Math.floor(g.distance) + ' m';
+    ctx.fillStyle = 'rgba(0,0,0,.45)';
+    ctx.beginPath(); ctx.roundRect(8, 44, 130, 26, 8); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 11px monospace';
+    ctx.fillText('DIST: ' + distTxt, 16, 62);
+
+    // marcador de velocidad
+    var speedKmh = Math.floor(effSpeed * 26);
+    ctx.fillStyle = 'rgba(0,0,0,.45)';
+    ctx.beginPath(); ctx.roundRect(8, 76, 130, 26, 8); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 11px monospace';
+    ctx.fillText('VEL: ' + speedKmh + ' km/h', 16, 94);
+
+    // medidor de combustible (estilo Road Fighter)
+    var fuelPct = g.fuel / g.fuelMax;
+    var fuelLow = fuelPct <= 0.2;
+    ctx.fillStyle = 'rgba(0,0,0,.45)';
+    ctx.beginPath(); ctx.roundRect(W - 118, 44, 110, 26, 8); ctx.fill();
+    if (fuelLow && g.frame % 20 < 10) {
+      ctx.strokeStyle = '#d32f2f'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.roundRect(W - 118, 44, 110, 26, 8); ctx.stroke();
+    }
+    ctx.fillStyle = '#333';
+    ctx.fillRect(W - 110, 50, 94, 12);
+    ctx.fillStyle = fuelPct > 0.5 ? '#4caf50' : (fuelPct > 0.2 ? '#ffb428' : '#d32f2f');
+    ctx.fillRect(W - 110, 50, 94 * fuelPct, 12);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 8px monospace';
+    ctx.fillText('FUEL', W - 96, 60);
 
     // flash de cupon ganado
     if (g.couponFlash > 0) {
@@ -7230,10 +7284,10 @@ function startGame() {
     g.running = false;
     stopEngine();
     playCrashSound();
-    var overlays = { mud:'rgba(92,64,34,.6)', cone:'rgba(230,92,0,.35)', bache:'rgba(10,10,20,.6)' };
+    var overlays = { mud:'rgba(92,64,34,.6)', cone:'rgba(230,92,0,.35)', bache:'rgba(10,10,20,.6)', fuel:'rgba(20,20,20,.7)' };
     ctx.fillStyle = overlays[type] || overlays.mud;
     ctx.fillRect(0, 0, W, H);
-    var msgs = { mud:'\u00A1Tu auto se llen\u00F3 de barro!', cone:'\u00A1Chocaste un cono!', bache:'\u00A1Ca\u00EDste en un bache!' };
+    var msgs = { mud:'\u00A1Tu auto se llen\u00F3 de barro!', cone:'\u00A1Chocaste un cono!', bache:'\u00A1Ca\u00EDste en un bache!', fuel:'\u00A1Te quedaste sin combustible!' };
     ctx.fillStyle = '#fff';
     ctx.font = 'bold 19px monospace';
     ctx.textAlign = 'center';
@@ -7933,6 +7987,19 @@ function limpiarOrdenForm() {
 // SITIOS AMIGOS
 // ==========================================
 var _sitioImgData = null;
+var _sitiosRotationSec = 30;
+
+function saveSitiosRotation() {
+  if (!isAdminLogged) { toast('Solo el admin puede configurar esto'); return; }
+  var val = parseInt(document.getElementById('sitio-rotation').value, 10);
+  if (!val || val < 5) { toast('Ingresá una duración válida (mínimo 5 segundos)'); return; }
+  db.collection('config').doc('sitiosAmigos').set({ duracion: val }, { merge: true }).then(function() {
+    _sitiosRotationSec = val;
+    var track = document.getElementById('sitios-grid');
+    if (track) track.style.animationDuration = val + 's';
+    toast('Velocidad del slider actualizada!');
+  }).catch(function(e) { console.error(e); toast('Error al guardar'); });
+}
 
 function sitioPickImg(f) {
   if (!f || !f.type.startsWith('image/')) return;
@@ -7980,7 +8047,15 @@ function loadSitiosAmigos() {
   var form = document.getElementById('sitios-admin-form');
   if (form) form.style.display = isAdminLogged ? 'block' : 'none';
 
-  db.collection('sitios_amigos').orderBy('createdAt', 'desc').get().then(function(snap) {
+  Promise.all([
+    db.collection('config').doc('sitiosAmigos').get().catch(function() { return null; }),
+    db.collection('sitios_amigos').orderBy('createdAt', 'desc').get()
+  ]).then(function(res) {
+    var cfgDoc = res[0], snap = res[1];
+    _sitiosRotationSec = (cfgDoc && cfgDoc.exists && cfgDoc.data().duracion) || 30;
+    var rotInput = document.getElementById('sitio-rotation');
+    if (rotInput) rotInput.value = _sitiosRotationSec;
+
     if (snap.empty) {
       grid.innerHTML = '';
       // Ocultar seccion completa si no hay sitios y no es admin
@@ -8009,7 +8084,9 @@ function loadSitiosAmigos() {
         out += inner;
       }
     });
-    grid.innerHTML = out;
+    // Duplicamos el contenido para lograr el loop continuo (entra por un lado, sale por el otro)
+    grid.innerHTML = out + out;
+    grid.style.animationDuration = _sitiosRotationSec + 's';
   }).catch(function(e) { console.error('Sitios amigos error:', e); });
 }
 
@@ -8234,6 +8311,11 @@ loadVtvCard();
 
   <!-- Admin form (solo admin) -->
   <div id="sitios-admin-form" style="display:none; background:var(--g1); border:1px solid rgba(205,127,50,.25); border-radius:0; padding:1.2rem; margin-bottom:1.5rem; max-width:500px; margin-left:auto; margin-right:auto;">
+    <div style="font-weight:700; font-size:.85rem; color:var(--m); margin-bottom:.8rem;">&#9881;&#65039; Velocidad del slider</div>
+    <div style="display:flex; align-items:center; gap:.6rem; margin-bottom:1.2rem;">
+      <input type="number" class="finput" id="sitio-rotation" placeholder="Segundos" min="5" max="120" style="flex:1;">
+      <button class="btn" style="padding:.6rem 1.1rem; font-size:.78rem; white-space:nowrap;" onclick="saveSitiosRotation()">Guardar</button>
+    </div>
     <div style="font-weight:700; font-size:.85rem; color:var(--m); margin-bottom:.8rem;">&#10133; Agregar sitio amigo</div>
     <div style="display:flex; align-items:center; gap:1rem; margin-bottom:.8rem;">
       <div id="sitio-img-preview" style="width:64px; height:64px; border-radius:0; background:var(--g2); display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; border:1px dashed rgba(205,127,50,.3);">
@@ -8249,8 +8331,10 @@ loadVtvCard();
     <button class="btn" onclick="publishSitio()" style="padding:.6rem 1.4rem; font-size:.82rem;">Publicar</button>
   </div>
 
-  <!-- Grid de sitios -->
-  <div id="sitios-grid" style="display:flex; flex-wrap:wrap; gap:1.2rem; justify-content:center;"></div>
+  <!-- Slider de sitios -->
+  <div class="sitios-marquee">
+    <div class="sitios-marquee-track" id="sitios-grid"></div>
+  </div>
 </div>
 
 <!-- ======== UBICACION / MAPA ======== -->
@@ -8428,6 +8512,11 @@ loadVtvCard();
         <canvas id="car-prev-2" width="80" height="110" style="display:block; margin:0 auto .5rem;"></canvas>
         <div style="color:#fff; font-size:.8rem; font-weight:700;">Audi RS4</div>
         <div style="color:#7A8BA8; font-size:.65rem;">Azul Sprint</div>
+      </button>
+      <button class="car-pick-btn" onclick="pickCar(3)" style="background:#1C2541; border:2px solid rgba(205,127,50,.4); border-radius:0; padding:1rem; cursor:pointer; text-align:center; transition:all .2s;">
+        <canvas id="car-prev-3" width="80" height="110" style="display:block; margin:0 auto .5rem;"></canvas>
+        <div style="color:#fff; font-size:.8rem; font-weight:700;">Ford Focus Mk3</div>
+        <div style="color:#7A8BA8; font-size:.65rem;">Gris &middot; 2015</div>
       </button>
     </div>
   </div>
