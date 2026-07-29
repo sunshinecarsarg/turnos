@@ -754,6 +754,13 @@ body.light-mode .gr-score { background:#fff !important; }
   -webkit-text-fill-color:transparent;
   animation:shimmerText 4s linear infinite;
 }
+/* modo claro: bronce oscuro con brillo medio, legible sobre fondo claro */
+body.light-mode .bk-title span {
+  background:linear-gradient(90deg, #7a4008 25%, #c98e3a 50%, #7a4008 75%);
+  background-size:200% auto;
+  -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
 
 /* Flotacion sutil del badge */
 @keyframes floatBadge { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
@@ -974,6 +981,24 @@ body.light-mode [style*="rgba(224,225,226,.2)"] { color:#3a4a5c !important; bord
 body.light-mode .hero-photo { opacity:.07; }
 body.light-mode .hero-dust { opacity:.45; }
 
+/* ── MODO CLARO: elementos que quedaban invisibles o sin color ── */
+/* boton de tema: era blanco translucido sobre nav clara */
+body.light-mode #theme-btn { color:#7a4008 !important; border-color:rgba(160,90,16,.45) !important; }
+/* chip "todo el dia": naranja palido sobre card blanca */
+body.light-mode .svc-allday { color:#8a5a00; background:rgba(176,114,8,.12); border-color:rgba(176,114,8,.4); }
+/* hero: reemplaza la mancha azul oscura por luz calida sobre fondo claro */
+body.light-mode .hero-bg {
+  background:
+    radial-gradient(ellipse 55% 45% at 72% 18%, rgba(160,90,16,.15) 0%, transparent 65%),
+    radial-gradient(ellipse 70% 55% at 22% 88%, rgba(186,196,214,.55) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 35% at 50% 50%, rgba(160,99,42,.09) 0%, transparent 70%);
+}
+/* superficies que permanecen oscuras por diseno (footer, VTV, banner tienda):
+   restaurar los acentos del tema oscuro para que no hereden colores de modo claro */
+body.light-mode .site-footer, body.light-mode #vtv-card-wrap, body.light-mode .banner-dark {
+  --m:#CD7F32; --deep:#A0632A; --muted:#7A8BA8; --white:#E0E1E2;
+}
+
 /* ======== ESPACIO SPONSOR ======== */
 .sponsor-strip { padding:1.5rem 5% 4.5rem; }
 .sponsor-box {
@@ -1125,6 +1150,10 @@ body::after {
   background:linear-gradient(120deg, var(--m), #F2D9B0 50%, var(--m));
   -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
 }
+body.light-mode .res-avg-num {
+  background:linear-gradient(120deg, #7a4008, #c98e3a 50%, #7a4008);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
 
 /* ======== FOOTER PRO ======== */
 .site-footer {
@@ -1261,16 +1290,19 @@ nav {
   .rb-car, .rb-car-inner { animation:none !important; }
   .rb-car { display:none; }
 }
-/* light mode */
-body.light-mode #road-bg { opacity:.38; }
+/* light mode: asfalto mas oscuro y lineas fuertes para que la ruta SE VEA */
+body.light-mode #road-bg { opacity:.6; }
 body.light-mode .rb-road {
   background:
-    repeating-linear-gradient(90deg, rgba(0,0,0,.015) 0 2px, transparent 2px 7px),
-    linear-gradient(to bottom, #c3c9d4 0%, #b9c0cc 45%, #aeb6c3 100%);
-  box-shadow:inset 0 8px 22px rgba(0,0,0,.12);
+    repeating-linear-gradient(90deg, rgba(0,0,0,.025) 0 2px, transparent 2px 7px),
+    linear-gradient(to bottom, #9aa3b2 0%, #8e97a7 45%, #828b9b 100%);
+  box-shadow:inset 0 8px 22px rgba(0,0,0,.22);
 }
-body.light-mode .rb-edge { background:rgba(255,255,255,.9); }
-body.light-mode .rb-dash { background:repeating-linear-gradient(90deg, rgba(255,255,255,.75) 0 34px, transparent 34px 72px); }
+body.light-mode .rb-edge { background:rgba(255,255,255,.95); }
+body.light-mode .rb-center::before, body.light-mode .rb-center::after { background:rgba(191,132,20,.85); }
+body.light-mode .rb-dash { background:repeating-linear-gradient(90deg, rgba(255,255,255,.88) 0 34px, transparent 34px 72px); }
+body.light-mode .rb-fade { background:linear-gradient(to bottom, #f2f4f8, transparent); }
+body.light-mode .rb-car-b { opacity:.8; }
 /* mobile: mas discreto */
 @media (max-width:768px) {
   #road-bg { height:112px; }
@@ -1493,7 +1525,7 @@ body.light-mode .rb-dash { background:repeating-linear-gradient(90deg, rgba(255,
       <div id="vtv-card-wrap"></div>
 
       <!-- BANNER PRODUCTOS -->
-      <div style="
+      <div class="banner-dark" style="
         margin-bottom:1.5rem;
         border:1px solid rgba(205,127,50,.2);
         border-radius:0;
