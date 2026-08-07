@@ -1154,17 +1154,6 @@ body::after {
 .svc-marquee span::after { content:'\2726'; color:rgba(205,127,50,.6); font-size:.6rem; }
 @keyframes marqueeMove { from { transform:translateX(0); } to { transform:translateX(-50%); } }
 
-/* ======== SLIDER SITIOS AMIGOS ======== */
-.sitios-marquee {
-  overflow:hidden; position:relative; width:100%;
-  -webkit-mask-image:linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
-  mask-image:linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
-}
-.sitios-marquee-track {
-  display:flex; gap:1.2rem; width:max-content;
-  animation:marqueeMove 30s linear infinite;
-}
-.sitios-marquee:hover .sitios-marquee-track { animation-play-state:paused; }
 .bk-header > *:nth-child(6) { animation-delay:.64s; }
 
 /* ======== RESENAS REDISENADAS ======== */
@@ -8281,116 +8270,6 @@ function limpiarOrdenForm() {
   oiRenderFotos();
 }
 
-// ==========================================
-// SITIOS AMIGOS
-// ==========================================
-var _sitioImgData = null;
-var _sitiosRotationSec = 30;
-
-function saveSitiosRotation() {
-  if (!isAdminLogged) { toast('Solo el admin puede configurar esto'); return; }
-  var val = parseInt(document.getElementById('sitio-rotation').value, 10);
-  if (!val || val < 5) { toast('Ingresá una duración válida (mínimo 5 segundos)'); return; }
-  db.collection('config').doc('sitiosAmigos').set({ duracion: val }, { merge: true }).then(function() {
-    _sitiosRotationSec = val;
-    var track = document.getElementById('sitios-grid');
-    if (track) track.style.animationDuration = val + 's';
-    toast('Velocidad del slider actualizada!');
-  }).catch(function(e) { console.error(e); toast('Error al guardar'); });
-}
-
-function sitioPickImg(f) {
-  if (!f || !f.type.startsWith('image/')) return;
-  compressImage(f, function(data) {
-    _sitioImgData = data;
-    var prev = document.getElementById('sitio-img-preview');
-    if (prev) prev.innerHTML = '<img src="' + data + '" style="width:100%;height:100%;object-fit:cover;">';
-  });
-}
-
-function publishSitio() {
-  if (!isAdminLogged) { toast('Solo el admin puede publicar'); return; }
-  if (!_sitioImgData) { toast('Subi una imagen primero'); return; }
-  var titulo = sanitize(document.getElementById('sitio-titulo').value.trim());
-  if (!titulo) { toast('Ingresa el nombre del sitio'); return; }
-  var url = document.getElementById('sitio-url').value.trim();
-
-  db.collection('sitios_amigos').add({
-    titulo: titulo,
-    url: url || null,
-    img: _sitioImgData,
-    createdAt: new Date().toISOString()
-  }).then(function() {
-    toast('Sitio amigo publicado!');
-    _sitioImgData = null;
-    document.getElementById('sitio-titulo').value = '';
-    document.getElementById('sitio-url').value = '';
-    document.getElementById('sitio-img-preview').innerHTML = '<span style="font-size:1.3rem;">&#128444;</span>';
-    loadSitiosAmigos();
-  }).catch(function(e) { console.error(e); toast('Error al publicar'); });
-}
-
-function deleteSitio(docId) {
-  if (!confirm('Eliminar este sitio amigo?')) return;
-  db.collection('sitios_amigos').doc(docId).delete().then(function() {
-    toast('Sitio eliminado');
-    loadSitiosAmigos();
-  }).catch(function(e) { console.error(e); toast('Error al eliminar'); });
-}
-
-function loadSitiosAmigos() {
-  var grid = document.getElementById('sitios-grid');
-  if (!grid) return;
-  // Mostrar/ocultar form admin
-  var form = document.getElementById('sitios-admin-form');
-  if (form) form.style.display = isAdminLogged ? 'block' : 'none';
-
-  Promise.all([
-    db.collection('config').doc('sitiosAmigos').get().catch(function() { return null; }),
-    db.collection('sitios_amigos').orderBy('createdAt', 'desc').get()
-  ]).then(function(res) {
-    var cfgDoc = res[0], snap = res[1];
-    _sitiosRotationSec = (cfgDoc && cfgDoc.exists && cfgDoc.data().duracion) || 30;
-    var rotInput = document.getElementById('sitio-rotation');
-    if (rotInput) rotInput.value = _sitiosRotationSec;
-
-    if (snap.empty) {
-      grid.innerHTML = '';
-      // Ocultar seccion completa si no hay sitios y no es admin
-      var section = grid.closest('div[style*="padding:3rem"]');
-      if (section && !isAdminLogged) section.style.display = 'none';
-      else if (section) section.style.display = 'block';
-      return;
-    }
-    var section = grid.closest('div[style*="padding:3rem"]');
-    if (section) section.style.display = 'block';
-
-    var out = '';
-    snap.forEach(function(d) {
-      var s = d.data();
-      var inner = '<div style="width:110px; text-align:center;">' +
-        '<div style="width:90px; height:90px; margin:0 auto .5rem; border-radius:0; overflow:hidden; border:1.5px solid rgba(205,127,50,.3); background:var(--g1); transition:transform .25s, border-color .25s;" onmouseover="this.style.transform=\'scale(1.07)\';this.style.borderColor=\'var(--m)\'" onmouseout="this.style.transform=\'scale(1)\';this.style.borderColor=\'rgba(205,127,50,.3)\'">' +
-          '<img src="' + s.img + '" style="width:100%; height:100%; object-fit:cover;" alt="' + s.titulo + '">' +
-        '</div>' +
-        '<div style="font-size:.75rem; color:var(--white); font-weight:600;">' + s.titulo + '</div>' +
-        (isAdminLogged ? '<button class="abtn no" style="font-size:.6rem; margin-top:.3rem;" onclick="event.preventDefault(); event.stopPropagation(); deleteSitio(\'' + d.id + '\')">Eliminar</button>' : '') +
-      '</div>';
-
-      if (s.url) {
-        out += '<a href="' + s.url + '" target="_blank" rel="noopener" style="text-decoration:none;">' + inner + '</a>';
-      } else {
-        out += inner;
-      }
-    });
-    // Duplicamos el contenido para lograr el loop continuo (entra por un lado, sale por el otro)
-    grid.innerHTML = out + out;
-    grid.style.animationDuration = _sitiosRotationSec + 's';
-  }).catch(function(e) { console.error('Sitios amigos error:', e); });
-}
-
-// Cargar al inicio y cuando cambia auth
-setTimeout(loadSitiosAmigos, 1500);
-
 function toggleCupones() {
   var p = document.getElementById('cupones-panel');
   if (!p) return;
@@ -8770,41 +8649,6 @@ loadVtvCard();
   </div>
 
   <div class="gr-grid" id="gr-grid"></div>
-</div>
-
-<!-- ======== SITIOS AMIGOS ======== -->
-<div style="padding:3rem 5% 1rem; max-width:1100px; margin:0 auto;">
-  <div style="text-align:center; margin-bottom:1.5rem;">
-    <div class="badge" style="margin-bottom:1rem;">Comunidad</div>
-    <h2 style="font-family:'JetBrains Mono',monospace; font-size:clamp(1.4rem,3.5vw,2rem); letter-spacing:1px;">SITIOS <span style="color:var(--m);">AMIGOS</span></h2>
-  </div>
-
-  <!-- Admin form (solo admin) -->
-  <div id="sitios-admin-form" style="display:none; background:var(--g1); border:1px solid rgba(205,127,50,.25); border-radius:0; padding:1.2rem; margin-bottom:1.5rem; max-width:500px; margin-left:auto; margin-right:auto;">
-    <div style="font-weight:700; font-size:.85rem; color:var(--m); margin-bottom:.8rem;">&#9881;&#65039; Velocidad del slider</div>
-    <div style="display:flex; align-items:center; gap:.6rem; margin-bottom:1.2rem;">
-      <input type="number" class="finput" id="sitio-rotation" placeholder="Segundos" min="5" max="120" style="flex:1;">
-      <button class="btn" style="padding:.6rem 1.1rem; font-size:.78rem; white-space:nowrap;" onclick="saveSitiosRotation()">Guardar</button>
-    </div>
-    <div style="font-weight:700; font-size:.85rem; color:var(--m); margin-bottom:.8rem;">&#10133; Agregar sitio amigo</div>
-    <div style="display:flex; align-items:center; gap:1rem; margin-bottom:.8rem;">
-      <div id="sitio-img-preview" style="width:64px; height:64px; border-radius:0; background:var(--g2); display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; border:1px dashed rgba(205,127,50,.3);">
-        <span style="font-size:1.3rem;">&#128444;</span>
-      </div>
-      <label style="cursor:pointer; background:rgba(205,127,50,.08); border:1px dashed rgba(205,127,50,.3); border-radius:0; padding:.5rem 1rem; font-size:.78rem; color:var(--m);">
-        <input type="file" accept="image/*" style="display:none;" onchange="sitioPickImg(this.files[0])">
-        &#128247; Subir logo/imagen
-      </label>
-    </div>
-    <input type="text" class="finput" id="sitio-titulo" placeholder="Nombre del sitio" maxlength="60" style="margin-bottom:.6rem;">
-    <input type="text" class="finput" id="sitio-url" placeholder="Link (opcional, ej: https://instagram.com/...)" maxlength="200" style="margin-bottom:.8rem;">
-    <button class="btn" onclick="publishSitio()" style="padding:.6rem 1.4rem; font-size:.82rem;">Publicar</button>
-  </div>
-
-  <!-- Slider de sitios -->
-  <div class="sitios-marquee">
-    <div class="sitios-marquee-track" id="sitios-grid"></div>
-  </div>
 </div>
 
 <!-- ======== UBICACION / MAPA ======== -->
