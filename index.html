@@ -1261,6 +1261,95 @@ nav {
 /* Chips y tags en small caps con aire */
 .svc-tag { letter-spacing:.6px; }
 
+/* ======== BLOGSITOS ======== */
+.blog-grid {
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px;
+}
+@media(max-width:600px){ .blog-grid { grid-template-columns:1fr; } }
+.blog-card {
+  position:relative; cursor:pointer; overflow:hidden;
+  background:#0d0710; border:1px solid rgba(205,127,50,.18);
+  display:flex; flex-direction:column;
+  transition:transform .3s, box-shadow .3s, border-color .3s;
+  box-shadow:0 4px 20px rgba(0,0,0,.4);
+}
+.blog-card:hover { transform:translateY(-4px); box-shadow:0 14px 40px rgba(205,127,50,.28); border-color:rgba(205,127,50,.45); }
+.blog-card-img { position:relative; aspect-ratio:16/10; overflow:hidden; flex-shrink:0; }
+.blog-card-img img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .5s ease; }
+.blog-card:hover .blog-card-img img { transform:scale(1.06); }
+.blog-card-info {
+  padding:1rem 1.1rem 1.1rem; flex:1; display:flex; flex-direction:column; gap:.35rem;
+  background:linear-gradient(160deg, rgba(205,127,50,.1) 0%, rgba(5,2,10,1) 100%);
+  border-top:2px solid rgba(205,127,50,.5);
+}
+.blog-card-date { font-size:.6rem; font-weight:800; letter-spacing:2px; text-transform:uppercase; color:var(--m); }
+.blog-card-title { font-family:'JetBrains Mono',monospace; font-size:1.05rem; letter-spacing:1.5px; color:#fff; line-height:1.25; word-break:break-word; }
+.blog-card-sub {
+  font-size:.75rem; color:rgba(224,225,226,.55); line-height:1.5;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+.blog-card-count {
+  position:absolute; top:.7rem; right:.7rem; z-index:2;
+  background:rgba(0,0,0,.72); color:#fff; border:1px solid rgba(255,255,255,.25);
+  font-size:.62rem; font-weight:700; letter-spacing:1px; padding:.2rem .55rem;
+}
+/* overlay de lectura */
+#blog-overlay {
+  position:fixed; inset:0; z-index:1100; background:rgba(5,8,20,.98);
+  display:none; overflow-y:auto; -webkit-overflow-scrolling:touch;
+}
+#blog-overlay.open { display:block; }
+.blog-post { max-width:840px; margin:0 auto; padding:84px 5% 90px; }
+.blog-post-date { font-size:.65rem; font-weight:800; letter-spacing:2.5px; text-transform:uppercase; color:var(--m); margin-bottom:.7rem; }
+.blog-post-title {
+  font-family:'JetBrains Mono',monospace; font-size:clamp(1.5rem,4.5vw,2.4rem);
+  letter-spacing:1.5px; line-height:1.15; color:#fff; margin-bottom:.6rem; font-weight:800;
+}
+.blog-post-sub { color:rgba(224,225,226,.6); font-size:.95rem; line-height:1.6; margin-bottom:1.6rem; }
+.blog-post-cover { width:100%; max-height:56vh; object-fit:cover; display:block; border:1px solid rgba(205,127,50,.3); margin-bottom:2rem; }
+.blog-sec { margin-bottom:2.4rem; }
+.blog-sec-text { color:rgba(224,225,226,.88); line-height:1.85; font-size:.95rem; white-space:pre-line; margin-bottom:1.2rem; }
+.blog-sec-fotos { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px; }
+.blog-sec-fotos img {
+  width:100%; aspect-ratio:4/3; object-fit:cover; display:block; cursor:zoom-in;
+  border:1px solid rgba(205,127,50,.2); transition:transform .3s, border-color .3s;
+}
+.blog-sec-fotos img:hover { transform:scale(1.02); border-color:rgba(205,127,50,.5); }
+.blog-sec-fotos.single { grid-template-columns:1fr; }
+.blog-sec-fotos.single img { aspect-ratio:auto; max-height:70vh; object-fit:contain; background:#0d0710; }
+.blog-close-btn {
+  position:fixed; top:1.1rem; right:1.1rem; z-index:1102;
+  background:rgba(10,17,40,.8); border:1px solid rgba(205,127,50,.45); color:#fff;
+  width:42px; height:42px; font-size:1.2rem; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:background .2s, transform .2s;
+}
+.blog-close-btn:hover { background:var(--m); transform:rotate(90deg); }
+/* visor de foto a pantalla completa */
+#blog-photo-viewer {
+  position:fixed; inset:0; z-index:1200; background:rgba(0,0,0,.96);
+  display:none; align-items:center; justify-content:center; cursor:zoom-out;
+}
+#blog-photo-viewer.open { display:flex; }
+#blog-photo-viewer img { max-width:96vw; max-height:94vh; object-fit:contain; }
+/* admin: builder de secciones */
+.blog-sec-builder {
+  border:1px dashed rgba(205,127,50,.35); padding:1.2rem; margin-bottom:1rem;
+  background:rgba(205,127,50,.03); position:relative;
+}
+.blog-sec-builder .flabel { margin-bottom:.4rem; display:block; }
+/* modo claro */
+body.light-mode .blog-card { background:#fff; border-color:rgba(0,0,0,.1); box-shadow:0 4px 18px rgba(0,0,0,.08); }
+body.light-mode .blog-card-info { background:#fff; border-top-color:rgba(160,90,16,.5); }
+body.light-mode .blog-card-title { color:#0d1b2a; }
+body.light-mode .blog-card-sub { color:#3a4a5c; }
+body.light-mode #blog-overlay { background:rgba(242,244,248,.99); }
+body.light-mode .blog-post-title { color:#0d1b2a; }
+body.light-mode .blog-post-sub { color:#3a4a5c; }
+body.light-mode .blog-sec-text { color:#1a2433; }
+body.light-mode .blog-close-btn { background:rgba(255,255,255,.85); color:#0d1b2a; border-color:rgba(160,90,16,.5); }
+body.light-mode .blog-close-btn:hover { color:#fff; }
+
 </style>
 <link rel="manifest"  id="pwa-manifest">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1307,6 +1396,7 @@ nav {
     <button class="nav-btn" onclick="showView('reviews')">Reviews</button>
     <button class="nav-btn" onclick="showView('resenas')">Resenas</button>
     <button class="nav-btn" onclick="showView('galeria')">Galeria</button>
+    <button class="nav-btn" onclick="showView('blogs')">Blogs</button>
     <button class="nav-btn" onclick="showView('tienda')">Tienda</button>
     <button class="nav-btn nav-cta" onclick="showView('booking')">Reservar</button>
   </div>
@@ -1320,6 +1410,7 @@ nav {
   <button onclick="showView('reviews');closeMobileMenu();">Reviews</button>
   <button onclick="showView('resenas');closeMobileMenu();">Resenas</button>
   <button onclick="showView('galeria');closeMobileMenu();">Galeria</button>
+  <button onclick="showView('blogs');closeMobileMenu();">Blogs</button>
   <button onclick="showView('tienda');closeMobileMenu();">Tienda</button>
   <button onclick="isAdminLogged?showView('admin'):(showView('admin-login'),clearAdminBadge());closeMobileMenu();">Admin</button>
 </div>
@@ -1848,6 +1939,59 @@ nav {
     <div class="gal-grid" id="gal-grid">
       <div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted);font-size:.9rem;">
         Cargando galeria...
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ======== BLOGS ======== -->
+<div id="view-blogs" class="view">
+
+  <div class="gal-hero">
+    <div class="gal-hero-bg"></div>
+    <div style="position:relative;z-index:2;">
+      <div class="badge" style="margin-bottom:1.2rem;">Historias del taller</div>
+      <h1 class="bk-title">BLOGS <span>SUNSHINE</span></h1>
+      <p class="bk-sub">Cada auto tiene su historia &mdash; el proceso completo, con fotos</p>
+    </div>
+  </div>
+
+  <div class="gal-section">
+
+    <!-- Admin: crear blogsito -->
+    <div id="blog-admin-form" style="display:none;margin-bottom:2.5rem;">
+      <div style="background:var(--g1);border:1px solid rgba(205,127,50,.2);border-radius:0;padding:2rem;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:1.3rem;letter-spacing:2px;color:var(--m);margin-bottom:1.2rem;">
+          &#128221; Nuevo blogsito
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.8rem;margin-bottom:1.2rem;">
+          <div class="fi">
+            <label class="flabel">Titulo *</label>
+            <input type="text" class="finput" id="blog-titulo" placeholder="BMW M3 Competition — Correccion completa">
+          </div>
+          <div class="fi">
+            <label class="flabel">Bajada <span style="font-weight:400;color:var(--muted)">(se ve en la tarjeta, opcional)</span></label>
+            <input type="text" class="finput" id="blog-sub" placeholder="Un M3 2022 que llego con la pintura castigada y se fue como de fabrica...">
+          </div>
+        </div>
+        <div id="blog-secs"></div>
+        <div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.6rem;align-items:center;">
+          <button class="btn2" onclick="blogAddSec()" style="cursor:pointer;">+ Agregar seccion</button>
+          <button class="btn" onclick="publishBlog()" id="blog-publish-btn" style="max-width:260px;">Publicar blogsito</button>
+          <span id="blog-upload-status" style="font-size:.75rem;color:var(--muted);"></span>
+        </div>
+        <div style="font-size:.72rem;color:var(--muted);margin-top:.8rem;line-height:1.5;">
+          Cada seccion lleva su propio texto y sus fotos (ej: presentacion del auto &rarr; proceso &rarr; resultado final).
+          Hasta 30 fotos en total. La primera foto de la primera seccion es la portada.
+        </div>
+      </div>
+    </div>
+
+    <!-- Grid de blogsitos -->
+    <div class="blog-grid" id="blog-grid">
+      <div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted);font-size:.9rem;">
+        Cargando blogs...
       </div>
     </div>
 
@@ -3475,7 +3619,7 @@ function showView(name) {
   }
   document.getElementById('view-' + name).classList.add('active');
   // Recordar ultima vista (solo vistas de cliente, no admin)
-  var clientViews = ['booking','galeria','tienda','reviews','resenas'];
+  var clientViews = ['booking','galeria','tienda','reviews','resenas','blogs'];
   if (clientViews.indexOf(name) !== -1) {
     localStorage.setItem('sc_last_view', name);
     // Navego a una vista de cliente: el intento de acceso admin ya no aplica
@@ -3497,6 +3641,7 @@ function showView(name) {
     galAdminActive = isAdminLogged;
     renderGaleria();
   }
+  if (name === 'blogs') { renderBlogs(); }
   if (name === 'resenas') { syncResenas(); renderResenas(); }
   if (name === 'reviews') {
     loadAndRenderReviews();
@@ -7864,6 +8009,255 @@ document.addEventListener('keydown', function(e) {
 });
 
 // ==========================================
+// BLOGSITOS (posts con secciones de texto + fotos)
+// ==========================================
+var blogSecs = [];        // borrador del admin: [{texto, fotos:[urls]}]
+var _blogUploading = 0;   // fotos subiendo a Cloudinary en este momento
+var _blogsCache = [];
+
+function blogEsc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function blogTotalFotos() {
+  return blogSecs.reduce(function(s, x){ return s + x.fotos.length; }, 0);
+}
+
+function blogUpdateStatus() {
+  var el = document.getElementById('blog-upload-status');
+  if (el) el.textContent = _blogUploading > 0 ? ('Subiendo ' + _blogUploading + ' foto(s)...') : '';
+}
+
+// Sube un data-URI comprimido a Cloudinary (mismo preset que los videos de la galeria)
+function blogUploadDataUri(dataUri, onDone, onError) {
+  var form = new FormData();
+  form.append('file', dataUri);
+  form.append('upload_preset', CLOUDINARY_PRESET);
+  var xhr = new XMLHttpRequest();
+  xhr.onload = function() {
+    if (xhr.status === 200) onDone(JSON.parse(xhr.responseText).secure_url);
+    else onError(new Error('Cloudinary error ' + xhr.status));
+  };
+  xhr.onerror = function() { onError(new Error('Network error')); };
+  xhr.open('POST', 'https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD + '/image/upload');
+  xhr.send(form);
+}
+
+function blogAddSec() {
+  if (blogSecs.length >= 8) { toast('Maximo 8 secciones'); return; }
+  blogSecs.push({ texto: '', fotos: [] });
+  blogRenderSecs();
+}
+
+function blogRemoveSec(i) {
+  blogSecs.splice(i, 1);
+  blogRenderSecs();
+}
+
+function blogSecTexto(i, el) { if (blogSecs[i]) blogSecs[i].texto = el.value; }
+
+function blogRemoveFoto(si, fi) {
+  blogSecs[si].fotos.splice(fi, 1);
+  blogRenderSecs();
+}
+
+function blogAddFotos(si, files) {
+  var restantes = 30 - blogTotalFotos() - _blogUploading;
+  if (restantes <= 0) { toast('Maximo 30 fotos por blogsito'); return; }
+  if (files.length > restantes) toast('Solo entran ' + restantes + ' fotos mas (max 30)');
+  var lote = Math.min(files.length, restantes);
+  for (var i = 0; i < lote; i++) {
+    (function(f) {
+      if (!f.type || f.type.indexOf('image/') !== 0) { toast('Solo imagenes'); return; }
+      _blogUploading++;
+      blogUpdateStatus();
+      compressImageCustom(f, 1400, 450000, function(data) {
+        blogUploadDataUri(data, function(url) {
+          _blogUploading--;
+          if (blogSecs[si]) blogSecs[si].fotos.push(url);
+          blogUpdateStatus();
+          blogRenderSecs();
+        }, function(err) {
+          _blogUploading--;
+          blogUpdateStatus();
+          console.error(err);
+          toast('Error al subir una foto. Proba de nuevo.');
+        });
+      });
+    })(files[i]);
+  }
+}
+
+function blogRenderSecs() {
+  var wrap = document.getElementById('blog-secs');
+  if (!wrap) return;
+  var names = ['El auto', 'El proceso', 'Resultado final'];
+  wrap.innerHTML = blogSecs.map(function(sec, i) {
+    var thumbs = sec.fotos.map(function(u, j) {
+      return '<div style="position:relative;width:74px;height:74px;">' +
+        '<img src="' + u + '" style="width:74px;height:74px;object-fit:cover;border:2px solid rgba(205,127,50,.4);">' +
+        '<button onclick="blogRemoveFoto(' + i + ',' + j + ')" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:#CD7F32;border:none;color:#fff;font-size:.65rem;cursor:pointer;line-height:1;">x</button>' +
+        '</div>';
+    }).join('');
+    var ph = i === 0 ? 'Este auto llego al taller de la mano de su dueno, que queria...'
+           : i === 1 ? 'Arrancamos con un lavado descontaminante, despues...'
+           : 'Conta esta parte de la historia...';
+    return '<div class="blog-sec-builder">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.7rem;gap:.5rem;">' +
+        '<span style="font-family:\'JetBrains Mono\',monospace;font-size:.78rem;letter-spacing:2px;color:var(--m);">SECCION ' + (i + 1) + (names[i] ? ' &mdash; ' + names[i].toUpperCase() : '') + '</span>' +
+        '<button onclick="blogRemoveSec(' + i + ')" style="background:none;border:1px solid rgba(224,60,60,.4);color:#e03c3c;font-size:.65rem;padding:.25rem .6rem;cursor:pointer;">Quitar</button>' +
+      '</div>' +
+      '<label class="flabel">Texto de la seccion</label>' +
+      '<textarea class="finput" rows="4" oninput="blogSecTexto(' + i + ',this)" placeholder="' + ph + '" style="resize:vertical;min-height:80px;font-family:inherit;margin-bottom:.8rem;">' + blogEsc(sec.texto) + '</textarea>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.6rem;">' + thumbs + '</div>' +
+      '<label style="display:inline-flex;align-items:center;gap:.5rem;cursor:pointer;background:rgba(205,127,50,.08);border:1px dashed rgba(205,127,50,.3);padding:.55rem 1rem;font-size:.8rem;color:var(--m);">' +
+        '<input type="file" accept="image/*" multiple style="display:none;" onchange="blogAddFotos(' + i + ',this.files);this.value=\'\';">' +
+        '&#128247; Agregar fotos a esta seccion' +
+      '</label>' +
+      '</div>';
+  }).join('');
+}
+
+function publishBlog() {
+  if (!isAdminLogged) { toast('Solo el admin puede publicar'); return; }
+  if (_blogUploading > 0) { toast('Espera: hay fotos subiendo todavia'); return; }
+  var titulo = document.getElementById('blog-titulo').value.trim();
+  if (!titulo) { toast('Ingresa un titulo'); return; }
+  var sub = document.getElementById('blog-sub').value.trim();
+  var secs = blogSecs
+    .map(function(s){ return { texto: (s.texto || '').trim(), fotos: s.fotos.slice() }; })
+    .filter(function(s){ return s.texto || s.fotos.length; });
+  if (!secs.length) { toast('Agrega al menos una seccion con texto o fotos'); return; }
+  var cover = null;
+  for (var i = 0; i < secs.length && !cover; i++) if (secs[i].fotos.length) cover = secs[i].fotos[0];
+  if (!cover) { toast('Subi al menos una foto'); return; }
+  var item = {
+    titulo: titulo,
+    sub: sub,
+    cover: cover,
+    fotoCount: secs.reduce(function(n, s){ return n + s.fotos.length; }, 0),
+    secciones: secs,
+    fecha: new Date().toLocaleDateString('es-AR', {day:'numeric',month:'long',year:'numeric'}),
+    createdAt: new Date().toISOString()
+  };
+  var btn = document.getElementById('blog-publish-btn');
+  if (btn) btn.disabled = true;
+  db.collection('blogs').add(item).then(function() {
+    if (btn) btn.disabled = false;
+    toast('Blogsito publicado! 🎉');
+    document.getElementById('blog-titulo').value = '';
+    document.getElementById('blog-sub').value = '';
+    blogSecs = [];
+    blogRenderSecs();
+    loadAndRenderBlogs();
+  }).catch(function(e) {
+    if (btn) btn.disabled = false;
+    console.error(e);
+    toast('Error al publicar el blogsito');
+  });
+}
+
+function renderBlogs() {
+  var form = document.getElementById('blog-admin-form');
+  if (form) form.style.display = isAdminLogged ? 'block' : 'none';
+  if (isAdminLogged && !blogSecs.length) blogAddSec();
+  else blogRenderSecs();
+  loadAndRenderBlogs();
+}
+
+function loadAndRenderBlogs() {
+  db.collection('blogs').orderBy('createdAt','desc').get().then(function(snap) {
+    _blogsCache = [];
+    snap.forEach(function(d){ _blogsCache.push(Object.assign({ id: d.id }, d.data())); });
+    blogRenderGrid();
+  }).catch(function(e) { console.error(e); blogRenderGrid(); });
+}
+
+function blogRenderGrid() {
+  var grid = document.getElementById('blog-grid');
+  if (!grid) return;
+  if (!_blogsCache.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3.5rem 1rem;color:var(--muted);">' +
+      '<div style="font-size:2.2rem;margin-bottom:.6rem;">&#128221;</div>' +
+      '<div style="font-size:.95rem;line-height:1.6;">Todavia no hay blogsitos.<br>Muy pronto vas a poder leer las historias de los autos que pasan por el taller.</div></div>';
+    return;
+  }
+  grid.innerHTML = _blogsCache.map(function(b) {
+    var del = isAdminLogged
+      ? '<button onclick="event.stopPropagation();deleteBlog(\'' + b.id + '\')" style="position:absolute;top:.7rem;left:.7rem;z-index:2;background:rgba(224,60,60,.9);border:none;color:#fff;font-size:.65rem;font-weight:700;padding:.3rem .6rem;cursor:pointer;">Borrar</button>'
+      : '';
+    return '<div class="blog-card" onclick="openBlogPost(\'' + b.id + '\')">' +
+      del +
+      '<div class="blog-card-count">&#128247; ' + (b.fotoCount || 0) + '</div>' +
+      '<div class="blog-card-img"><img src="' + b.cover + '" alt="' + blogEsc(b.titulo) + '" loading="lazy"></div>' +
+      '<div class="blog-card-info">' +
+        '<div class="blog-card-date">' + blogEsc(b.fecha || '') + '</div>' +
+        '<div class="blog-card-title">' + blogEsc(b.titulo) + '</div>' +
+        (b.sub ? '<div class="blog-card-sub">' + blogEsc(b.sub) + '</div>' : '') +
+      '</div>' +
+      '</div>';
+  }).join('');
+}
+
+function deleteBlog(id) {
+  if (!isAdminLogged) return;
+  if (!confirm('Borrar este blogsito? No se puede deshacer.')) return;
+  db.collection('blogs').doc(id).delete().then(function() {
+    toast('Blogsito borrado');
+    loadAndRenderBlogs();
+  }).catch(function(e){ console.error(e); toast('Error al borrar'); });
+}
+
+function openBlogPost(id) {
+  var b = null;
+  for (var i = 0; i < _blogsCache.length; i++) if (_blogsCache[i].id === id) { b = _blogsCache[i]; break; }
+  if (!b) return;
+  var html = '<div class="blog-post-date">' + blogEsc(b.fecha || '') + ' &middot; SunshineCars Detail</div>' +
+    '<h1 class="blog-post-title">' + blogEsc(b.titulo) + '</h1>' +
+    (b.sub ? '<div class="blog-post-sub">' + blogEsc(b.sub) + '</div>' : '') +
+    (b.cover ? '<img class="blog-post-cover" src="' + b.cover + '" alt="' + blogEsc(b.titulo) + '">' : '');
+  (b.secciones || []).forEach(function(sec, si) {
+    html += '<div class="blog-sec">';
+    if (sec.texto) html += '<div class="blog-sec-text">' + blogEsc(sec.texto) + '</div>';
+    var fotos = (sec.fotos || []).slice();
+    // la portada ya se muestra arriba: no repetirla en la primera seccion
+    if (si === 0 && fotos.length && fotos[0] === b.cover) fotos.shift();
+    if (fotos.length) {
+      html += '<div class="blog-sec-fotos' + (fotos.length === 1 ? ' single' : '') + '">' +
+        fotos.map(function(u){ return '<img src="' + u + '" loading="lazy" onclick="blogViewPhoto(this.src)" alt="">'; }).join('') +
+        '</div>';
+    }
+    html += '</div>';
+  });
+  html += '<div style="text-align:center;margin-top:1.5rem;">' +
+    '<button class="btn" style="max-width:300px;" onclick="closeBlogPost();showView(\'booking\');window.scrollTo(0,0);">Quiero esto para mi auto</button>' +
+    '</div>';
+  document.getElementById('blog-post-content').innerHTML = html;
+  var ov = document.getElementById('blog-overlay');
+  ov.classList.add('open');
+  ov.scrollTop = 0;
+  document.body.style.overflow = 'hidden';
+}
+
+function closeBlogPost() {
+  document.getElementById('blog-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function blogViewPhoto(src) {
+  document.getElementById('blog-photo-viewer-img').src = src;
+  document.getElementById('blog-photo-viewer').classList.add('open');
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key !== 'Escape') return;
+  var viewer = document.getElementById('blog-photo-viewer');
+  if (viewer && viewer.classList.contains('open')) { viewer.classList.remove('open'); return; }
+  var ov = document.getElementById('blog-overlay');
+  if (ov && ov.classList.contains('open')) closeBlogPost();
+});
+
+// ==========================================
 // RESENAS DE GOOGLE (admin-managed)
 // ==========================================
 function starsHtml(n) {
@@ -8559,7 +8953,7 @@ firebase.auth().onAuthStateChanged(function(user) {
     }
     // Cliente: restaurar ultima vista visitada
     var lastView = localStorage.getItem('sc_last_view');
-    var validViews = ['booking','galeria','tienda','reviews','resenas'];
+    var validViews = ['booking','galeria','tienda','reviews','resenas','blogs'];
     if (lastView && validViews.indexOf(lastView) !== -1) {
       showView(lastView);
     }
@@ -8805,6 +9199,15 @@ loadVtvCard();
       <button class="sd-cta" id="sd-cta" onclick="reservarDesdeDetalle()"></button>
     </div>
   </div>
+</div>
+
+<!-- ======== BLOG: LECTURA + VISOR ======== -->
+<div id="blog-overlay">
+  <button class="blog-close-btn" onclick="closeBlogPost()">&#10005;</button>
+  <div class="blog-post" id="blog-post-content"></div>
+</div>
+<div id="blog-photo-viewer" onclick="this.classList.remove('open')">
+  <img id="blog-photo-viewer-img" src="" alt="Foto del blog">
 </div>
 
 <!-- ======== JUEGO SUNSHINE RUN ======== -->
