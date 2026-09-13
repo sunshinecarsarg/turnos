@@ -1344,8 +1344,12 @@ body.light-mode .ba-cap-d { color:#3a4a5c; }
   font-size:.95rem; line-height:1.65; color:rgba(224,225,226,.72);
 }
 .hero-pitch strong { color:var(--white); font-weight:600; }
+.hero-pitch-lead {
+  display:block; color:var(--white); font-weight:600;
+  font-size:1.05rem; line-height:1.5; margin-bottom:.45rem;
+}
 body.light-mode .hero-pitch { color:#3a4a5c; }
-body.light-mode .hero-pitch strong { color:#0d1b2a; }
+body.light-mode .hero-pitch strong, body.light-mode .hero-pitch-lead { color:#0d1b2a; }
 
 /* ======== LAVADO COMUN VS DETAILING ======== */
 .vs-wrap { padding:4rem 5% 1rem; max-width:1100px; margin:0 auto; }
@@ -1366,13 +1370,31 @@ body.light-mode .hero-pitch strong { color:#0d1b2a; }
   border-bottom:1px solid rgba(224,225,226,.1); color:var(--muted);
 }
 .vs-col.good .vs-col-t { color:var(--m); border-bottom-color:rgba(205,127,50,.28); }
-.vs-li { display:flex; gap:.7rem; align-items:flex-start; margin-bottom:.85rem; font-size:.86rem; line-height:1.55; }
+.vs-li { display:flex; gap:.7rem; align-items:flex-start; margin-bottom:1.15rem; font-size:.83rem; line-height:1.6; }
 .vs-li:last-child { margin-bottom:0; }
+.vs-li-t {
+  display:block; font-weight:700; font-size:.9rem;
+  letter-spacing:.3px; line-height:1.35; margin-bottom:.2rem;
+}
+.vs-col .vs-li-t { color:rgba(224,225,226,.82); }
+.vs-col.good .vs-li-t { color:var(--m); }
+body.light-mode .vs-col .vs-li-t { color:#2a3441; }
+body.light-mode .vs-col.good .vs-li-t { color:#a05a10; }
+/* cierre del bloque */
+.vs-closing {
+  text-align:center; margin:2.2rem auto 0; max-width:680px;
+  font-family:'JetBrains Mono',monospace; font-size:clamp(.95rem,2.4vw,1.18rem);
+  line-height:1.6; letter-spacing:.5px; color:var(--muted);
+  padding-top:1.6rem; border-top:1px solid rgba(205,127,50,.22);
+}
+.vs-closing span { color:var(--m); }
+body.light-mode .vs-closing { color:#3a4a5c; }
+body.light-mode .vs-closing span { color:#a05a10; }
 .vs-ico { flex-shrink:0; width:17px; height:17px; margin-top:.15rem; font-size:.7rem; font-weight:800;
   display:flex; align-items:center; justify-content:center; border-radius:50%; }
 .vs-col .vs-ico { background:rgba(224,225,226,.1); color:var(--muted); }
 .vs-col.good .vs-ico { background:var(--m); color:#0A1128; }
-.vs-col .vs-li { color:var(--muted); }
+.vs-col .vs-li { color:rgba(224,225,226,.68); }
 .vs-col.good .vs-li { color:rgba(224,225,226,.9); }
 body.light-mode .vs-col { background:#fff; border-color:rgba(0,0,0,.1); }
 body.light-mode .vs-col.good { background:linear-gradient(165deg,rgba(160,90,16,.08),#fff 65%); border-color:rgba(160,90,16,.4); }
@@ -1628,9 +1650,8 @@ body.light-mode .blog-close-btn:hover { color:#fff; }
       <h1 class="bk-title">AGENDÁ TU<br><span>DETAILING</span></h1>
       <p class="bk-sub">Detailing profesional en La Plata</p>
       <p class="hero-pitch">
-        No es un lavado m&aacute;s: es devolverle a tu auto el brillo que ten&iacute;a de cero.
-        Trabajamos con <strong>productos de grado profesional</strong> y t&eacute;cnica de taller,
-        con <strong>garant&iacute;a por escrito</strong> en cada trabajo que entregamos.
+        <span class="hero-pitch-lead">No es un lavado m&aacute;s. Es recuperar la esencia de tu veh&iacute;culo.</span>
+        Productos de grado profesional, t&eacute;cnica de taller y atenci&oacute;n al detalle en cada superficie.
       </p>
 
       <!-- BARRA DE UBICACION DESTACADA -->
@@ -10116,23 +10137,55 @@ loadAntesDespues();
 
     <div class="vs-col">
       <div class="vs-col-t">Un lavado com&uacute;n</div>
-      <div class="vs-li"><span class="vs-ico">&times;</span><span>Saca el polvo, pero la pintura sigue <strong>opaca y sin profundidad</strong>.</span></div>
-      <div class="vs-li"><span class="vs-ico">&times;</span><span>Las <strong>marcas de remolino</strong> (swirls) y microrayas siguen ah&iacute;: se ven apenas les pega el sol.</span></div>
-      <div class="vs-li"><span class="vs-ico">&times;</span><span>La <strong>savia, el alquitr&aacute;n y las manchas de lluvia</strong> quedan pegados: el shampoo no los saca.</span></div>
-      <div class="vs-li"><span class="vs-ico">&times;</span><span>Pl&aacute;sticos y gomas quedan <strong>resecos y grises</strong>, y el interior con olor a encerrado.</span></div>
-      <div class="vs-li"><span class="vs-ico">&times;</span><span>El brillo <strong>dura dos d&iacute;as</strong>: sin protecci&oacute;n, la suciedad vuelve a pegarse enseguida.</span></div>
+      <div class="vs-li"><span class="vs-ico">&times;</span><span>
+        <span class="vs-li-t">Limpieza superficial</span>
+        Elimina polvo y suciedad visible, pero no remueve la contaminaci&oacute;n adherida ni recupera la terminaci&oacute;n de la pintura.
+      </span></div>
+      <div class="vs-li"><span class="vs-ico">&times;</span><span>
+        <span class="vs-li-t">La pintura sigue contaminada</span>
+        Savia, alquitr&aacute;n, residuos de insectos, contaminaci&oacute;n ambiental y dep&oacute;sitos minerales pueden permanecer adheridos despu&eacute;s del lavado.
+      </span></div>
+      <div class="vs-li"><span class="vs-ico">&times;</span><span>
+        <span class="vs-li-t">Las imperfecciones permanecen</span>
+        Swirls, microrayas y marcas de lavado siguen presentes y se hacen especialmente visibles bajo la luz directa.
+      </span></div>
+      <div class="vs-li"><span class="vs-ico">&times;</span><span>
+        <span class="vs-li-t">Sin correcci&oacute;n ni protecci&oacute;n</span>
+        El lavado limpia la superficie, pero no corrige defectos ni proporciona una protecci&oacute;n duradera.
+      </span></div>
+      <div class="vs-li"><span class="vs-ico">&times;</span><span>
+        <span class="vs-li-t">El resultado dura poco</span>
+        Sin una protecci&oacute;n adecuada, la suciedad vuelve a adherirse con mayor facilidad y el acabado pierde r&aacute;pidamente su aspecto reci&eacute;n lavado.
+      </span></div>
     </div>
 
     <div class="vs-col good">
       <div class="vs-col-t">Un detailing real</div>
-      <div class="vs-li"><span class="vs-ico">&#10003;</span><span><strong>Descontaminaci&oacute;n profunda:</strong> sacamos lo que el lavado deja, hasta que la pintura queda lisa al tacto.</span></div>
-      <div class="vs-li"><span class="vs-ico">&#10003;</span><span><strong>Correcci&oacute;n de pintura:</strong> pulimos y eliminamos los swirls. El color vuelve a tener profundidad, no un brillo de aerosol.</span></div>
-      <div class="vs-li"><span class="vs-ico">&#10003;</span><span><strong>Tratamiento cer&aacute;mico:</strong> una capa que repele agua y suciedad, y protege la pintura durante meses.</span></div>
-      <div class="vs-li"><span class="vs-ico">&#10003;</span><span><strong>Detailing interior:</strong> tapizados, pl&aacute;sticos y cueros limpios en profundidad, hidratados y protegidos.</span></div>
-      <div class="vs-li"><span class="vs-ico">&#10003;</span><span><strong>&Oacute;pticas pulidas y motor detallado:</strong> los detalles que hacen que el auto se vea cuidado de verdad.</span></div>
+      <div class="vs-li"><span class="vs-ico">&#10003;</span><span>
+        <span class="vs-li-t">Descontaminaci&oacute;n profunda</span>
+        Removemos la contaminaci&oacute;n que un lavado convencional no puede eliminar, dejando la pintura limpia y suave al tacto.
+      </span></div>
+      <div class="vs-li"><span class="vs-ico">&#10003;</span><span>
+        <span class="vs-li-t">Correcci&oacute;n de pintura</span>
+        Mediante pulido profesional, reducimos swirls, microrayas y otras imperfecciones para recuperar profundidad, claridad y brillo.
+      </span></div>
+      <div class="vs-li"><span class="vs-ico">&#10003;</span><span>
+        <span class="vs-li-t">Protecci&oacute;n de superficies</span>
+        Aplicamos selladores y tratamientos espec&iacute;ficos que aportan repelencia al agua y ayudan a proteger la superficie frente a contaminantes ambientales.
+      </span></div>
+      <div class="vs-li"><span class="vs-ico">&#10003;</span><span>
+        <span class="vs-li-t">Detailing interior</span>
+        Limpiamos en profundidad tapizados, pl&aacute;sticos y cueros, utilizando productos espec&iacute;ficos para cada material.
+      </span></div>
+      <div class="vs-li"><span class="vs-ico">&#10003;</span><span>
+        <span class="vs-li-t">El detalle hace la diferencia</span>
+        &Oacute;pticas, pl&aacute;sticos, gomas, llantas, vano motor y cada sector del veh&iacute;culo reciben el tratamiento que corresponde.
+      </span></div>
     </div>
 
   </div>
+
+  <p class="vs-closing">Un lavado limpia. <span>El detailing transforma, corrige y protege.</span></p>
 </div>
 
 <!-- ======== ANTES Y DESPUES ======== -->
