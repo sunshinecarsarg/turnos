@@ -1418,6 +1418,48 @@ body.light-mode .vs-col .vs-li { color:#4a5a6c; }
 body.light-mode .why-card { background:#fff; border-color:rgba(0,0,0,.1); }
 body.light-mode .why-d { color:#3a4a5c; }
 
+/* ======== MARCAS QUE USAMOS ======== */
+.mk-wrap { padding:3rem 5% 1rem; max-width:1100px; margin:0 auto; display:none; }
+.mk-grid {
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(155px,1fr));
+  gap:1px; background:rgba(205,127,50,.13); border:1px solid rgba(205,127,50,.13);
+}
+.mk-item {
+  background:var(--black); display:flex; align-items:center; justify-content:center;
+  padding:1.5rem 1.1rem; min-height:112px; position:relative;
+  transition:background .3s; text-decoration:none;
+}
+.mk-item:hover { background:rgba(205,127,50,.06); }
+.mk-item img {
+  max-width:100%; max-height:56px; object-fit:contain; display:block;
+  /* silueta blanca: unifica logos de cualquier color */
+  filter:brightness(0) invert(1); opacity:.72;
+  transition:filter .35s, opacity .35s, transform .35s;
+}
+.mk-item:hover img { filter:none; opacity:1; transform:scale(1.06); }
+/* logos que se ven mejor con su color original */
+.mk-item.color img { filter:none; opacity:.9; }
+.mk-item.color:hover img { opacity:1; }
+.mk-name {
+  position:absolute; bottom:.45rem; left:0; right:0; text-align:center;
+  font-size:.58rem; letter-spacing:1.5px; text-transform:uppercase;
+  color:var(--muted); opacity:0; transition:opacity .3s; pointer-events:none;
+}
+.mk-item:hover .mk-name { opacity:1; }
+body.light-mode .mk-item { background:#fff; }
+body.light-mode .mk-item img { filter:brightness(0); opacity:.62; }
+body.light-mode .mk-item:hover img { filter:none; opacity:1; }
+body.light-mode .mk-item.color img { filter:none; opacity:.9; }
+/* admin */
+.mk-admin-row {
+  display:flex; align-items:center; gap:.8rem; padding:.7rem 1rem; margin-bottom:.5rem;
+  background:var(--g1); border:1px solid rgba(205,127,50,.12); flex-wrap:wrap;
+}
+.mk-admin-row img {
+  width:74px; height:40px; object-fit:contain; background:rgba(255,255,255,.06);
+  border:1px solid rgba(205,127,50,.25); padding:.2rem;
+}
+
 /* ======== COTIZA POR FOTOS ======== */
 .pq-wrap { padding:3.5rem 5%; max-width:1100px; margin:0 auto; }
 .pq-box {
@@ -2369,6 +2411,7 @@ body.light-mode .blog-close-btn:hover { color:#fff; }
         </button>
         <button class="fbtn" id="svcs-toggle-btn" onclick="toggleSvcsAdmin()" style="border-color:rgba(205,127,50,.4);color:#CD7F32;">Servicios</button>
         <button class="fbtn" id="alianzas-toggle-btn" onclick="toggleAlianzasAdmin()" style="border-color:rgba(205,127,50,.4);color:#CD7F32;">&#129309; Alianzas</button>
+        <button class="fbtn" id="marcas-toggle-btn" onclick="toggleMarcasAdmin()" style="border-color:rgba(205,127,50,.4);color:#CD7F32;">&#127991; Marcas</button>
         <button class="fbtn" onclick="toggleVtvEdit()" style="border-color:rgba(205,127,50,.3);color:rgba(205,127,50,.7);">Card VTV</button>
         <button class="fbtn" onclick="toggleOrdenIngreso()" style="border-color:rgba(0,200,117,.4);color:#00c875;">&#128203; Orden de Ingreso</button>
         <button class="fbtn" onclick="toggleCupones()" style="border-color:rgba(255,193,7,.4);color:#ffc107;">&#127915; Cupones</button>
@@ -2401,6 +2444,39 @@ body.light-mode .blog-close-btn:hover { color:#fff; }
           <img id="al-img-prev" style="display:none; width:160px; height:60px; object-fit:cover; border:1px solid rgba(205,127,50,.35);">
         </div>
         <button class="btn" onclick="publishAlianza()">Publicar anuncio</button>
+      </div>
+    </div>
+
+    <!-- PANEL MARCAS DE PRODUCTOS -->
+    <div id="marcas-admin-panel" style="display:none; background:var(--g1); border:1px solid rgba(205,127,50,.25); border-radius:0; padding:1.5rem; margin-bottom:1.5rem;">
+      <div style="font-weight:800; color:var(--m); margin-bottom:.3rem;">&#127991; Marcas de productos que us&aacute;s</div>
+      <div style="font-size:.72rem;color:var(--muted);margin-bottom:1rem;line-height:1.6;">
+        Se muestran en la portada, debajo de &quot;Por qu&eacute; elegirnos&quot;. Cargas las que us&aacute;s y
+        las que dejes de usar las pausas o las borras.<br>
+        <strong style="color:var(--white);">Logo ideal:</strong> PNG con fondo transparente. Por defecto se
+        muestran en blanco (queda prolijo y parejo) y al pasar el mouse aparece el color real.
+        Si un logo se ve mal as&iacute;, marc&aacute; &quot;color original&quot;.
+      </div>
+
+      <div id="marcas-list-admin" style="margin-bottom:1.5rem;"></div>
+
+      <div style="border-top:1px solid rgba(205,127,50,.15); padding-top:1rem;">
+        <div style="font-weight:700; font-size:.85rem; margin-bottom:.8rem;">Nueva marca</div>
+        <div class="fg" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:.8rem; margin-bottom:.8rem;">
+          <div><label class="flabel">Nombre *</label><input type="text" class="finput" id="mk-nombre" maxlength="40" placeholder="Ej: Meguiar's"></div>
+          <div><label class="flabel">Link <span style="font-weight:400;color:var(--muted)">(opcional)</span></label><input type="text" class="finput" id="mk-link" maxlength="200" placeholder="https://..."></div>
+        </div>
+        <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom:1rem;">
+          <label style="cursor:pointer; background:rgba(205,127,50,.08); border:1px dashed rgba(205,127,50,.35); padding:.6rem 1.2rem; font-size:.8rem; color:var(--m);">
+            <input type="file" accept="image/*" style="display:none;" onchange="mkPickImg(this.files); this.value='';">
+            &#128444;&#65039; Elegir logo
+          </label>
+          <img id="mk-img-prev" style="display:none; width:110px; height:46px; object-fit:contain; background:rgba(255,255,255,.06); border:1px solid rgba(205,127,50,.3); padding:.2rem;">
+          <label style="display:flex; align-items:center; gap:.45rem; font-size:.8rem; cursor:pointer;">
+            <input type="checkbox" id="mk-color"> Mostrar en color original
+          </label>
+        </div>
+        <button class="btn" onclick="publishMarca()" style="max-width:200px;">Agregar marca</button>
       </div>
     </div>
 
@@ -9979,6 +10055,151 @@ function renderAlianzasAdminList() {
 
 document.addEventListener('DOMContentLoaded', loadAlianzas);
 
+// ==========================================
+// MARCAS DE PRODUCTOS QUE USAMOS
+// ==========================================
+var MARCAS = [];
+var mkImgData = null;
+
+function mkEsc(s) {
+  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function loadMarcas() {
+  db.collection('marcas').orderBy('createdAt', 'asc').get().then(function(snap) {
+    MARCAS = [];
+    snap.forEach(function(d){ MARCAS.push(Object.assign({ id: d.id }, d.data())); });
+    renderMarcasPublic();
+    renderMarcasAdminList();
+  }).catch(function(e){ console.error('Error cargando marcas:', e); });
+}
+
+function renderMarcasPublic() {
+  var wrap = document.getElementById('marcas-wrap');
+  var grid = document.getElementById('marcas-grid');
+  if (!wrap || !grid) return;
+  var activas = MARCAS.filter(function(m){ return m.activo !== false; });
+  if (!activas.length) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  grid.innerHTML = activas.map(function(m) {
+    var cls = 'mk-item' + (m.color ? ' color' : '');
+    var inner = '<img src="' + m.logo + '" alt="' + mkEsc(m.nombre) + '" loading="lazy">' +
+                '<span class="mk-name">' + mkEsc(m.nombre) + '</span>';
+    return m.link
+      ? '<a class="' + cls + '" href="' + mkEsc(m.link) + '" target="_blank" rel="noopener">' + inner + '</a>'
+      : '<div class="' + cls + '">' + inner + '</div>';
+  }).join('');
+}
+
+// ── ADMIN ──
+function toggleMarcasAdmin() {
+  var el = document.getElementById('marcas-admin-panel');
+  var btn = document.getElementById('marcas-toggle-btn');
+  if (!el) return;
+  if (el.style.display === 'none') {
+    el.style.display = 'block';
+    if (btn) btn.innerHTML = 'Ocultar marcas';
+    renderMarcasAdminList();
+  } else {
+    el.style.display = 'none';
+    if (btn) btn.innerHTML = '&#127991; Marcas';
+  }
+}
+
+function mkPickImg(files) {
+  if (!files || !files.length) return;
+  var f = files[0];
+  if (!f.type || f.type.indexOf('image/') !== 0) { toast('Elegi una imagen'); return; }
+  // los logos PNG con transparencia se mantienen como PNG (comprimir a JPG les pone fondo negro)
+  if (f.type === 'image/png' || f.type === 'image/svg+xml' || f.type === 'image/webp') {
+    if (f.size > 300000) { toast('Logo muy pesado. Max 300KB para PNG.'); return; }
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      mkImgData = ev.target.result;
+      var prev = document.getElementById('mk-img-prev');
+      if (prev) { prev.src = mkImgData; prev.style.display = 'block'; }
+      toast('Logo listo');
+    };
+    reader.readAsDataURL(f);
+  } else {
+    compressImageCustom(f, 600, 120000, function(data) {
+      mkImgData = data;
+      var prev = document.getElementById('mk-img-prev');
+      if (prev) { prev.src = data; prev.style.display = 'block'; }
+      toast('Logo listo');
+    });
+  }
+}
+
+function publishMarca() {
+  if (!isAdminLogged) { toast('Solo el admin'); return; }
+  if (!mkImgData) { toast('Subi el logo de la marca'); return; }
+  var nombre = (document.getElementById('mk-nombre').value || '').trim();
+  if (!nombre) { toast('Ingresa el nombre de la marca'); return; }
+  var link = (document.getElementById('mk-link').value || '').trim();
+  if (link && !/^https?:\/\//i.test(link)) link = 'https://' + link;
+  db.collection('marcas').add({
+    nombre: nombre,
+    link: link,
+    logo: mkImgData,
+    color: document.getElementById('mk-color').checked,
+    activo: true,
+    createdAt: new Date().toISOString()
+  }).then(function() {
+    toast('Marca agregada!');
+    mkImgData = null;
+    document.getElementById('mk-nombre').value = '';
+    document.getElementById('mk-link').value = '';
+    document.getElementById('mk-color').checked = false;
+    var prev = document.getElementById('mk-img-prev');
+    if (prev) { prev.style.display = 'none'; prev.src = ''; }
+    loadMarcas();
+  }).catch(function(e){ console.error(e); toast('Error al agregar la marca'); });
+}
+
+function toggleMarcaActiva(id, activo) {
+  db.collection('marcas').doc(id).update({ activo: !activo }).then(loadMarcas)
+    .catch(function(e){ console.error(e); toast('Error al actualizar'); });
+}
+
+function toggleMarcaColor(id, color) {
+  db.collection('marcas').doc(id).update({ color: !color }).then(loadMarcas)
+    .catch(function(e){ console.error(e); toast('Error al actualizar'); });
+}
+
+function deleteMarca(id) {
+  if (!confirm('Eliminar esta marca?')) return;
+  db.collection('marcas').doc(id).delete().then(function() {
+    toast('Marca eliminada');
+    loadMarcas();
+  }).catch(function(e){ console.error(e); toast('Error al eliminar'); });
+}
+
+function renderMarcasAdminList() {
+  var list = document.getElementById('marcas-list-admin');
+  if (!list) return;
+  if (!MARCAS.length) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:.85rem;padding:1rem 0;">Todavia no cargaste ninguna marca. Agrega la primera abajo.</div>';
+    return;
+  }
+  list.innerHTML = MARCAS.map(function(m) {
+    var activo = m.activo !== false;
+    var color = !!m.color;
+    return '<div class="mk-admin-row">' +
+      '<img src="' + m.logo + '" alt="' + mkEsc(m.nombre) + '">' +
+      '<div style="flex:1;min-width:130px;">' +
+        '<div style="font-weight:700;font-size:.85rem;">' + mkEsc(m.nombre) + '</div>' +
+        (m.link ? '<div style="font-size:.68rem;color:var(--muted);word-break:break-all;">' + mkEsc(m.link) + '</div>' : '') +
+      '</div>' +
+      '<button class="fbtn" onclick="toggleMarcaColor(\'' + m.id + '\',' + color + ')" style="font-size:.7rem;' + (color ? 'border-color:rgba(205,127,50,.5);color:var(--m);' : '') + '">' + (color ? 'Color original' : 'Blanco') + '</button>' +
+      '<button class="fbtn" onclick="toggleMarcaActiva(\'' + m.id + '\',' + activo + ')" style="' + (activo ? 'border-color:rgba(0,200,117,.4);color:#00c875;' : 'border-color:rgba(255,255,255,.2);color:var(--muted);') + '">' + (activo ? 'Activa' : 'Pausada') + '</button>' +
+      '<button class="fbtn" onclick="deleteMarca(\'' + m.id + '\')" style="border-color:rgba(224,60,60,.4);color:#e03c3c;">Eliminar</button>' +
+    '</div>';
+  }).join('');
+}
+
+document.addEventListener('DOMContentLoaded', loadMarcas);
+
 // Controles touch
 (function() {
   document.addEventListener('DOMContentLoaded', function() {
@@ -10260,16 +10481,6 @@ loadAntesDespues();
     </div>
 
     <div class="why-card">
-      <span class="why-ico">&#128220;</span>
-      <div class="why-t">Garant&iacute;a por escrito</div>
-      <div class="why-d">
-        Cada trabajo se entrega con su orden firmada, donde queda asentado
-        qu&eacute; se hizo y con qu&eacute; protecci&oacute;n. Si algo no qued&oacute; como
-        acordamos, lo resolvemos. Sin letra chica.
-      </div>
-    </div>
-
-    <div class="why-card">
       <span class="why-ico">&#128100;</span>
       <div class="why-t">Atenci&oacute;n personalizada</div>
       <div class="why-d">
@@ -10280,6 +10491,16 @@ loadAntesDespues();
     </div>
 
   </div>
+</div>
+
+<!-- ======== MARCAS QUE USAMOS ======== -->
+<div class="mk-wrap" id="marcas-wrap">
+  <div class="vs-head" style="margin-bottom:1.8rem;">
+    <div class="badge" style="margin-bottom:1rem;">Con qu&eacute; trabajamos</div>
+    <h2 class="vs-title">MARCAS QUE <span>USAMOS</span></h2>
+    <p class="vs-sub">Productos de grado profesional, elegidos uno por uno seg&uacute;n lo que pide cada superficie.</p>
+  </div>
+  <div class="mk-grid" id="marcas-grid"></div>
 </div>
 
 <!-- ======== COTIZA POR FOTOS ======== -->
