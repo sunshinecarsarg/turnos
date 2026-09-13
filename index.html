@@ -1265,13 +1265,15 @@ nav {
 #hero-video {
   position:absolute; top:0; left:0; right:0; height:100vh;
   width:100%; object-fit:cover; display:none;
-  opacity:.20; filter:grayscale(.55) contrast(1.12) brightness(.75);
+  /* la opacidad final la pone el JS al estar listo, con fundido suave */
+  opacity:0; transition:opacity .9s ease;
+  filter:grayscale(.55) contrast(1.12) brightness(.75);
   mask-image:linear-gradient(to bottom, black 0%, rgba(0,0,0,.55) 55%, transparent 95%);
   -webkit-mask-image:linear-gradient(to bottom, black 0%, rgba(0,0,0,.55) 55%, transparent 95%);
   pointer-events:none; z-index:0;
 }
 #hero-video.on { display:block; }
-body.light-mode #hero-video { opacity:.12; filter:grayscale(.4) contrast(1.05) brightness(1.05); }
+body.light-mode #hero-video { filter:grayscale(.4) contrast(1.05) brightness(1.05); }
 @media (prefers-reduced-motion: reduce) { #hero-video { display:none !important; } }
 
 /* ======== ANTES Y DESPUES (slider) ======== */
@@ -6884,6 +6886,7 @@ function toggleTheme() {
     if (btn) btn.textContent = '☀️';
   }
   try { localStorage.setItem('sc_theme', isDark ? 'dark' : 'light'); } catch(e){}
+  if (typeof hvRefrescarOpacidad === 'function') hvRefrescarOpacidad();
 }
 
 // Load saved theme
@@ -8442,6 +8445,26 @@ document.addEventListener('keydown', function(e) {
 // ==========================================
 var _heroVideoCfg = null;
 
+// Cloudinary puede transcodificar al vuelo: el MP4 original de 9 MB baja a ~0.3 MB
+// con la misma resolucion. f_auto elige el mejor formato para cada navegador
+// (WebM/VP9 en Chrome y Android, MP4 en Safari/iPhone).
+function cloudinaryVideoOpt(url, ancho) {
+  if (!url || url.indexOf('res.cloudinary.com') === -1) return url;
+  var i = url.indexOf('/upload/');
+  if (i === -1) return url;
+  var resto = url.slice(i + 8);
+  // si ya trae transformaciones (no arranca con la version vNNN) se deja como esta
+  if (!/^v\d+\//.test(resto)) return url;
+  return url.slice(0, i + 8) + 'f_auto,q_auto:eco,w_' + (ancho || 1280) + ',c_limit/' + resto;
+}
+
+// Imagen del primer fotograma, para mostrar algo al instante mientras carga
+function cloudinaryVideoPoster(url, ancho) {
+  var opt = cloudinaryVideoOpt(url, ancho);
+  if (opt.indexOf('res.cloudinary.com') === -1) return '';
+  return opt.replace(/\.(mp4|webm|mov|m4v)(\?.*)?$/i, '.jpg');
+}
+
 function loadHeroVideo() {
   db.collection('config').doc('herovideo').get().then(function(d) {
     _heroVideoCfg = d.exists ? d.data() : null;
@@ -8449,31 +8472,70 @@ function loadHeroVideo() {
   }).catch(function(e){ console.error('Error cargando video del hero:', e); });
 }
 
+// En modo claro el video tapa mas el texto: se atenua un poco mas
+function hvOpacidadDestino() {
+  var base = (_heroVideoCfg && _heroVideoCfg.opacidad) ? _heroVideoCfg.opacidad : 0.20;
+  return document.body.classList.contains('light-mode') ? (base * 0.6).toFixed(3) : base;
+}
+
+// Al cambiar de tema se reajusta sin recargar el video
+function hvRefrescarOpacidad() {
+  var v = document.getElementById('hero-video');
+  if (v && v.classList.contains('on')) v.style.opacity = hvOpacidadDestino();
+}
+
 function applyHeroVideo() {
   var v = document.getElementById('hero-video');
   if (!v) return;
   var cfg = _heroVideoCfg;
+  var ph = document.querySelector('.hero-photo');
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (!cfg || !cfg.url || cfg.activo === false || reduce) {
+
+  // Conexion lenta o "ahorro de datos" activado: ni se descarga el video
+  var con = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  var conexionPobre = !!(con && (con.saveData || /^(slow-)?2g$/.test(con.effectiveType || '')));
+
+  function mostrarFoto() {
     v.classList.remove('on');
+    v.style.opacity = '0';
     v.removeAttribute('src');
     try { v.load(); } catch(e) {}
-    var ph0 = document.querySelector('.hero-photo');
-    if (ph0) ph0.style.display = '';
-    return;
+    if (ph) ph.style.display = '';
   }
-  if (v.getAttribute('src') !== cfg.url) {
-    v.setAttribute('src', cfg.url);
+
+  if (!cfg || !cfg.url || cfg.activo === false || reduce || conexionPobre) { mostrarFoto(); return; }
+
+  // en celular alcanza con menos ancho: menos datos todavia
+  var ancho = (window.innerWidth && window.innerWidth <= 768) ? 720 : 1280;
+  var src = cloudinaryVideoOpt(cfg.url, ancho);
+  var destino = hvOpacidadDestino();
+
+  if (v.getAttribute('src') !== src) {
+    var poster = cloudinaryVideoPoster(cfg.url, ancho);
+    if (poster) v.setAttribute('poster', poster);
+    v.setAttribute('src', src);
     v.preload = 'auto';
+    v.style.opacity = '0';
     try { v.load(); } catch(e) {}
   }
-  if (cfg.opacidad) v.style.opacity = cfg.opacidad;
-  v.classList.add('on');
-  // la foto fija y el video juntos ensucian la imagen: dejamos solo el video
-  var ph = document.querySelector('.hero-photo');
-  if (ph) ph.style.display = 'none';
-  var p = v.play();
-  if (p && p.catch) p.catch(function(){ /* autoplay bloqueado: queda el primer frame */ });
+
+  // hasta que el video no pueda reproducirse, se mantiene la foto de siempre:
+  // asi nunca queda la portada vacia mientras carga
+  function alEstarListo() {
+    v.classList.add('on');
+    if (ph) ph.style.display = 'none';
+    // forzar reflow para que la transicion de opacidad se vea
+    void v.offsetHeight;
+    v.style.opacity = destino;
+    var p = v.play();
+    if (p && p.catch) p.catch(function(){ /* autoplay bloqueado: queda el poster */ });
+  }
+
+  if (v.readyState >= 3) alEstarListo();
+  else {
+    v.addEventListener('canplay', alEstarListo, { once: true });
+    v.addEventListener('error', mostrarFoto, { once: true });
+  }
 }
 
 // Pausar el video cuando no se ve (bateria y datos)
