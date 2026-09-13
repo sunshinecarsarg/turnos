@@ -1261,6 +1261,114 @@ nav {
 /* Chips y tags en small caps con aire */
 .svc-tag { letter-spacing:.6px; }
 
+/* ======== PITCH DEL HERO ======== */
+.hero-pitch {
+  max-width:560px; margin:1.1rem auto 0;
+  font-size:.95rem; line-height:1.65; color:rgba(224,225,226,.72);
+}
+.hero-pitch strong { color:var(--white); font-weight:600; }
+body.light-mode .hero-pitch { color:#3a4a5c; }
+body.light-mode .hero-pitch strong { color:#0d1b2a; }
+
+/* ======== LAVADO COMUN VS DETAILING ======== */
+.vs-wrap { padding:4rem 5% 1rem; max-width:1100px; margin:0 auto; }
+.vs-head { text-align:center; margin-bottom:2.2rem; }
+.vs-title {
+  font-family:'JetBrains Mono',monospace; font-size:clamp(1.5rem,4vw,2.2rem);
+  letter-spacing:1px; margin-bottom:.6rem; line-height:1.2;
+}
+.vs-title span { color:var(--m); }
+.vs-sub { color:var(--muted); font-size:.9rem; line-height:1.6; max-width:620px; margin:0 auto; }
+.vs-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; }
+@media(max-width:760px){ .vs-grid { grid-template-columns:1fr; } }
+.vs-col { border:1px solid rgba(224,225,226,.12); background:var(--g1); padding:1.6rem 1.5rem; }
+.vs-col.good { border-color:rgba(205,127,50,.45); background:linear-gradient(165deg, rgba(205,127,50,.09), var(--g1) 65%); }
+.vs-col-t {
+  font-family:'JetBrains Mono',monospace; font-size:.95rem; letter-spacing:2px;
+  text-transform:uppercase; margin-bottom:1.1rem; padding-bottom:.7rem;
+  border-bottom:1px solid rgba(224,225,226,.1); color:var(--muted);
+}
+.vs-col.good .vs-col-t { color:var(--m); border-bottom-color:rgba(205,127,50,.28); }
+.vs-li { display:flex; gap:.7rem; align-items:flex-start; margin-bottom:.85rem; font-size:.86rem; line-height:1.55; }
+.vs-li:last-child { margin-bottom:0; }
+.vs-ico { flex-shrink:0; width:17px; height:17px; margin-top:.15rem; font-size:.7rem; font-weight:800;
+  display:flex; align-items:center; justify-content:center; border-radius:50%; }
+.vs-col .vs-ico { background:rgba(224,225,226,.1); color:var(--muted); }
+.vs-col.good .vs-ico { background:var(--m); color:#0A1128; }
+.vs-col .vs-li { color:var(--muted); }
+.vs-col.good .vs-li { color:rgba(224,225,226,.9); }
+body.light-mode .vs-col { background:#fff; border-color:rgba(0,0,0,.1); }
+body.light-mode .vs-col.good { background:linear-gradient(165deg,rgba(160,90,16,.08),#fff 65%); border-color:rgba(160,90,16,.4); }
+body.light-mode .vs-col.good .vs-li { color:#1a2433; }
+body.light-mode .vs-col .vs-li { color:#4a5a6c; }
+
+/* ======== POR QUE ELEGIRNOS ======== */
+.why-wrap { padding:3rem 5% 1rem; max-width:1100px; margin:0 auto; }
+.why-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:1.2rem; }
+.why-card {
+  border:1px solid rgba(205,127,50,.2); background:var(--g1);
+  padding:1.7rem 1.5rem; transition:transform .3s, border-color .3s, box-shadow .3s;
+}
+.why-card:hover { transform:translateY(-4px); border-color:rgba(205,127,50,.5); box-shadow:0 12px 34px rgba(205,127,50,.15); }
+.why-ico { font-size:1.7rem; margin-bottom:.8rem; display:block; }
+.why-t {
+  font-family:'JetBrains Mono',monospace; font-size:.92rem; letter-spacing:1.5px;
+  text-transform:uppercase; color:var(--m); margin-bottom:.6rem; line-height:1.3;
+}
+.why-d { font-size:.85rem; line-height:1.65; color:var(--muted); }
+body.light-mode .why-card { background:#fff; border-color:rgba(0,0,0,.1); }
+body.light-mode .why-d { color:#3a4a5c; }
+
+/* ======== COTIZA POR FOTOS ======== */
+.pq-wrap { padding:3.5rem 5%; max-width:1100px; margin:0 auto; }
+.pq-box {
+  position:relative; overflow:hidden; text-align:center;
+  border:1px solid rgba(37,211,102,.35);
+  background:linear-gradient(150deg, rgba(37,211,102,.08) 0%, var(--g1) 55%, rgba(205,127,50,.07) 100%);
+  padding:3rem 2rem;
+}
+.pq-box::before {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:radial-gradient(ellipse 60% 70% at 50% 0%, rgba(37,211,102,.1) 0%, transparent 70%);
+}
+.pq-inner { position:relative; z-index:1; }
+.pq-badge {
+  display:inline-block; font-size:.62rem; letter-spacing:2.5px; text-transform:uppercase;
+  background:rgba(37,211,102,.12); border:1px solid rgba(37,211,102,.35);
+  color:#25D366; padding:.3rem .9rem; font-weight:700; margin-bottom:1.2rem;
+}
+.pq-title {
+  font-family:'JetBrains Mono',monospace; font-size:clamp(1.5rem,4.2vw,2.3rem);
+  letter-spacing:1px; line-height:1.2; margin-bottom:.7rem;
+}
+.pq-title span { color:var(--m); }
+.pq-sub { font-size:1rem; font-weight:600; color:var(--white); margin-bottom:.9rem; }
+.pq-text { font-size:.9rem; line-height:1.7; color:var(--muted); max-width:520px; margin:0 auto 1.8rem; }
+.pq-btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:.7rem;
+  background:linear-gradient(135deg,#25D366,#1da851); color:#fff; text-decoration:none;
+  padding:1.15rem 2.6rem; font-family:'Inter',sans-serif;
+  font-size:.95rem; font-weight:800; letter-spacing:1.5px;
+  box-shadow:0 8px 28px rgba(37,211,102,.3);
+  transition:transform .25s, box-shadow .25s, filter .25s;
+}
+.pq-btn:hover { transform:translateY(-3px); box-shadow:0 14px 38px rgba(37,211,102,.42); filter:brightness(1.06); }
+.pq-btn:active { transform:translateY(-1px); }
+.pq-note { font-size:.72rem; color:var(--muted); margin-top:1rem; letter-spacing:.5px; }
+.pq-steps {
+  display:flex; justify-content:center; gap:1.6rem; flex-wrap:wrap;
+  margin-bottom:1.8rem; font-size:.78rem; color:var(--muted);
+}
+.pq-step { display:flex; align-items:center; gap:.45rem; }
+.pq-step b {
+  width:20px; height:20px; flex-shrink:0; border-radius:50%;
+  background:rgba(205,127,50,.15); border:1px solid rgba(205,127,50,.4); color:var(--m);
+  font-size:.65rem; display:flex; align-items:center; justify-content:center;
+}
+body.light-mode .pq-box { background:linear-gradient(150deg,rgba(37,211,102,.08) 0%,#fff 55%,rgba(160,90,16,.07) 100%); }
+body.light-mode .pq-sub { color:#0d1b2a; }
+body.light-mode .pq-text, body.light-mode .pq-note, body.light-mode .pq-steps { color:#3a4a5c; }
+
 /* ======== BLOGSITOS ======== */
 .blog-grid {
   display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px;
@@ -1440,7 +1548,12 @@ body.light-mode .blog-close-btn:hover { color:#fff; }
     <div class="bk-header">
       <div class="badge">Reserva online</div>
       <h1 class="bk-title">AGENDÁ TU<br><span>DETAILING</span></h1>
-      <p class="bk-sub">Taller de detailing profesional en La Plata</p>
+      <p class="bk-sub">Detailing profesional en La Plata</p>
+      <p class="hero-pitch">
+        No es un lavado m&aacute;s: es devolverle a tu auto el brillo que ten&iacute;a de cero.
+        Trabajamos con <strong>productos de grado profesional</strong> y t&eacute;cnica de taller,
+        con <strong>garant&iacute;a por escrito</strong> en cada trabajo que entregamos.
+      </p>
 
       <!-- BARRA DE UBICACION DESTACADA -->
       <div style="
@@ -9533,6 +9646,104 @@ loadVtvCard();
   </div>
 
   <div class="gr-grid" id="gr-grid"></div>
+</div>
+
+<!-- ======== LAVADO COMUN VS DETAILING REAL ======== -->
+<div class="vs-wrap">
+  <div class="vs-head">
+    <div class="badge" style="margin-bottom:1rem;">La diferencia</div>
+    <h2 class="vs-title">UN LAVADO NO ES <span>UN DETAILING</span></h2>
+    <p class="vs-sub">
+      Los dos dejan el auto limpio. Solo uno le devuelve el brillo, le saca las marcas
+      y lo deja protegido para que dure. Mir&aacute; la diferencia:
+    </p>
+  </div>
+  <div class="vs-grid">
+
+    <div class="vs-col">
+      <div class="vs-col-t">Un lavado com&uacute;n</div>
+      <div class="vs-li"><span class="vs-ico">&times;</span><span>Saca el polvo, pero la pintura sigue <strong>opaca y sin profundidad</strong>.</span></div>
+      <div class="vs-li"><span class="vs-ico">&times;</span><span>Las <strong>marcas de remolino</strong> (swirls) y microrayas siguen ah&iacute;: se ven apenas les pega el sol.</span></div>
+      <div class="vs-li"><span class="vs-ico">&times;</span><span>La <strong>savia, el alquitr&aacute;n y las manchas de lluvia</strong> quedan pegados: el shampoo no los saca.</span></div>
+      <div class="vs-li"><span class="vs-ico">&times;</span><span>Pl&aacute;sticos y gomas quedan <strong>resecos y grises</strong>, y el interior con olor a encerrado.</span></div>
+      <div class="vs-li"><span class="vs-ico">&times;</span><span>El brillo <strong>dura dos d&iacute;as</strong>: sin protecci&oacute;n, la suciedad vuelve a pegarse enseguida.</span></div>
+    </div>
+
+    <div class="vs-col good">
+      <div class="vs-col-t">Un detailing real</div>
+      <div class="vs-li"><span class="vs-ico">&#10003;</span><span><strong>Descontaminaci&oacute;n profunda:</strong> sacamos lo que el lavado deja, hasta que la pintura queda lisa al tacto.</span></div>
+      <div class="vs-li"><span class="vs-ico">&#10003;</span><span><strong>Correcci&oacute;n de pintura:</strong> pulimos y eliminamos los swirls. El color vuelve a tener profundidad, no un brillo de aerosol.</span></div>
+      <div class="vs-li"><span class="vs-ico">&#10003;</span><span><strong>Tratamiento cer&aacute;mico:</strong> una capa que repele agua y suciedad, y protege la pintura durante meses.</span></div>
+      <div class="vs-li"><span class="vs-ico">&#10003;</span><span><strong>Detailing interior:</strong> tapizados, pl&aacute;sticos y cueros limpios en profundidad, hidratados y protegidos.</span></div>
+      <div class="vs-li"><span class="vs-ico">&#10003;</span><span><strong>&Oacute;pticas pulidas y motor detallado:</strong> los detalles que hacen que el auto se vea cuidado de verdad.</span></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ======== POR QUE ELEGIRNOS ======== -->
+<div class="why-wrap">
+  <div class="vs-head">
+    <div class="badge" style="margin-bottom:1rem;">Por qu&eacute; elegirnos</div>
+    <h2 class="vs-title">TU AUTO EN <span>BUENAS MANOS</span></h2>
+  </div>
+  <div class="why-grid">
+
+    <div class="why-card">
+      <span class="why-ico">&#129514;</span>
+      <div class="why-t">Productos de grado profesional</div>
+      <div class="why-d">
+        Usamos las mismas l&iacute;neas que se usan en talleres de detailing serios:
+        shampoos pH neutro, descontaminantes, pulimentos y selladores cer&aacute;micos.
+        Nada de recetas caseras ni productos de g&oacute;ndola que rayan la pintura.
+      </div>
+    </div>
+
+    <div class="why-card">
+      <span class="why-ico">&#128220;</span>
+      <div class="why-t">Garant&iacute;a por escrito</div>
+      <div class="why-d">
+        Cada trabajo se entrega con su orden firmada, donde queda asentado
+        qu&eacute; se hizo y con qu&eacute; protecci&oacute;n. Si algo no qued&oacute; como
+        acordamos, lo resolvemos. Sin letra chica.
+      </div>
+    </div>
+
+    <div class="why-card">
+      <span class="why-ico">&#128100;</span>
+      <div class="why-t">Atenci&oacute;n personalizada</div>
+      <div class="why-d">
+        No trabajamos en serie. Revisamos tu auto, te explicamos qu&eacute; necesita
+        de verdad y te recomendamos el servicio justo &mdash; aunque sea
+        el m&aacute;s simple. Un solo auto por turno, sin apuro.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ======== COTIZA POR FOTOS ======== -->
+<div class="pq-wrap">
+  <div class="pq-box">
+    <div class="pq-inner">
+      <div class="pq-badge">Diagn&oacute;stico sin cargo</div>
+      <h2 class="pq-title">&iquest;NO SAB&Eacute;S QU&Eacute; <span>NECESITA TU AUTO?</span></h2>
+      <p class="pq-sub">Mandanos 3 fotos y te decimos qu&eacute; hacerle</p>
+      <p class="pq-text">
+        Sacale fotos del techo, cap&oacute; e interior y te decimos qu&eacute; tratamiento le hace falta.
+      </p>
+      <div class="pq-steps">
+        <span class="pq-step"><b>1</b> Sac&aacute; las 3 fotos</span>
+        <span class="pq-step"><b>2</b> Mandalas por WhatsApp</span>
+        <span class="pq-step"><b>3</b> Te decimos qu&eacute; necesita</span>
+      </div>
+      <a class="pq-btn" target="_blank" rel="noopener"
+         href="https://wa.me/5492214387138?text=Hola!%20Te%20mando%20fotos%20de%20mi%20auto%20para%20que%20me%20recomienden%20un%20tratamiento.">
+        &#128242; Enviar mis fotos por WhatsApp
+      </a>
+      <div class="pq-note">Te respondemos con el tratamiento recomendado y el precio para tu veh&iacute;culo.</div>
+    </div>
+  </div>
 </div>
 
 <!-- ======== UBICACION / MAPA ======== -->
