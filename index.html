@@ -1261,6 +1261,83 @@ nav {
 /* Chips y tags en small caps con aire */
 .svc-tag { letter-spacing:.6px; }
 
+/* ======== VIDEO DE FONDO DEL HERO ======== */
+#hero-video {
+  position:absolute; top:0; left:0; right:0; height:100vh;
+  width:100%; object-fit:cover; display:none;
+  opacity:.20; filter:grayscale(.55) contrast(1.12) brightness(.75);
+  mask-image:linear-gradient(to bottom, black 0%, rgba(0,0,0,.55) 55%, transparent 95%);
+  -webkit-mask-image:linear-gradient(to bottom, black 0%, rgba(0,0,0,.55) 55%, transparent 95%);
+  pointer-events:none; z-index:0;
+}
+#hero-video.on { display:block; }
+body.light-mode #hero-video { opacity:.12; filter:grayscale(.4) contrast(1.05) brightness(1.05); }
+@media (prefers-reduced-motion: reduce) { #hero-video { display:none !important; } }
+
+/* ======== ANTES Y DESPUES (slider) ======== */
+.ba-wrap { padding:3.5rem 5% 1rem; max-width:1100px; margin:0 auto; }
+.ba-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:1.3rem; }
+@media(max-width:600px){ .ba-grid { grid-template-columns:1fr; } }
+.ba-card { display:flex; flex-direction:column; }
+.ba-item {
+  position:relative; aspect-ratio:4/3; overflow:hidden;
+  border:1px solid rgba(205,127,50,.28); background:var(--g1);
+  cursor:ew-resize; user-select:none; -webkit-user-select:none; touch-action:none;
+  box-shadow:0 6px 26px rgba(0,0,0,.35);
+}
+.ba-item:focus-visible { outline:2px solid var(--m); outline-offset:3px; }
+.ba-item img {
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:cover; display:block; -webkit-user-drag:none;
+}
+.ba-line {
+  position:absolute; top:0; bottom:0; width:2px;
+  background:rgba(255,255,255,.92); pointer-events:none;
+  box-shadow:0 0 14px rgba(0,0,0,.6); z-index:3;
+}
+.ba-handle {
+  position:absolute; top:50%; width:40px; height:40px; border-radius:50%;
+  background:var(--m); color:#0A1128; transform:translate(-50%,-50%);
+  display:flex; align-items:center; justify-content:center;
+  pointer-events:none; z-index:4; box-shadow:0 4px 18px rgba(0,0,0,.5);
+  transition:transform .18s ease;
+}
+.ba-item:hover .ba-handle { transform:translate(-50%,-50%) scale(1.1); }
+.ba-tag {
+  position:absolute; top:.6rem; z-index:2; pointer-events:none;
+  font-size:.58rem; letter-spacing:1.8px; text-transform:uppercase;
+  font-weight:800; padding:.28rem .65rem;
+}
+.ba-tag-b { left:.6rem; background:rgba(0,0,0,.72); color:#fff; border:1px solid rgba(255,255,255,.18); }
+.ba-tag-a { right:.6rem; background:var(--m); color:#0A1128; }
+.ba-hint {
+  position:absolute; left:50%; bottom:.7rem; transform:translateX(-50%);
+  z-index:4; pointer-events:none; font-size:.6rem; letter-spacing:1px;
+  background:rgba(0,0,0,.6); color:rgba(255,255,255,.9);
+  padding:.25rem .7rem; border:1px solid rgba(255,255,255,.15);
+  transition:opacity .3s; white-space:nowrap;
+}
+.ba-item.touched .ba-hint { opacity:0; }
+.ba-cap { padding:.8rem .2rem 0; }
+.ba-cap-t { font-family:'JetBrains Mono',monospace; font-size:.9rem; letter-spacing:1px; color:var(--white); line-height:1.3; }
+.ba-cap-d { font-size:.75rem; color:var(--muted); margin-top:.25rem; line-height:1.5; }
+.ba-del {
+  position:absolute; top:.6rem; left:50%; transform:translateX(-50%); z-index:5;
+  background:rgba(224,60,60,.9); border:none; color:#fff;
+  font-size:.62rem; font-weight:700; padding:.28rem .6rem; cursor:pointer;
+}
+body.light-mode .ba-cap-t { color:#0d1b2a; }
+body.light-mode .ba-cap-d { color:#3a4a5c; }
+/* builder admin */
+.ba-drop {
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.4rem;
+  border:1px dashed rgba(205,127,50,.4); background:rgba(205,127,50,.05);
+  padding:1.4rem 1rem; cursor:pointer; text-align:center; min-height:150px;
+  transition:border-color .2s, background .2s;
+}
+.ba-drop:hover { border-color:var(--m); background:rgba(205,127,50,.1); }
+.ba-drop img { max-width:100%; max-height:120px; object-fit:contain; }
+
 /* ======== PITCH DEL HERO ======== */
 .hero-pitch {
   max-width:560px; margin:1.1rem auto 0;
@@ -1538,6 +1615,7 @@ body.light-mode .blog-close-btn:hover { color:#fff; }
 <!-- ======== BOOKING ======== -->
 <div id="view-booking" class="view active">
 <div class="hero">
+  <video id="hero-video" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"></video>
   <div class="hero-photo"></div>
   <script>(function(){var m=document.querySelector('meta[property="og:image"]');if(m){document.currentScript.previousElementSibling.style.backgroundImage='url("'+m.content+'")';}})();</script>
   <div class="hero-bg"></div>
@@ -2274,6 +2352,7 @@ body.light-mode .blog-close-btn:hover { color:#fff; }
         <button class="fbtn" onclick="toggleOrdenIngreso()" style="border-color:rgba(0,200,117,.4);color:#00c875;">&#128203; Orden de Ingreso</button>
         <button class="fbtn" onclick="toggleCupones()" style="border-color:rgba(255,193,7,.4);color:#ffc107;">&#127915; Cupones</button>
         <button class="fbtn" onclick="toggleFinanzas()" style="border-color:rgba(77,163,255,.4);color:#4da3ff;">&#128176; Caja</button>
+        <button class="fbtn" onclick="toggleHeroVideoPanel()" style="border-color:rgba(205,127,50,.4);color:#CD7F32;">&#127916; Video del hero</button>
         <button class="fbtn" id="stats-toggle-btn" onclick="toggleStats()" style="border-color:rgba(205,127,50,.4);color:var(--m);">Ver estadisticas</button>
         <button class="logout-btn" onclick="doLogout()">Cerrar sesion</button>
       </div>
@@ -2349,6 +2428,43 @@ body.light-mode .blog-close-btn:hover { color:#fff; }
       </div>
       <div style="font-size:.72rem; color:var(--muted); margin-bottom:1rem;">Los clientes ganan cupones jugando. Verific&aacute; el c&oacute;digo ac&aacute; antes de aplicar el descuento. Un c&oacute;digo = un uso.</div>
       <div id="cupones-list" style="display:flex; flex-direction:column; gap:.5rem;"></div>
+    </div>
+
+    <!-- PANEL VIDEO DEL HERO -->
+    <div id="herovideo-panel" style="display:none; background:var(--g1); border:1px solid rgba(205,127,50,.25); border-radius:0; padding:1.5rem; margin-bottom:1.5rem;">
+      <div style="font-weight:800; color:var(--m); margin-bottom:.3rem;">&#127916; Video de fondo del inicio</div>
+      <div style="font-size:.72rem;color:var(--muted);margin-bottom:1.2rem;line-height:1.6;">
+        Un video corto tuyo puliendo o lavando un auto queda buen&iacute;simo de fondo en la portada.
+        Se ve en silencio y en loop, atenuado para que el texto siga leg&iacute;ble.<br>
+        <strong style="color:var(--white);">Recomendado:</strong> MP4 horizontal, 8 a 15 segundos, sin audio importante.
+        Evit&aacute; archivos de m&aacute;s de 15 MB para que cargue r&aacute;pido en el celular.
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;align-items:start;">
+        <div>
+          <div style="font-size:.75rem;font-weight:700;margin-bottom:.6rem;">Video actual</div>
+          <div id="hv-actual"></div>
+        </div>
+        <div>
+          <label style="display:inline-flex;align-items:center;gap:.5rem;cursor:pointer;background:rgba(205,127,50,.08);border:1px dashed rgba(205,127,50,.35);padding:.7rem 1.2rem;font-size:.82rem;color:var(--m);margin-bottom:1rem;">
+            <input type="file" accept="video/mp4,video/*" style="display:none;" onchange="hvSubirVideo(this.files[0]); this.value='';">
+            &#127916; Subir video
+          </label>
+          <span id="hv-status" style="font-size:.75rem;color:var(--muted);margin-left:.6rem;"></span>
+
+          <div class="fi" style="margin-bottom:.8rem;">
+            <label class="flabel">Intensidad <span style="font-weight:400;color:var(--muted)">(0.10 tenue &mdash; 0.35 marcado)</span></label>
+            <input type="number" class="finput" id="hv-opacidad" min="0.05" max="0.5" step="0.05" value="0.20" style="max-width:130px;">
+          </div>
+          <label style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;cursor:pointer;margin-bottom:1rem;">
+            <input type="checkbox" id="hv-activo" checked> Mostrar el video en la portada
+          </label>
+          <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
+            <button class="btn" onclick="hvGuardarAjustes()" style="max-width:180px;">Guardar ajustes</button>
+            <button class="fbtn" onclick="hvQuitarVideo()" style="border-color:rgba(224,60,60,.4);color:#e03c3c;">Quitar video</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- PANEL CAJA / FINANZAS -->
@@ -3847,6 +3963,8 @@ function showView(name) {
   galAdminActive = isAdminLogged;
   tiendaAdminActive = isAdminLogged;
   svcsAdminActive = isAdminLogged;
+  // el bloque antes/despues muestra su formulario solo al admin
+  if (typeof baRenderGrid === 'function') baRenderGrid();
   if (name === 'tienda') {
     tiendaAdminActive = isAdminLogged;
     renderTienda();
@@ -8223,6 +8341,340 @@ document.addEventListener('keydown', function(e) {
 });
 
 // ==========================================
+// VIDEO DE FONDO DEL HERO (configurable por admin)
+// ==========================================
+var _heroVideoCfg = null;
+
+function loadHeroVideo() {
+  db.collection('config').doc('herovideo').get().then(function(d) {
+    _heroVideoCfg = d.exists ? d.data() : null;
+    applyHeroVideo();
+  }).catch(function(e){ console.error('Error cargando video del hero:', e); });
+}
+
+function applyHeroVideo() {
+  var v = document.getElementById('hero-video');
+  if (!v) return;
+  var cfg = _heroVideoCfg;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!cfg || !cfg.url || cfg.activo === false || reduce) {
+    v.classList.remove('on');
+    v.removeAttribute('src');
+    try { v.load(); } catch(e) {}
+    var ph0 = document.querySelector('.hero-photo');
+    if (ph0) ph0.style.display = '';
+    return;
+  }
+  if (v.getAttribute('src') !== cfg.url) {
+    v.setAttribute('src', cfg.url);
+    v.preload = 'auto';
+    try { v.load(); } catch(e) {}
+  }
+  if (cfg.opacidad) v.style.opacity = cfg.opacidad;
+  v.classList.add('on');
+  // la foto fija y el video juntos ensucian la imagen: dejamos solo el video
+  var ph = document.querySelector('.hero-photo');
+  if (ph) ph.style.display = 'none';
+  var p = v.play();
+  if (p && p.catch) p.catch(function(){ /* autoplay bloqueado: queda el primer frame */ });
+}
+
+// Pausar el video cuando no se ve (bateria y datos)
+(function() {
+  function ctrl() {
+    var v = document.getElementById('hero-video');
+    if (!v || !v.classList.contains('on')) return;
+    var visible = !document.hidden &&
+      document.getElementById('view-booking').classList.contains('active') &&
+      v.getBoundingClientRect().bottom > 0;
+    if (visible) { if (v.paused) { var p = v.play(); if (p && p.catch) p.catch(function(){}); } }
+    else if (!v.paused) v.pause();
+  }
+  document.addEventListener('visibilitychange', ctrl);
+  window.addEventListener('scroll', function(){
+    clearTimeout(window._hvT); window._hvT = setTimeout(ctrl, 200);
+  }, { passive: true });
+})();
+
+// ── Admin: subir / quitar el video ──
+function toggleHeroVideoPanel() {
+  var p = document.getElementById('herovideo-panel');
+  if (!p) return;
+  var open = p.style.display !== 'none';
+  p.style.display = open ? 'none' : 'block';
+  if (!open) {
+    var cfg = _heroVideoCfg || {};
+    var op = document.getElementById('hv-opacidad');
+    if (op) op.value = cfg.opacidad || 0.20;
+    var ac = document.getElementById('hv-activo');
+    if (ac) ac.checked = cfg.activo !== false;
+    hvRenderActual();
+  }
+}
+
+function hvRenderActual() {
+  var box = document.getElementById('hv-actual');
+  if (!box) return;
+  var cfg = _heroVideoCfg;
+  box.innerHTML = (cfg && cfg.url)
+    ? '<video src="' + cfg.url + '" muted loop autoplay playsinline style="width:100%;max-width:320px;border:1px solid rgba(205,127,50,.35);display:block;"></video>' +
+      '<div style="font-size:.68rem;color:var(--muted);margin-top:.4rem;word-break:break-all;">' + cfg.url.slice(0, 70) + '...</div>'
+    : '<div style="font-size:.78rem;color:var(--muted);">No hay video cargado. El hero usa la foto de siempre.</div>';
+}
+
+function hvSubirVideo(file) {
+  if (!isAdminLogged) { toast('Solo el admin'); return; }
+  if (!file) return;
+  if (!file.type || file.type.indexOf('video/') !== 0) { toast('Tiene que ser un video (MP4)'); return; }
+  var st = document.getElementById('hv-status');
+  if (st) st.textContent = 'Subiendo video... 0%';
+  uploadGalMedia(file,
+    function(pct){ if (st) st.textContent = 'Subiendo video... ' + pct + '%'; },
+    function(url) {
+      if (st) st.textContent = 'Guardando...';
+      var cfg = {
+        url: url,
+        opacidad: parseFloat(document.getElementById('hv-opacidad').value) || 0.20,
+        activo: true,
+        updatedAt: new Date().toISOString()
+      };
+      db.collection('config').doc('herovideo').set(cfg).then(function() {
+        _heroVideoCfg = cfg;
+        applyHeroVideo();
+        hvRenderActual();
+        if (st) st.textContent = '';
+        toast('Video del hero actualizado');
+      }).catch(function(e){ console.error(e); if (st) st.textContent = ''; toast('Error al guardar'); });
+    },
+    function(err){ console.error(err); if (st) st.textContent = ''; toast('Error al subir el video'); }
+  );
+}
+
+function hvGuardarAjustes() {
+  if (!isAdminLogged) { toast('Solo el admin'); return; }
+  if (!_heroVideoCfg || !_heroVideoCfg.url) { toast('Primero subi un video'); return; }
+  var cfg = {
+    url: _heroVideoCfg.url,
+    opacidad: parseFloat(document.getElementById('hv-opacidad').value) || 0.20,
+    activo: document.getElementById('hv-activo').checked,
+    updatedAt: new Date().toISOString()
+  };
+  db.collection('config').doc('herovideo').set(cfg).then(function() {
+    _heroVideoCfg = cfg;
+    applyHeroVideo();
+    toast('Ajustes guardados');
+  }).catch(function(e){ console.error(e); toast('Error al guardar'); });
+}
+
+function hvQuitarVideo() {
+  if (!isAdminLogged) return;
+  if (!confirm('Quitar el video del hero? Vuelve la foto de siempre.')) return;
+  db.collection('config').doc('herovideo').set({ url: '', activo: false, updatedAt: new Date().toISOString() }).then(function() {
+    _heroVideoCfg = null;
+    applyHeroVideo();
+    hvRenderActual();
+    toast('Video quitado');
+  }).catch(function(e){ console.error(e); toast('Error'); });
+}
+
+// ==========================================
+// ANTES Y DESPUES (slider comparativo)
+// ==========================================
+var _baItems = [];
+var _baNuevo = { antes: null, despues: null };
+var _baSubiendo = 0;
+
+function baEsc(s) {
+  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Admin: elegir fotos del par ──
+function baPickFoto(cual, file) {
+  if (!file || !file.type || file.type.indexOf('image/') !== 0) { toast('Elegi una imagen'); return; }
+  var st = document.getElementById('ba-status');
+  _baSubiendo++;
+  if (st) st.textContent = 'Subiendo foto...';
+  compressImageCustom(file, 1400, 450000, function(data) {
+    blogUploadDataUri(data, function(url) {
+      _baSubiendo--;
+      _baNuevo[cual] = url;
+      baRenderDrop(cual);
+      if (st) st.textContent = _baSubiendo > 0 ? 'Subiendo foto...' : '';
+    }, function(err) {
+      _baSubiendo--;
+      console.error(err);
+      if (st) st.textContent = '';
+      toast('Error al subir la foto');
+    });
+  });
+}
+
+function baRenderDrop(cual) {
+  var drop = document.getElementById('ba-drop-' + cual);
+  if (!drop) return;
+  var url = _baNuevo[cual];
+  var input = drop.querySelector('input');
+  drop.innerHTML = '';
+  drop.appendChild(input);
+  if (url) {
+    var img = document.createElement('img');
+    img.src = url;
+    drop.appendChild(img);
+    var lbl = document.createElement('span');
+    lbl.style.cssText = 'font-size:.7rem;color:var(--m);font-weight:700;letter-spacing:1px;margin-top:.4rem;';
+    lbl.textContent = (cual === 'antes' ? 'ANTES' : 'DESPUÉS') + ' — click para cambiar';
+    drop.appendChild(lbl);
+  } else {
+    drop.insertAdjacentHTML('beforeend',
+      '<span style="font-size:1.6rem;">' + (cual === 'antes' ? '&#128247;' : '&#10024;') + '</span>' +
+      '<span style="font-size:.78rem;color:var(--m);font-weight:700;letter-spacing:1px;">FOTO "' + (cual === 'antes' ? 'ANTES' : 'DESPU&Eacute;S') + '"</span>' +
+      '<span style="font-size:.68rem;color:var(--muted);">Click para elegir</span>');
+  }
+}
+
+function publishAntesDespues() {
+  if (!isAdminLogged) { toast('Solo el admin'); return; }
+  if (_baSubiendo > 0) { toast('Espera: hay fotos subiendo'); return; }
+  if (!_baNuevo.antes || !_baNuevo.despues) { toast('Faltan las dos fotos (antes y despues)'); return; }
+  var titulo = (document.getElementById('ba-titulo').value || '').trim();
+  if (!titulo) { toast('Ingresa un titulo'); return; }
+  var btn = document.getElementById('ba-pub-btn');
+  if (btn) btn.disabled = true;
+  db.collection('antesdespues').add({
+    titulo: titulo,
+    desc: (document.getElementById('ba-desc').value || '').trim(),
+    antes: _baNuevo.antes,
+    despues: _baNuevo.despues,
+    createdAt: new Date().toISOString()
+  }).then(function() {
+    if (btn) btn.disabled = false;
+    toast('Publicado!');
+    document.getElementById('ba-titulo').value = '';
+    document.getElementById('ba-desc').value = '';
+    _baNuevo = { antes: null, despues: null };
+    baRenderDrop('antes'); baRenderDrop('despues');
+    loadAntesDespues();
+  }).catch(function(e) {
+    if (btn) btn.disabled = false;
+    console.error(e); toast('Error al publicar');
+  });
+}
+
+function deleteAntesDespues(id) {
+  if (!isAdminLogged) return;
+  if (!confirm('Borrar este antes/despues?')) return;
+  db.collection('antesdespues').doc(id).delete().then(function() {
+    toast('Borrado');
+    loadAntesDespues();
+  }).catch(function(e){ console.error(e); toast('Error al borrar'); });
+}
+
+// ── Carga y render ──
+function loadAntesDespues() {
+  db.collection('antesdespues').orderBy('createdAt', 'desc').limit(30).get().then(function(snap) {
+    _baItems = [];
+    snap.forEach(function(d){ _baItems.push(Object.assign({ id: d.id }, d.data())); });
+    baRenderGrid();
+  }).catch(function(e) { console.error(e); _baItems = []; baRenderGrid(); });
+}
+
+function baRenderGrid() {
+  var sec = document.getElementById('ba-section');
+  var grid = document.getElementById('ba-grid');
+  if (!sec || !grid) return;
+  var form = document.getElementById('ba-admin-form');
+  if (form) form.style.display = isAdminLogged ? 'block' : 'none';
+  // sin contenido: la seccion solo se muestra al admin (para que pueda cargar)
+  if (!_baItems.length) {
+    grid.innerHTML = isAdminLogged
+      ? '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--muted);font-size:.85rem;">Todavia no cargaste ningun antes/despues. Subi el primer par con el formulario de arriba.</div>'
+      : '';
+    sec.style.display = isAdminLogged ? 'block' : 'none';
+    return;
+  }
+  sec.style.display = 'block';
+  grid.innerHTML = _baItems.map(function(it, i) {
+    return '<div class="ba-card">' +
+      '<div class="ba-item" data-i="' + i + '" tabindex="0" role="slider" aria-label="Comparar antes y despues: ' + baEsc(it.titulo) + '" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">' +
+        (isAdminLogged ? '<button class="ba-del" onclick="event.stopPropagation();deleteAntesDespues(\'' + it.id + '\')">Borrar</button>' : '') +
+        '<img class="ba-after" src="' + it.despues + '" alt="Despues: ' + baEsc(it.titulo) + '" draggable="false" loading="lazy">' +
+        '<img class="ba-before" src="' + it.antes + '" alt="Antes: ' + baEsc(it.titulo) + '" draggable="false" loading="lazy" style="clip-path:inset(0 50% 0 0);">' +
+        '<span class="ba-tag ba-tag-b">Antes</span>' +
+        '<span class="ba-tag ba-tag-a">Despu&eacute;s</span>' +
+        '<div class="ba-line" style="left:50%;"></div>' +
+        '<div class="ba-handle" style="left:50%;">' +
+          '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5"/></svg>' +
+        '</div>' +
+        '<span class="ba-hint">&#8646; Arrastr&aacute; para comparar</span>' +
+      '</div>' +
+      '<div class="ba-cap">' +
+        '<div class="ba-cap-t">' + baEsc(it.titulo) + '</div>' +
+        (it.desc ? '<div class="ba-cap-d">' + baEsc(it.desc) + '</div>' : '') +
+      '</div>' +
+      '</div>';
+  }).join('');
+  baBindSliders();
+}
+
+// ── Interaccion del slider (mouse, touch y teclado) ──
+function baSetPos(item, pct) {
+  pct = Math.max(0, Math.min(100, pct));
+  var before = item.querySelector('.ba-before');
+  var line = item.querySelector('.ba-line');
+  var handle = item.querySelector('.ba-handle');
+  if (before) before.style.clipPath = 'inset(0 ' + (100 - pct) + '% 0 0)';
+  if (line) line.style.left = pct + '%';
+  if (handle) handle.style.left = pct + '%';
+  item.setAttribute('aria-valuenow', Math.round(pct));
+  item.classList.add('touched');
+}
+
+function baBindSliders() {
+  var items = document.querySelectorAll('#ba-grid .ba-item');
+  Array.prototype.forEach.call(items, function(item) {
+    if (item._baBound) return;
+    item._baBound = true;
+    var arrastrando = false;
+
+    function posDesdeEvento(e) {
+      var rect = item.getBoundingClientRect();
+      var x = (e.touches && e.touches[0] ? e.touches[0].clientX : e.clientX) - rect.left;
+      return (x / rect.width) * 100;
+    }
+    function mover(e) {
+      if (!arrastrando) return;
+      if (e.cancelable) e.preventDefault();
+      baSetPos(item, posDesdeEvento(e));
+    }
+    function soltar() { arrastrando = false; }
+
+    item.addEventListener('pointerdown', function(e) {
+      if (e.target.classList.contains('ba-del')) return;
+      arrastrando = true;
+      try { item.setPointerCapture(e.pointerId); } catch(err) {}
+      baSetPos(item, posDesdeEvento(e));
+    });
+    item.addEventListener('pointermove', mover);
+    item.addEventListener('pointerup', soltar);
+    item.addEventListener('pointercancel', soltar);
+    item.addEventListener('pointerleave', soltar);
+    // hover suave en desktop: seguir el mouse sin tener que arrastrar
+    item.addEventListener('mousemove', function(e) {
+      if (arrastrando || e.pointerType === 'touch') return;
+      if (item.matches(':hover')) baSetPos(item, posDesdeEvento(e));
+    });
+    // teclado
+    item.addEventListener('keydown', function(e) {
+      var actual = parseFloat(item.getAttribute('aria-valuenow')) || 50;
+      if (e.key === 'ArrowLeft')  { e.preventDefault(); baSetPos(item, actual - 4); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); baSetPos(item, actual + 4); }
+      if (e.key === 'Home')       { e.preventDefault(); baSetPos(item, 0); }
+      if (e.key === 'End')        { e.preventDefault(); baSetPos(item, 100); }
+    });
+  });
+}
+
+// ==========================================
 // CAJA / FINANZAS - ingresos, egresos y saldo por cuenta
 // ==========================================
 var _movs = [];                       // todos los movimientos
@@ -9565,6 +10017,8 @@ firebase.auth().onAuthStateChanged(function(user) {
 
 loadSVCS(function(){ renderSvcs(); renderCal(); });
 loadVtvCard();
+loadHeroVideo();
+loadAntesDespues();
 </script>
 
 
@@ -9679,6 +10133,59 @@ loadVtvCard();
     </div>
 
   </div>
+</div>
+
+<!-- ======== ANTES Y DESPUES ======== -->
+<div class="ba-wrap" id="ba-section" style="display:none;">
+  <div class="vs-head">
+    <div class="badge" style="margin-bottom:1rem;">Resultados reales</div>
+    <h2 class="vs-title">ANTES Y <span>DESPU&Eacute;S</span></h2>
+    <p class="vs-sub">
+      Trabajos hechos en nuestro taller. Arrastr&aacute; la l&iacute;nea para ver c&oacute;mo lleg&oacute;
+      cada auto y c&oacute;mo se fue.
+    </p>
+  </div>
+
+  <!-- Admin: cargar par de fotos -->
+  <div id="ba-admin-form" style="display:none;margin-bottom:2rem;background:var(--g1);border:1px solid rgba(205,127,50,.25);padding:1.6rem;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:1.05rem;letter-spacing:2px;color:var(--m);margin-bottom:1rem;">
+      &#128248; Nuevo antes / despu&eacute;s
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+      <label class="ba-drop" id="ba-drop-antes">
+        <input type="file" accept="image/*" style="display:none;" onchange="baPickFoto('antes', this.files[0]); this.value='';">
+        <span style="font-size:1.6rem;">&#128247;</span>
+        <span style="font-size:.78rem;color:var(--m);font-weight:700;letter-spacing:1px;">FOTO "ANTES"</span>
+        <span style="font-size:.68rem;color:var(--muted);">Click para elegir</span>
+      </label>
+      <label class="ba-drop" id="ba-drop-despues">
+        <input type="file" accept="image/*" style="display:none;" onchange="baPickFoto('despues', this.files[0]); this.value='';">
+        <span style="font-size:1.6rem;">&#10024;</span>
+        <span style="font-size:.78rem;color:var(--m);font-weight:700;letter-spacing:1px;">FOTO "DESPU&Eacute;S"</span>
+        <span style="font-size:.68rem;color:var(--muted);">Click para elegir</span>
+      </label>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.8rem;margin-bottom:1rem;">
+      <div class="fi">
+        <label class="flabel">T&iacute;tulo *</label>
+        <input type="text" class="finput" id="ba-titulo" maxlength="60" placeholder="BMW M3 — Correcci&oacute;n de pintura">
+      </div>
+      <div class="fi">
+        <label class="flabel">Detalle <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
+        <input type="text" class="finput" id="ba-desc" maxlength="90" placeholder="Pulido en 2 pasos + cer&aacute;mico">
+      </div>
+    </div>
+    <div style="display:flex;gap:.8rem;align-items:center;flex-wrap:wrap;">
+      <button class="btn" onclick="publishAntesDespues()" id="ba-pub-btn" style="max-width:230px;">Publicar</button>
+      <span id="ba-status" style="font-size:.75rem;color:var(--muted);"></span>
+    </div>
+    <div style="font-size:.72rem;color:var(--muted);margin-top:.8rem;line-height:1.5;">
+      Conviene sacar las dos fotos <strong>desde el mismo &aacute;ngulo y distancia</strong>: as&iacute; el deslizador
+      se ve perfecto. Se recortan en formato 4:3 autom&aacute;ticamente.
+    </div>
+  </div>
+
+  <div class="ba-grid" id="ba-grid"></div>
 </div>
 
 <!-- ======== POR QUE ELEGIRNOS ======== -->
