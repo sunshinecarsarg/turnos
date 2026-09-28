@@ -1420,6 +1420,69 @@ body.light-mode .vs-col .vs-li { color:#4a5a6c; }
 body.light-mode .why-card { background:#fff; border-color:rgba(0,0,0,.1); }
 body.light-mode .why-d { color:#3a4a5c; }
 
+/* ======== PANEL DE VISITAS ======== */
+.vi-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:1px; background:rgba(155,89,182,.14); border:1px solid rgba(155,89,182,.14); margin-bottom:1.5rem; }
+.vi-card { background:var(--black); padding:1rem 1.1rem; }
+.vi-card-n { font-family:'JetBrains Mono',monospace; font-size:1.6rem; line-height:1.1; color:#b07cc6; margin-bottom:.2rem; }
+.vi-card-l { font-size:.63rem; letter-spacing:2px; text-transform:uppercase; color:var(--muted); }
+.vi-bars { display:flex; align-items:flex-end; gap:2px; height:120px; padding:.6rem .2rem 0; overflow-x:auto; }
+.vi-bar { flex:1; min-width:9px; background:linear-gradient(to top,#8e5aa8,#b07cc6); position:relative; border-radius:2px 2px 0 0; transition:opacity .2s; }
+.vi-bar:hover { opacity:.75; }
+.vi-bar span { position:absolute; bottom:-18px; left:50%; transform:translateX(-50%); font-size:.55rem; color:var(--muted); }
+.vi-tabla { width:100%; border-collapse:collapse; font-size:.8rem; }
+.vi-tabla th { text-align:left; font-size:.62rem; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); padding:.5rem .6rem; border-bottom:1px solid rgba(255,255,255,.1); font-weight:600; }
+.vi-tabla td { padding:.6rem; border-bottom:1px solid rgba(255,255,255,.05); }
+.vi-tabla tr:hover td { background:rgba(155,89,182,.05); }
+.vi-num { font-family:'JetBrains Mono',monospace; color:#b07cc6; text-align:right; }
+body.light-mode .vi-card { background:#fff; }
+body.light-mode .vi-card-n { color:#7b4a94; }
+body.light-mode .vi-num { color:#7b4a94; }
+
+/* ======== RULETA DE PREMIOS (presencial, solo admin) ======== */
+#ruleta-modal {
+  position:fixed; inset:0; z-index:1300; display:none;
+  background:radial-gradient(ellipse at 50% 35%, #16203c 0%, #070b18 70%);
+  overflow-y:auto; -webkit-overflow-scrolling:touch;
+}
+#ruleta-modal.open { display:block; }
+.rl-inner { min-height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:1.5rem 1rem 2.5rem; text-align:center; }
+.rl-logo { font-family:'JetBrains Mono',monospace; font-size:1.05rem; letter-spacing:5px; color:var(--m); margin-bottom:.15rem; }
+.rl-sub { font-size:.66rem; letter-spacing:3px; text-transform:uppercase; color:rgba(224,225,226,.45); margin-bottom:1.2rem; }
+.rl-stage { position:relative; display:inline-block; }
+#ruleta-canvas { display:block; touch-action:none; filter:drop-shadow(0 16px 44px rgba(0,0,0,.6)); }
+.rl-pointer {
+  position:absolute; top:-6px; left:50%; transform:translateX(-50%); z-index:3;
+  width:0; height:0; border-left:15px solid transparent; border-right:15px solid transparent;
+  border-top:30px solid var(--m); filter:drop-shadow(0 3px 7px rgba(0,0,0,.7));
+}
+.rl-charge-wrap { width:min(340px,86vw); margin:1.4rem auto .3rem; }
+.rl-charge-track { height:13px; background:rgba(255,255,255,.08); border:1px solid rgba(205,127,50,.3); overflow:hidden; }
+.rl-charge-fill { height:100%; width:0%; background:linear-gradient(90deg,#CD7F32,#f0a85a,#ffd280); transition:width .05s linear; }
+.rl-charge-lbl { font-size:.6rem; letter-spacing:2.5px; text-transform:uppercase; color:var(--muted); margin-top:.4rem; height:14px; }
+.rl-btn {
+  margin-top:1rem; background:linear-gradient(135deg,var(--m),#A0632A); color:#0A1128;
+  border:none; padding:1.15rem 3rem; font-family:'JetBrains Mono',monospace;
+  font-weight:800; font-size:1.05rem; letter-spacing:3px; cursor:pointer;
+  box-shadow:0 8px 26px rgba(205,127,50,.4); user-select:none; -webkit-user-select:none;
+  touch-action:none; transition:transform .1s, box-shadow .2s;
+}
+.rl-btn:active { transform:scale(.96); }
+.rl-btn:disabled { opacity:.4; cursor:default; box-shadow:none; }
+.rl-btn.cargando { animation:rlPulse .35s ease-in-out infinite alternate; }
+@keyframes rlPulse { from { box-shadow:0 8px 26px rgba(205,127,50,.4); } to { box-shadow:0 8px 40px rgba(255,200,120,.85); } }
+.rl-resultado {
+  margin-top:1.4rem; width:min(430px,90vw); padding:1.5rem 1.4rem;
+  border:2px dashed var(--m); background:rgba(205,127,50,.09); display:none;
+  animation:rlPop .45s cubic-bezier(.2,1.5,.4,1) both;
+}
+.rl-resultado.show { display:block; }
+@keyframes rlPop { from { opacity:0; transform:scale(.85); } to { opacity:1; transform:scale(1); } }
+.rl-res-lbl { font-size:.62rem; letter-spacing:3px; text-transform:uppercase; color:var(--muted); margin-bottom:.5rem; }
+.rl-res-premio { font-family:'JetBrains Mono',monospace; font-size:1.3rem; line-height:1.3; color:#fff; margin-bottom:.8rem; }
+.rl-res-nota { font-size:.74rem; color:rgba(224,225,226,.6); line-height:1.5; }
+.rl-close { position:fixed; top:1rem; right:1rem; z-index:1302; background:rgba(10,17,40,.8); border:1px solid rgba(205,127,50,.45); color:#fff; width:44px; height:44px; font-size:1.3rem; cursor:pointer; }
+.rl-admin-row { display:flex; align-items:center; gap:.6rem; padding:.55rem .8rem; margin-bottom:.4rem; background:var(--g1); border:1px solid rgba(205,127,50,.12); flex-wrap:wrap; }
+
 /* ======== MARCAS QUE USAMOS ======== */
 .mk-wrap { padding:3rem 5% 1rem; max-width:1100px; margin:0 auto; display:none; }
 .mk-grid {
@@ -2419,6 +2482,9 @@ body.light-mode .blog-close-btn:hover { color:#fff; }
         <button class="fbtn" onclick="toggleCupones()" style="border-color:rgba(255,193,7,.4);color:#ffc107;">&#127915; Cupones</button>
         <button class="fbtn" onclick="toggleFinanzas()" style="border-color:rgba(77,163,255,.4);color:#4da3ff;">&#128176; Caja</button>
         <button class="fbtn" onclick="toggleHeroVideoPanel()" style="border-color:rgba(205,127,50,.4);color:#CD7F32;">&#127916; Video del hero</button>
+        <button class="fbtn" onclick="toggleVisitas()" style="border-color:rgba(155,89,182,.5);color:#b07cc6;">&#128202; Visitas</button>
+        <button class="fbtn" onclick="abrirRuleta()" style="border-color:rgba(205,127,50,.6);color:#CD7F32;font-weight:700;">&#127920; Ruleta</button>
+        <button class="fbtn" onclick="toggleRuletaPanel()" style="border-color:rgba(205,127,50,.3);color:rgba(205,127,50,.75);" title="Editar premios">&#9881;</button>
         <button class="fbtn" id="stats-toggle-btn" onclick="toggleStats()" style="border-color:rgba(205,127,50,.4);color:var(--m);">Ver estadisticas</button>
         <button class="logout-btn" onclick="doLogout()">Cerrar sesion</button>
       </div>
@@ -2527,6 +2593,59 @@ body.light-mode .blog-close-btn:hover { color:#fff; }
       </div>
       <div style="font-size:.72rem; color:var(--muted); margin-bottom:1rem;">Los clientes ganan cupones jugando. Verific&aacute; el c&oacute;digo ac&aacute; antes de aplicar el descuento. Un c&oacute;digo = un uso.</div>
       <div id="cupones-list" style="display:flex; flex-direction:column; gap:.5rem;"></div>
+    </div>
+
+    <!-- PANEL VISITAS -->
+    <div id="visitas-panel" style="display:none; background:var(--g1); border:1px solid rgba(155,89,182,.3); border-radius:0; padding:1.5rem; margin-bottom:1.5rem;">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom:1rem;">
+        <div style="font-weight:800; color:#b07cc6;">&#128202; Visitas de la secci&oacute;n Blogs</div>
+        <div style="display:flex; gap:.5rem; align-items:center; flex-wrap:wrap;">
+          <input type="month" class="finput" id="vi-mes" onchange="renderVisitas()" style="width:auto;padding:.4rem .6rem;font-size:.8rem;">
+          <button class="fbtn" onclick="loadVisitas()" style="font-size:.7rem;">&#128260;</button>
+        </div>
+      </div>
+
+      <div class="vi-cards" id="vi-cards"></div>
+
+      <div style="margin-bottom:1.6rem;">
+        <div style="font-weight:700;font-size:.85rem;margin-bottom:.3rem;">Visitas por d&iacute;a <span id="vi-mes-lbl" style="font-weight:400;font-size:.72rem;color:var(--muted);"></span></div>
+        <div class="vi-bars" id="vi-bars"></div>
+        <div style="height:20px;"></div>
+      </div>
+
+      <div>
+        <div style="font-weight:700;font-size:.85rem;margin-bottom:.6rem;">Lecturas por blog <span style="font-weight:400;font-size:.72rem;color:var(--muted);">(hist&oacute;rico total)</span></div>
+        <div style="overflow-x:auto;"><table class="vi-tabla" id="vi-tabla"></table></div>
+      </div>
+
+      <div style="font-size:.7rem;color:var(--muted);margin-top:1rem;line-height:1.55;">
+        Se cuenta una visita por persona por d&iacute;a (no se infla si recarga la p&aacute;gina).
+        &quot;Entradas a la secci&oacute;n&quot; es cu&aacute;nta gente abri&oacute; la pesta&ntilde;a Blogs;
+        &quot;lecturas&quot; es cu&aacute;ntos abrieron un blog para leerlo.
+      </div>
+    </div>
+
+    <!-- PANEL RULETA (config) -->
+    <div id="ruleta-panel" style="display:none; background:var(--g1); border:1px solid rgba(205,127,50,.3); border-radius:0; padding:1.5rem; margin-bottom:1.5rem;">
+      <div style="font-weight:800; color:var(--m); margin-bottom:.3rem;">&#127920; Premios de la ruleta</div>
+      <div style="font-size:.72rem;color:var(--muted);margin-bottom:1rem;line-height:1.6;">
+        El <strong style="color:var(--white);">peso</strong> es qu&eacute; tan grande es la porci&oacute;n en la ruleta:
+        m&aacute;s peso = m&aacute;s chances de salir. La ruleta gira de verdad, as&iacute; que el tama&ntilde;o de cada
+        porci&oacute;n es la probabilidad real y se ve a simple vista.
+      </div>
+      <div id="ruleta-lista-admin" style="margin-bottom:1rem;"></div>
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;">
+        <button class="btn" onclick="guardarPremios()" style="max-width:190px;">Guardar premios</button>
+        <button class="fbtn" onclick="agregarPremio()">+ Agregar premio</button>
+        <button class="fbtn" onclick="resetPremios()" style="border-color:rgba(224,60,60,.4);color:#e03c3c;">Restaurar por defecto</button>
+      </div>
+      <div style="margin-top:1.5rem;border-top:1px solid rgba(205,127,50,.15);padding-top:1rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem;margin-bottom:.6rem;">
+          <div style="font-weight:700;font-size:.85rem;">&#128203; &Uacute;ltimos premios entregados</div>
+          <button class="fbtn" onclick="loadTiradas()" style="font-size:.7rem;">&#128260;</button>
+        </div>
+        <div id="ruleta-historial" style="max-height:260px;overflow-y:auto;"></div>
+      </div>
     </div>
 
     <!-- PANEL VIDEO DEL HERO -->
@@ -4072,7 +4191,7 @@ function showView(name) {
     galAdminActive = isAdminLogged;
     renderGaleria();
   }
-  if (name === 'blogs') { renderBlogs(); }
+  if (name === 'blogs') { renderBlogs(); registrarVisitaBlogs(); }
   if (name === 'resenas') { syncResenas(); renderResenas(); }
   if (name === 'reviews') {
     loadAndRenderReviews();
@@ -9223,6 +9342,497 @@ function finExportCSV() {
 }
 
 // ==========================================
+// RULETA DE PREMIOS (presencial, solo admin)
+// ==========================================
+var PREMIOS_DEFAULT = [
+  { txt: '20% OFF en Fonda Cafe',              peso: 18, tipo: 'aliado' },
+  { txt: '20% OFF en Faebarbershop',           peso: 18, tipo: 'aliado' },
+  { txt: '10% OFF en tu proximo lavado',       peso: 20, tipo: 'casa'   },
+  { txt: 'Una fragancia a eleccion',           peso: 12, tipo: 'casa'   },
+  { txt: 'Buena suerte, intentalo de nuevo',   peso: 22, tipo: 'nada'   },
+  { txt: '30% OFF en tu kit de lavado en seco',peso:  8, tipo: 'casa'   },
+  { txt: 'Una vuelta gratis en un Audi A5',    peso:  2, tipo: 'top'    }
+];
+var PREMIOS = PREMIOS_DEFAULT.map(function(p){ return Object.assign({}, p); });
+var _rl = { ang: 0, vel: 0, girando: false, carga: 0, cargando: false, raf: null, cargaRaf: null, resultado: null };
+
+function premioColor(tipo, i) {
+  if (tipo === 'top')  return { bg: '#f0b559', fg: '#0A1128' };
+  if (tipo === 'nada') return { bg: '#243050', fg: 'rgba(224,225,226,.7)' };
+  return (i % 2 === 0) ? { bg: '#CD7F32', fg: '#0A1128' } : { bg: '#14213d', fg: '#E0E1E2' };
+}
+
+function ruletaDibujar() {
+  var cv = document.getElementById('ruleta-canvas');
+  if (!cv) return;
+  var ctx = cv.getContext('2d');
+  var W = cv.width, H = cv.height, cx = W/2, cy = H/2, R = Math.min(W,H)/2 - 12;
+  ctx.clearRect(0,0,W,H);
+
+  var total = PREMIOS.reduce(function(s,p){ return s + (p.peso||1); }, 0) || 1;
+  var ang = _rl.ang;
+
+  for (var i = 0; i < PREMIOS.length; i++) {
+    var p = PREMIOS[i];
+    var frac = (p.peso||1) / total;
+    var fin = ang + frac * Math.PI * 2;
+    var col = premioColor(p.tipo, i);
+
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, R, ang, fin);
+    ctx.closePath();
+    ctx.fillStyle = col.bg;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(10,17,40,.55)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // texto radial
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(ang + (fin - ang) / 2);
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = col.fg;
+    var alto = frac * Math.PI * 2 * R;          // arco disponible
+    var fs = Math.max(9, Math.min(15, alto * 0.42));
+    ctx.font = '700 ' + fs.toFixed(0) + 'px Inter, sans-serif';
+    var palabras = p.txt.split(' ');
+    var lineas = [], actual = '';
+    var maxChars = Math.max(10, Math.floor((R - 42) / (fs * 0.5)));
+    for (var w = 0; w < palabras.length; w++) {
+      var prueba = actual ? actual + ' ' + palabras[w] : palabras[w];
+      if (prueba.length > maxChars && actual) { lineas.push(actual); actual = palabras[w]; }
+      else actual = prueba;
+    }
+    if (actual) lineas.push(actual);
+    if (lineas.length > 3) { lineas = lineas.slice(0,3); lineas[2] += '...'; }
+    var y0 = -((lineas.length - 1) * fs * 0.58);
+    for (var l = 0; l < lineas.length; l++) {
+      ctx.fillText(lineas[l], R - 16, y0 + l * fs * 1.16);
+    }
+    ctx.restore();
+    ang = fin;
+  }
+
+  // aro exterior
+  ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI*2);
+  ctx.strokeStyle = '#CD7F32'; ctx.lineWidth = 6; ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx, cy, R + 5, 0, Math.PI*2);
+  ctx.strokeStyle = 'rgba(205,127,50,.28)'; ctx.lineWidth = 2; ctx.stroke();
+
+  // centro
+  ctx.beginPath(); ctx.arc(cx, cy, 42, 0, Math.PI*2);
+  var g = ctx.createLinearGradient(cx-42, cy-42, cx+42, cy+42);
+  g.addColorStop(0, '#1C2541'); g.addColorStop(1, '#0A1128');
+  ctx.fillStyle = g; ctx.fill();
+  ctx.strokeStyle = '#CD7F32'; ctx.lineWidth = 3; ctx.stroke();
+  ctx.fillStyle = '#CD7F32';
+  ctx.font = '800 13px JetBrains Mono, monospace';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('SC', cx, cy);
+}
+
+// que porcion quedo bajo la flecha (arriba = -90 grados)
+function ruletaGanador() {
+  var total = PREMIOS.reduce(function(s,p){ return s + (p.peso||1); }, 0) || 1;
+  var dosPi = Math.PI * 2;
+  var objetivo = ((-Math.PI/2 - _rl.ang) % dosPi + dosPi) % dosPi;
+  var acum = 0;
+  for (var i = 0; i < PREMIOS.length; i++) {
+    var frac = (PREMIOS[i].peso||1) / total;
+    var sig = acum + frac * dosPi;
+    if (objetivo >= acum && objetivo < sig) return i;
+    acum = sig;
+  }
+  return PREMIOS.length - 1;
+}
+
+function abrirRuleta() {
+  if (!isAdminLogged) { toast('Solo el admin'); return; }
+  document.getElementById('ruleta-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  ajustarRuleta();
+  ruletaReset();
+  loadPremios(function(){ ruletaDibujar(); });
+}
+
+function cerrarRuleta() {
+  document.getElementById('ruleta-modal').classList.remove('open');
+  document.body.style.overflow = '';
+  if (_rl.raf) cancelAnimationFrame(_rl.raf);
+  if (_rl.cargaRaf) cancelAnimationFrame(_rl.cargaRaf);
+  _rl.girando = false; _rl.cargando = false;
+}
+
+function ajustarRuleta() {
+  var cv = document.getElementById('ruleta-canvas');
+  if (!cv) return;
+  var lado = Math.min(window.innerWidth * 0.88, window.innerHeight * 0.52, 440);
+  lado = Math.max(260, Math.floor(lado));
+  cv.width = lado; cv.height = lado;
+  cv.style.width = lado + 'px'; cv.style.height = lado + 'px';
+  ruletaDibujar();
+}
+
+function ruletaReset() {
+  _rl.resultado = null;
+  _rl.carga = 0;
+  document.getElementById('rl-resultado').classList.remove('show');
+  document.getElementById('rl-charge').style.width = '0%';
+  document.getElementById('rl-charge-lbl').textContent = 'Mantené presionado para tomar impulso';
+  var b = document.getElementById('rl-btn');
+  b.disabled = false; b.textContent = 'GIRAR'; b.classList.remove('cargando');
+  ruletaDibujar();
+}
+
+// ── impulso: cuanto mas tiempo presionado, mas rapido gira ──
+function ruletaEmpezarCarga() {
+  if (_rl.girando || _rl.cargando) return;
+  _rl.cargando = true;
+  _rl.carga = 0;
+  var t0 = performance.now();
+  var btn = document.getElementById('rl-btn');
+  btn.classList.add('cargando');
+  btn.textContent = 'SOLTÁ!';
+  var fill = document.getElementById('rl-charge');
+  var lbl = document.getElementById('rl-charge-lbl');
+  function paso() {
+    if (!_rl.cargando) return;
+    var t = (performance.now() - t0) / 1600;          // 1.6s para llegar al maximo
+    _rl.carga = Math.min(1, t);
+    fill.style.width = (_rl.carga * 100).toFixed(0) + '%';
+    lbl.textContent = _rl.carga < 0.35 ? 'Flojo...' : (_rl.carga < 0.7 ? 'Bien!' : (_rl.carga < 0.99 ? 'Fuerte!!' : 'A FONDO!!!'));
+    // la ruleta ya vibra mientras carga
+    _rl.ang += 0.006 + _rl.carga * 0.02;
+    ruletaDibujar();
+    _rl.cargaRaf = requestAnimationFrame(paso);
+  }
+  paso();
+}
+
+function ruletaSoltar() {
+  if (!_rl.cargando) return;
+  _rl.cargando = false;
+  if (_rl.cargaRaf) cancelAnimationFrame(_rl.cargaRaf);
+  var btn = document.getElementById('rl-btn');
+  btn.classList.remove('cargando');
+  btn.disabled = true;
+  btn.textContent = 'GIRANDO...';
+  document.getElementById('rl-charge-lbl').textContent = '';
+  // un toque de azar para que dos impulsos iguales no den lo mismo
+  _rl.vel = 0.18 + _rl.carga * 0.52 + Math.random() * 0.06;
+  _rl.girando = true;
+  ruletaGirar();
+}
+
+function ruletaGirar() {
+  function frame() {
+    if (!_rl.girando) return;
+    _rl.ang = (_rl.ang + _rl.vel) % (Math.PI * 2);
+    _rl.vel *= 0.982;                                  // rozamiento
+    ruletaDibujar();
+    if (_rl.vel < 0.0022) {
+      _rl.girando = false;
+      ruletaFin();
+      return;
+    }
+    _rl.raf = requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+function ruletaFin() {
+  var i = ruletaGanador();
+  var p = PREMIOS[i];
+  _rl.resultado = p;
+  var box = document.getElementById('rl-resultado');
+  var nada = p.tipo === 'nada';
+  document.getElementById('rl-res-lbl').innerHTML = nada ? '&#128533; Esta vez no' : '&#127881; Ganaste';
+  document.getElementById('rl-res-premio').textContent = p.txt;
+  var notas = {
+    nada:   'Gracias por participar igual! Contale del taller a alguien que lo necesite.',
+    aliado: 'Anotá el premio y avisale al comercio. Válido presentando el comprobante.',
+    top:    '¡Premio mayor! Coordinamos la vuelta por WhatsApp cuando quieras.',
+    casa:   'Anotalo en la orden cuando venga. Válido por 30 días.'
+  };
+  document.getElementById('rl-res-nota').textContent = notas[p.tipo] || notas.casa;
+  box.classList.add('show');
+  var btn = document.getElementById('rl-btn');
+  btn.disabled = false;
+  btn.textContent = 'GIRAR DE NUEVO';
+  document.getElementById('rl-charge').style.width = '0%';
+  document.getElementById('rl-charge-lbl').textContent = 'Mantené presionado para tomar impulso';
+  // queda registrado para saber que se entrego
+  db.collection('ruleta_tiradas').add({
+    premio: p.txt, tipo: p.tipo,
+    fecha: new Date().toLocaleDateString('es-AR'),
+    createdAt: new Date().toISOString()
+  }).catch(function(e){ console.error('ruleta registro:', e); });
+}
+
+// ── controles: mantener presionado (mouse y dedo) ──
+(function() {
+  function init() {
+    var btn = document.getElementById('rl-btn');
+    if (!btn) return;
+    btn.addEventListener('pointerdown', function(e){ e.preventDefault(); if (!btn.disabled) ruletaEmpezarCarga(); });
+    btn.addEventListener('pointerup', function(e){ e.preventDefault(); ruletaSoltar(); });
+    btn.addEventListener('pointerleave', function(){ if (_rl.cargando) ruletaSoltar(); });
+    btn.addEventListener('pointercancel', function(){ if (_rl.cargando) ruletaSoltar(); });
+    // barra espaciadora: comodo si lo usan con notebook
+    document.addEventListener('keydown', function(e){
+      if (e.code !== 'Space') return;
+      var m = document.getElementById('ruleta-modal');
+      if (!m || !m.classList.contains('open')) return;
+      e.preventDefault();
+      if (!btn.disabled && !_rl.cargando) ruletaEmpezarCarga();
+    });
+    document.addEventListener('keyup', function(e){
+      if (e.code === 'Space' && _rl.cargando) { e.preventDefault(); ruletaSoltar(); }
+    });
+    window.addEventListener('resize', function(){
+      var m = document.getElementById('ruleta-modal');
+      if (m && m.classList.contains('open')) ajustarRuleta();
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+
+// ── ADMIN: premios configurables ──
+function loadPremios(cb) {
+  db.collection('config').doc('ruleta').get().then(function(d) {
+    var data = d.exists ? d.data() : null;
+    if (data && data.premios && data.premios.length) PREMIOS = data.premios;
+    if (cb) cb();
+    renderPremiosAdmin();
+  }).catch(function(e){ console.error(e); if (cb) cb(); });
+}
+
+function toggleRuletaPanel() {
+  var p = document.getElementById('ruleta-panel');
+  if (!p) return;
+  var abierto = p.style.display !== 'none';
+  p.style.display = abierto ? 'none' : 'block';
+  if (!abierto) { loadPremios(); loadTiradas(); }
+}
+
+function renderPremiosAdmin() {
+  var box = document.getElementById('ruleta-lista-admin');
+  if (!box) return;
+  var total = PREMIOS.reduce(function(s,p){ return s + (p.peso||1); }, 0) || 1;
+  box.innerHTML = PREMIOS.map(function(p, i) {
+    var pct = ((p.peso||1)/total*100).toFixed(1);
+    return '<div class="rl-admin-row">' +
+      '<input type="text" class="finput" value="' + blogEsc(p.txt) + '" oninput="PREMIOS[' + i + '].txt=this.value" style="flex:1;min-width:170px;padding:.4rem .6rem;font-size:.82rem;">' +
+      '<select class="finput" onchange="PREMIOS[' + i + '].tipo=this.value;renderPremiosAdmin()" style="width:auto;padding:.4rem;font-size:.75rem;">' +
+        ['casa','aliado','top','nada'].map(function(t){
+          var nom = { casa:'Del taller', aliado:'Comercio aliado', top:'Premio mayor', nada:'Sin premio' }[t];
+          return '<option value="' + t + '"' + (p.tipo===t?' selected':'') + '>' + nom + '</option>';
+        }).join('') +
+      '</select>' +
+      '<label style="font-size:.66rem;color:var(--muted);display:flex;align-items:center;gap:.3rem;">Peso' +
+        '<input type="number" min="1" max="100" value="' + (p.peso||1) + '" oninput="PREMIOS[' + i + '].peso=parseInt(this.value,10)||1;renderPremiosAdmin()" style="width:56px;background:none;border:1px solid var(--g3);color:inherit;padding:.25rem;"></label>' +
+      '<span style="font-size:.68rem;color:var(--m);min-width:46px;text-align:right;">' + pct + '%</span>' +
+      '<button class="fbtn" onclick="PREMIOS.splice(' + i + ',1);renderPremiosAdmin()" style="border-color:rgba(224,60,60,.4);color:#e03c3c;font-size:.68rem;">&times;</button>' +
+    '</div>';
+  }).join('');
+}
+
+function agregarPremio() {
+  if (PREMIOS.length >= 12) { toast('Maximo 12 premios'); return; }
+  PREMIOS.push({ txt: 'Nuevo premio', peso: 10, tipo: 'casa' });
+  renderPremiosAdmin();
+}
+
+function resetPremios() {
+  if (!confirm('Volver a los premios originales?')) return;
+  PREMIOS = PREMIOS_DEFAULT.map(function(p){ return Object.assign({}, p); });
+  renderPremiosAdmin();
+}
+
+function guardarPremios() {
+  if (!isAdminLogged) { toast('Solo el admin'); return; }
+  if (!PREMIOS.length) { toast('Tiene que haber al menos un premio'); return; }
+  var limpios = PREMIOS.filter(function(p){ return (p.txt||'').trim(); })
+    .map(function(p){ return { txt: p.txt.trim(), peso: Math.max(1, p.peso||1), tipo: p.tipo || 'casa' }; });
+  if (!limpios.length) { toast('Los premios necesitan texto'); return; }
+  PREMIOS = limpios;
+  db.collection('config').doc('ruleta').set({ premios: limpios, updatedAt: new Date().toISOString() })
+    .then(function(){ toast('Premios guardados'); renderPremiosAdmin(); ruletaDibujar(); })
+    .catch(function(e){ console.error(e); toast('Error al guardar'); });
+}
+
+function loadTiradas() {
+  var box = document.getElementById('ruleta-historial');
+  if (!box) return;
+  box.innerHTML = '<div style="color:var(--muted);font-size:.8rem;">Cargando...</div>';
+  db.collection('ruleta_tiradas').orderBy('createdAt','desc').limit(60).get().then(function(snap) {
+    if (snap.empty) { box.innerHTML = '<div style="color:var(--muted);font-size:.8rem;">Todavia no se giro la ruleta.</div>'; return; }
+    var porPremio = {}, filas = [];
+    snap.forEach(function(d) {
+      var t = d.data();
+      porPremio[t.premio] = (porPremio[t.premio]||0) + 1;
+      filas.push(t);
+    });
+    var resumen = Object.keys(porPremio).sort(function(a,b){ return porPremio[b]-porPremio[a]; })
+      .map(function(k){ return '<span style="display:inline-block;background:rgba(205,127,50,.1);border:1px solid rgba(205,127,50,.25);padding:.2rem .55rem;margin:0 .3rem .3rem 0;font-size:.7rem;">' + blogEsc(k) + ' <strong style="color:var(--m);">' + porPremio[k] + '</strong></span>'; }).join('');
+    box.innerHTML = '<div style="margin-bottom:.8rem;">' + resumen + '</div>' +
+      filas.slice(0,25).map(function(t) {
+        return '<div style="display:flex;justify-content:space-between;gap:.8rem;padding:.4rem .6rem;border-bottom:1px solid rgba(255,255,255,.05);font-size:.78rem;">' +
+          '<span>' + blogEsc(t.premio) + '</span>' +
+          '<span style="color:var(--muted);font-size:.7rem;white-space:nowrap;">' + blogEsc(t.fecha||'') + '</span></div>';
+      }).join('');
+  }).catch(function(e){ console.error(e); box.innerHTML = '<div style="color:var(--muted);font-size:.8rem;">Error al cargar.</div>'; });
+}
+
+// ==========================================
+// CONTADOR DE VISITAS DE BLOGS
+// ==========================================
+var _visitas = [];        // documentos por dia
+var _visTotales = {};     // lecturas historicas por blog
+
+function visHoy() {
+  var d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+// una visita por persona por dia (no se infla al recargar)
+function visYaContado(clave) {
+  try {
+    var k = 'sc_vis_' + clave + '_' + visHoy();
+    if (localStorage.getItem(k)) return true;
+    localStorage.setItem(k, '1');
+    return false;
+  } catch(e) { return false; }
+}
+
+function visInc() {
+  return firebase.firestore.FieldValue.increment(1);
+}
+
+// Entrada a la seccion Blogs
+function registrarVisitaBlogs() {
+  if (isAdminLogged) return;                 // no contamos las visitas del admin
+  if (visYaContado('seccion')) return;
+  var dia = visHoy();
+  db.collection('visitas').doc(dia).set({ fecha: dia, seccion: visInc() }, { merge: true })
+    .catch(function(e){ console.error('visitas seccion:', e); });
+}
+
+// Lectura de un blog puntual
+function registrarVistaPost(id) {
+  if (!id || isAdminLogged) return;
+  if (visYaContado('post_' + id)) return;
+  var dia = visHoy();
+  var porDia = { fecha: dia, posts: {} };
+  porDia.posts[id] = visInc();
+  db.collection('visitas').doc(dia).set(porDia, { merge: true })
+    .catch(function(e){ console.error('visitas post:', e); });
+  var totales = {};
+  totales[id] = visInc();
+  db.collection('visitas_totales').doc('blogs').set(totales, { merge: true })
+    .catch(function(e){ console.error('visitas totales:', e); });
+}
+
+// ── ADMIN ──
+function toggleVisitas() {
+  var p = document.getElementById('visitas-panel');
+  if (!p) return;
+  var abierto = p.style.display !== 'none';
+  p.style.display = abierto ? 'none' : 'block';
+  if (abierto) return;
+  var m = document.getElementById('vi-mes');
+  if (m && !m.value) m.value = visHoy().slice(0,7);
+  loadVisitas();
+}
+
+function loadVisitas() {
+  var cargas = [
+    db.collection('visitas').orderBy('fecha','desc').limit(400).get().then(function(snap){
+      _visitas = [];
+      snap.forEach(function(d){ _visitas.push(Object.assign({ id: d.id }, d.data())); });
+    }),
+    db.collection('visitas_totales').doc('blogs').get().then(function(d){
+      _visTotales = d.exists ? d.data() : {};
+    })
+  ];
+  Promise.all(cargas).then(renderVisitas).catch(function(e){
+    console.error(e);
+    renderVisitas();
+  });
+}
+
+function renderVisitas() {
+  if (!document.getElementById('visitas-panel')) return;
+  var mes = (document.getElementById('vi-mes') || {}).value || visHoy().slice(0,7);
+  var hoy = visHoy();
+
+  var delMes = _visitas.filter(function(v){ return (v.fecha||'').indexOf(mes) === 0; });
+  function lecturasDe(v) {
+    var n = 0, p = v.posts || {};
+    for (var k in p) if (Object.prototype.hasOwnProperty.call(p,k)) n += (p[k]||0);
+    return n;
+  }
+  var secMes = delMes.reduce(function(s,v){ return s + (v.seccion||0); }, 0);
+  var lecMes = delMes.reduce(function(s,v){ return s + lecturasDe(v); }, 0);
+  var docHoy = _visitas.filter(function(v){ return v.fecha === hoy; })[0] || {};
+  var secHoy = docHoy.seccion || 0;
+  var lecHoy = lecturasDe(docHoy);
+  var diasConDatos = delMes.filter(function(v){ return (v.seccion||0) > 0; }).length;
+
+  document.getElementById('vi-cards').innerHTML =
+    viCard(secHoy, 'Entradas hoy') +
+    viCard(lecHoy, 'Lecturas hoy') +
+    viCard(secMes, 'Entradas del mes') +
+    viCard(lecMes, 'Lecturas del mes') +
+    viCard(diasConDatos ? (secMes/diasConDatos).toFixed(1) : '0', 'Promedio por dia');
+
+  // barras por dia
+  var partes = mes.split('-');
+  var diasEnMes = new Date(parseInt(partes[0],10), parseInt(partes[1],10), 0).getDate();
+  var mapa = {};
+  delMes.forEach(function(v){ mapa[v.fecha] = (v.seccion||0) + lecturasDe(v); });
+  var max = 1;
+  for (var k in mapa) if (mapa[k] > max) max = mapa[k];
+  var barras = '';
+  for (var d = 1; d <= diasEnMes; d++) {
+    var f = mes + '-' + String(d).padStart(2,'0');
+    var val = mapa[f] || 0;
+    var alto = val ? Math.max(4, Math.round(val/max*100)) : 2;
+    barras += '<div class="vi-bar" style="height:' + alto + '%;' + (val ? '' : 'background:rgba(255,255,255,.07);') + '" title="' + f + ': ' + val + ' visitas">' +
+      (d === 1 || d % 5 === 0 ? '<span>' + d + '</span>' : '') + '</div>';
+  }
+  document.getElementById('vi-bars').innerHTML = barras;
+  document.getElementById('vi-mes-lbl').textContent = '(' + finNombreMes(mes) + ')';
+
+  // tabla por blog
+  var filas = (_blogsCache || []).map(function(b) {
+    var totalHist = _visTotales[b.id] || 0;
+    var delMesBlog = delMes.reduce(function(s,v){ return s + ((v.posts||{})[b.id] || 0); }, 0);
+    return { titulo: b.titulo, hist: totalHist, mes: delMesBlog, fecha: b.fecha };
+  }).sort(function(a,b){ return b.hist - a.hist; });
+
+  var t = document.getElementById('vi-tabla');
+  if (!filas.length) {
+    t.innerHTML = '<tr><td style="color:var(--muted);font-size:.82rem;padding:1rem 0;">Todavia no hay blogs publicados.</td></tr>';
+  } else {
+    t.innerHTML = '<tr><th>Blog</th><th style="text-align:right;">Este mes</th><th style="text-align:right;">Total</th></tr>' +
+      filas.map(function(f) {
+        return '<tr><td>' + blogEsc(f.titulo) +
+          '<div style="font-size:.66rem;color:var(--muted);">' + blogEsc(f.fecha||'') + '</div></td>' +
+          '<td class="vi-num">' + f.mes + '</td><td class="vi-num">' + f.hist + '</td></tr>';
+      }).join('');
+  }
+}
+
+function viCard(n, label) {
+  return '<div class="vi-card"><div class="vi-card-n">' + n + '</div><div class="vi-card-l">' + label + '</div></div>';
+}
+
+// ==========================================
 // BLOGSITOS (posts con secciones de texto + fotos)
 // ==========================================
 var blogSecs = [];        // borrador del admin: [{texto, fotos:[urls]}]
@@ -9400,8 +10010,11 @@ function blogRenderGrid() {
     var del = isAdminLogged
       ? '<button onclick="event.stopPropagation();deleteBlog(\'' + b.id + '\')" style="position:absolute;top:.7rem;left:.7rem;z-index:2;background:rgba(224,60,60,.9);border:none;color:#fff;font-size:.65rem;font-weight:700;padding:.3rem .6rem;cursor:pointer;">Borrar</button>'
       : '';
+    var vistas = isAdminLogged
+      ? '<div class="blog-card-count" style="right:auto;left:.7rem;top:2.4rem;background:rgba(155,89,182,.85);border-color:rgba(255,255,255,.3);">&#128065; ' + (_visTotales[b.id] || 0) + '</div>'
+      : '';
     return '<div class="blog-card" onclick="openBlogPost(\'' + b.id + '\')">' +
-      del +
+      del + vistas +
       '<div class="blog-card-count">&#128247; ' + (b.fotoCount || 0) + '</div>' +
       '<div class="blog-card-img"><img src="' + b.cover + '" alt="' + blogEsc(b.titulo) + '" loading="lazy"></div>' +
       '<div class="blog-card-info">' +
@@ -9447,6 +10060,7 @@ function openBlogPost(id) {
     '<button class="btn" style="max-width:300px;" onclick="closeBlogPost();showView(\'booking\');window.scrollTo(0,0);">Quiero esto para mi auto</button>' +
     '</div>';
   document.getElementById('blog-post-content').innerHTML = html;
+  registrarVistaPost(b.id);
   var ov = document.getElementById('blog-overlay');
   ov.classList.add('open');
   ov.scrollTop = 0;
@@ -9902,7 +10516,7 @@ function loadCupones() {
       out += '<div style="display:flex;align-items:center;justify-content:space-between;gap:.8rem;background:rgba(255,255,255,.03);border:1px solid ' + (isActive ? 'rgba(0,200,117,.3)' : 'rgba(255,255,255,.08)') + ';border-radius:0;padding:.7rem 1rem;flex-wrap:wrap;">' +
         '<div>' +
           '<span style="font-family:monospace;font-weight:800;font-size:.95rem;color:' + (isActive ? '#ffc107' : 'var(--muted)') + ';letter-spacing:1px;' + (isActive ? '' : 'text-decoration:line-through;') + '">' + c.code + '</span>' +
-          '<span style="font-size:.72rem;color:var(--muted);margin-left:.8rem;">' + c.pct + '% OFF &middot; ' + (c.fecha || '') + ' &middot; Score: ' + (c.score || '-') + '</span>' +
+          '<span style="font-size:.72rem;color:var(--muted);margin-left:.8rem;">' + (c.pct ? c.pct + '% OFF' : (c.desc || c.premio || 'Premio')) + ' &middot; ' + (c.fecha || '') + ' &middot; ' + (c.source === 'ruleta' ? 'Ruleta' : ('Score: ' + (c.score || '-'))) + '</span>' +
         '</div>' +
         '<div style="display:flex;gap:.4rem;">' +
           (isActive
@@ -10741,6 +11355,34 @@ loadAntesDespues();
       </div>
       <div class="sd-warn" id="sd-warn" style="display:none;"><span>&#9888;&#65039;</span><span id="sd-warn-txt"></span></div>
       <button class="sd-cta" id="sd-cta" onclick="reservarDesdeDetalle()"></button>
+    </div>
+  </div>
+</div>
+
+<!-- ======== RULETA DE PREMIOS (presencial) ======== -->
+<div id="ruleta-modal">
+  <button class="rl-close" onclick="cerrarRuleta()">&#10005;</button>
+  <div class="rl-inner">
+    <div class="rl-logo">SUNSHINE CARS</div>
+    <div class="rl-sub">Gir&aacute; y gan&aacute; tu premio</div>
+
+    <div class="rl-stage">
+      <div class="rl-pointer"></div>
+      <canvas id="ruleta-canvas" width="440" height="440"></canvas>
+    </div>
+
+    <div class="rl-charge-wrap">
+      <div class="rl-charge-track"><div class="rl-charge-fill" id="rl-charge"></div></div>
+      <div class="rl-charge-lbl" id="rl-charge-lbl">Manten&eacute; presionado para tomar impulso</div>
+    </div>
+
+    <button class="rl-btn" id="rl-btn">GIRAR</button>
+
+    <div class="rl-resultado" id="rl-resultado">
+      <div class="rl-res-lbl" id="rl-res-lbl">&#127881; Ganaste</div>
+      <div class="rl-res-premio" id="rl-res-premio"></div>
+      <div class="rl-res-nota" id="rl-res-nota"></div>
+      <button class="game-btn" onclick="ruletaReset()" style="margin-top:1rem;">&#128260; Otra persona</button>
     </div>
   </div>
 </div>

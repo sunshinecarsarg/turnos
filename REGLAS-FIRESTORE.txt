@@ -1,0 +1,143 @@
+========================================================
+REGLAS DE SEGURIDAD PARA FIRESTORE - SunshineCars Detail
+Actualizado: septiembre 2026
+========================================================
+
+POR QUE ESTO IMPORTA
+--------------------
+Hoy la base de datos esta ABIERTA: cualquier persona que entre al sitio
+puede leer y escribir cualquier coleccion desde la consola del navegador.
+Eso significa que un desconocido podria ver cuanta plata tiene cada uno
+en la Caja, los telefonos de tus clientes, o borrarte movimientos.
+
+Las reglas de abajo dejan publico solo lo que tiene que serlo (galeria,
+blogs, resenas, servicios, tienda, marcas, antes/despues) y cierran lo
+privado (caja, cuentas, turnos, cupones, visitas, ruleta).
+
+COMO APLICARLAS (5 minutos, una sola vez)
+-----------------------------------------
+1. Entra a https://console.firebase.google.com
+2. Elegi el proyecto "sunshinecars-turnos"
+3. Menu de la izquierda: Firestore Database
+4. Pestana "Reglas" (arriba)
+5. Borra TODO lo que hay y pega el bloque de abajo
+6. Boton "Publicar"
+
+DESPUES DE PUBLICAR, PROBA:
+- Entrar con /#admin-sc2024 e iniciar sesion
+- Cargar un movimiento en Caja
+- Abrir la pestana Blogs desde una ventana de incognito (para contar como
+  visitante) y despues revisar que el contador de Visitas haya sumado
+- Publicar una marca y un antes/despues
+Si algo dejara de andar, avisame y lo ajustamos.
+
+
+========================= PEGAR DESDE ACA =========================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Admin = usuario con email y contrasena (no anonimo)
+    function esAdmin() {
+      return request.auth != null
+        && request.auth.token.firebase.sign_in_provider == 'password';
+    }
+
+    // ---------- PRIVADO: solo el admin ----------
+
+    // Plata: quien tiene cuanto, ingresos y egresos
+    match /movimientos/{doc} {
+      allow read, write: if esAdmin();
+    }
+
+    // Premios entregados en la ruleta (la ruleta es solo presencial)
+    match /ruleta_tiradas/{doc} {
+      allow read, write: if esAdmin();
+    }
+
+    // Datos personales de clientes
+    match /turnos/{doc} {
+      allow create: if true;              // el cliente reserva su turno
+      allow read, update, delete: if esAdmin();
+    }
+
+    // Comentarios privados de clientes
+    match /recomendaciones/{doc} {
+      allow create: if true;
+      allow read, update, delete: if esAdmin();
+    }
+
+    // Cupones del juego: el jugador genera el suyo, solo vos los ves/validas
+    match /cupones/{doc} {
+      allow create: if true;
+      allow read, update, delete: if esAdmin();
+    }
+
+    // ---------- CONTADORES DE VISITAS ----------
+    // El visitante suma 1 al abrir Blogs o leer un blog, pero no puede
+    // ver las estadisticas: esas las lee solo el admin.
+    match /visitas/{dia} {
+      allow create, update: if true;
+      allow read: if esAdmin();
+      allow delete: if esAdmin();
+    }
+    match /visitas_totales/{doc} {
+      allow create, update: if true;
+      allow read: if esAdmin();
+      allow delete: if esAdmin();
+    }
+
+    // ---------- CONFIGURACION ----------
+    // Lo que el sitio necesita mostrar al visitante queda publico;
+    // el resto (cuentas de la Caja, premios de la ruleta) es privado.
+    match /config/{doc} {
+      allow read: if doc in ['vtv', 'herovideo'];
+      allow read, write: if esAdmin();
+    }
+
+    // ---------- PUBLICO PARA LEER, ADMIN PARA ESCRIBIR ----------
+    match /servicios/{doc}       { allow read: if true; allow write: if esAdmin(); }
+    match /galeria/{doc}         { allow read: if true; allow write: if esAdmin(); }
+    match /blogs/{doc}           { allow read: if true; allow write: if esAdmin(); }
+    match /productos/{doc}       { allow read: if true; allow write: if esAdmin(); }
+    match /google_reviews/{doc}  { allow read: if true; allow write: if esAdmin(); }
+    match /alianzas/{doc}        { allow read: if true; allow write: if esAdmin(); }
+    match /reviews/{doc}         { allow read: if true; allow write: if esAdmin(); }
+    match /marcas/{doc}          { allow read: if true; allow write: if esAdmin(); }
+    match /antesdespues/{doc}    { allow read: if true; allow write: if esAdmin(); }
+
+    // Resenas: el cliente deja la suya, solo el admin edita o borra
+    match /resenas/{doc} {
+      allow read, create: if true;
+      allow update, delete: if esAdmin();
+    }
+
+    // Todo lo demas: cerrado
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+========================= HASTA ACA =========================
+
+
+NOTAS
+-----
+CUPONES: con estas reglas el jugador puede generar su cupon pero no
+leerlo de la base. El juego igual le muestra el codigo en pantalla al
+ganarlo, asi que funciona normal. Vos los ves y validas desde el panel.
+
+RESENAS: el cliente sigue pudiendo escribir la suya, pero ya no puede
+editar ni borrar las de otros.
+
+CONTADORES DE VISITAS: para que un visitante pueda sumar su visita, la
+escritura tiene que estar permitida. Alguien con conocimientos podria
+inflar el numero a proposito. No hay forma de evitarlo del todo sin
+pagar un servidor intermedio, y como son numeros informativos (no plata
+ni datos de clientes) el riesgo es bajo. Lo importante es que NADIE
+puede leer tus estadisticas: eso queda solo para vos.
+
+CUENTAS DE LA CAJA: config/cuentas (los nombres de las personas) queda
+privado. Solo vos lo ves.
