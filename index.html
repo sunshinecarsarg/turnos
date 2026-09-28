@@ -2484,6 +2484,7 @@ body.light-mode .blog-close-btn:hover { color:#fff; }
         <button class="fbtn" onclick="toggleHeroVideoPanel()" style="border-color:rgba(205,127,50,.4);color:#CD7F32;">&#127916; Video del hero</button>
         <button class="fbtn" onclick="toggleVisitas()" style="border-color:rgba(155,89,182,.5);color:#b07cc6;">&#128202; Visitas</button>
         <button class="fbtn" onclick="abrirRuleta()" style="border-color:rgba(205,127,50,.6);color:#CD7F32;font-weight:700;">&#127920; Ruleta</button>
+        <button class="fbtn" onclick="toggleEmailPanel()" style="border-color:rgba(77,163,255,.4);color:#4da3ff;">✉️ Mail</button>
         <button class="fbtn" onclick="toggleRuletaPanel()" style="border-color:rgba(205,127,50,.3);color:rgba(205,127,50,.75);" title="Editar premios">&#9881;</button>
         <button class="fbtn" id="stats-toggle-btn" onclick="toggleStats()" style="border-color:rgba(205,127,50,.4);color:var(--m);">Ver estadisticas</button>
         <button class="logout-btn" onclick="doLogout()">Cerrar sesion</button>
@@ -2593,6 +2594,46 @@ body.light-mode .blog-close-btn:hover { color:#fff; }
       </div>
       <div style="font-size:.72rem; color:var(--muted); margin-bottom:1rem;">Los clientes ganan cupones jugando. Verific&aacute; el c&oacute;digo ac&aacute; antes de aplicar el descuento. Un c&oacute;digo = un uso.</div>
       <div id="cupones-list" style="display:flex; flex-direction:column; gap:.5rem;"></div>
+    </div>
+
+    <!-- PANEL ENVIO POR MAIL -->
+    <div id="email-panel" style="display:none; background:var(--g1); border:1px solid rgba(77,163,255,.3); border-radius:0; padding:1.5rem; margin-bottom:1.5rem;">
+      <div style="font-weight:800; color:#4da3ff; margin-bottom:.3rem;">&#9993;&#65039; Env&iacute;o de premios por mail</div>
+      <div id="em-estado" style="font-size:.78rem;margin-bottom:1rem;"></div>
+
+      <div style="font-size:.74rem;color:var(--muted);line-height:1.7;margin-bottom:1.2rem;background:rgba(77,163,255,.06);border-left:3px solid rgba(77,163,255,.4);padding:.9rem 1rem;">
+        <strong style="color:var(--white);">La web no puede mandar mails por su cuenta</strong> (no tiene un servidor propio),
+        as&iacute; que usa <strong style="color:var(--white);">EmailJS</strong>, un servicio gratuito hasta 200 mails por mes.
+        Es una sola vez, toma unos 10 minutos:
+        <ol style="margin:.7rem 0 0 1.1rem;padding:0;">
+          <li style="margin-bottom:.35rem;">Cre&aacute; una cuenta en <a href="https://www.emailjs.com" target="_blank" rel="noopener" style="color:#4da3ff;">emailjs.com</a> (gratis).</li>
+          <li style="margin-bottom:.35rem;">En <em>Email Services</em> conect&aacute; tu Gmail &rarr; te da un <strong>Service ID</strong>.</li>
+          <li style="margin-bottom:.35rem;">En <em>Email Templates</em> cre&aacute; una plantilla &rarr; te da un <strong>Template ID</strong>.
+            Dentro del texto pon&eacute; estas etiquetas: <code style="color:var(--m);">{{to_name}}</code>,
+            <code style="color:var(--m);">{{premio}}</code>, <code style="color:var(--m);">{{codigo}}</code>,
+            <code style="color:var(--m);">{{instrucciones}}</code>. En el campo &quot;To Email&quot; pon&eacute; <code style="color:var(--m);">{{to_email}}</code>.</li>
+          <li style="margin-bottom:.35rem;">En <em>Account</em> copi&aacute; tu <strong>Public Key</strong>.</li>
+          <li>Peg&aacute; los tres datos ac&aacute; abajo y guard&aacute;.</li>
+        </ol>
+        <div style="margin-top:.7rem;">Mientras tanto la ruleta funciona igual: genera el c&oacute;digo y lo manda por WhatsApp.</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.8rem;margin-bottom:.9rem;">
+        <div><label class="flabel">Public Key</label><input type="text" class="finput" id="em-public" placeholder="Ej: 4xAbC..."></div>
+        <div><label class="flabel">Service ID</label><input type="text" class="finput" id="em-service" placeholder="Ej: service_ab12cd"></div>
+        <div><label class="flabel">Template ID</label><input type="text" class="finput" id="em-template" placeholder="Ej: template_xy34zw"></div>
+      </div>
+      <label style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;cursor:pointer;margin-bottom:1rem;">
+        <input type="checkbox" id="em-activo" checked> Enviar los premios por mail
+      </label>
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
+        <button class="btn" onclick="guardarEmailCfg()" style="max-width:190px;">Guardar</button>
+        <button class="fbtn" onclick="probarEmail()">Mandar un mail de prueba</button>
+      </div>
+      <div style="font-size:.7rem;color:var(--muted);margin-top:.9rem;line-height:1.55;">
+        Estos tres datos son p&uacute;blicos por dise&ntilde;o (EmailJS los usa desde el navegador) y no dan acceso a tu casilla.
+        Igual, en tu cuenta de EmailJS activ&aacute; el l&iacute;mite por dominio para que solo funcionen desde sunshinecarsdetail.com.
+      </div>
     </div>
 
     <!-- PANEL VISITAS -->
@@ -8832,6 +8873,7 @@ function publishAntesDespues() {
     _baNuevo = { antes: null, despues: null };
     baRenderDrop('antes'); baRenderDrop('despues');
     loadAntesDespues();
+loadEmailCfg();
   }).catch(function(e) {
     if (btn) btn.disabled = false;
     console.error(e); toast('Error al publicar');
@@ -9345,7 +9387,7 @@ function finExportCSV() {
 // RULETA DE PREMIOS (presencial, solo admin)
 // ==========================================
 var PREMIOS_DEFAULT = [
-  { txt: '20% OFF en Fonda Cafe',              peso: 18, tipo: 'aliado' },
+  { txt: '20% OFF en Fonda Cafe',              peso: 18, tipo: 'aliado', fisico: true },
   { txt: '20% OFF en Faebarbershop',           peso: 18, tipo: 'aliado' },
   { txt: '10% OFF en tu proximo lavado',       peso: 20, tipo: 'casa'   },
   { txt: 'Una fragancia a eleccion',           peso: 12, tipo: 'casa'   },
@@ -9547,10 +9589,25 @@ function ruletaFin() {
   var i = ruletaGanador();
   var p = PREMIOS[i];
   _rl.resultado = p;
+  _rl.codigo = null;
   var box = document.getElementById('rl-resultado');
   var nada = p.tipo === 'nada';
   document.getElementById('rl-res-lbl').innerHTML = nada ? '&#128533; Esta vez no' : '&#127881; Ganaste';
   document.getElementById('rl-res-premio').textContent = p.txt;
+  // premios con codigo: se piden los datos para enviarselo
+  var pideCodigo = !nada && !p.fisico;
+  document.getElementById('rl-captura').style.display = pideCodigo ? 'block' : 'none';
+  document.getElementById('rl-codigo-box').style.display = 'none';
+  document.getElementById('rl-envio-estado').textContent = '';
+  ['rl-nombre','rl-email','rl-tel'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+  var be = document.getElementById('rl-enviar-btn');
+  if (be) { be.disabled = false; be.textContent = 'Generar y enviar codigo'; }
+  if (p.fisico && p.tipo !== 'nada') {
+    document.getElementById('rl-res-nota').textContent = 'Entregale el cupon en mano. No hace falta codigo.';
+    box.classList.add('show');
+    ruletaPostFin(p);
+    return;
+  }
   var notas = {
     nada:   'Gracias por participar igual! Contale del taller a alguien que lo necesite.',
     aliado: 'Anotá el premio y avisale al comercio. Válido presentando el comprobante.',
@@ -9559,6 +9616,10 @@ function ruletaFin() {
   };
   document.getElementById('rl-res-nota').textContent = notas[p.tipo] || notas.casa;
   box.classList.add('show');
+  ruletaPostFin(p);
+}
+
+function ruletaPostFin(p) {
   var btn = document.getElementById('rl-btn');
   btn.disabled = false;
   btn.textContent = 'GIRAR DE NUEVO';
@@ -9566,10 +9627,175 @@ function ruletaFin() {
   document.getElementById('rl-charge-lbl').textContent = 'Mantené presionado para tomar impulso';
   // queda registrado para saber que se entrego
   db.collection('ruleta_tiradas').add({
-    premio: p.txt, tipo: p.tipo,
+    premio: p.txt, tipo: p.tipo, fisico: !!p.fisico,
     fecha: new Date().toLocaleDateString('es-AR'),
     createdAt: new Date().toISOString()
   }).catch(function(e){ console.error('ruleta registro:', e); });
+}
+
+// ── codigo del premio, guardado y envio ──
+var _emailCfg = null;
+
+function loadEmailCfg() {
+  db.collection('config').doc('email').get().then(function(d){
+    _emailCfg = d.exists ? d.data() : null;
+    renderEmailCfg();
+  }).catch(function(e){ console.error('config email:', e); });
+}
+
+function emailConfigurado() {
+  return !!(_emailCfg && _emailCfg.activo !== false && _emailCfg.publicKey && _emailCfg.serviceId && _emailCfg.templateId);
+}
+
+// codigo unico tipo SCR-AB12C
+function genCodigoRuleta() {
+  var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', out = '';
+  for (var i = 0; i < 5; i++) out += chars[Math.floor(Math.random() * chars.length)];
+  return 'SCR-' + out;
+}
+
+function ruletaEnviarPremio() {
+  var p = _rl.resultado;
+  if (!p) return;
+  var nombre = (document.getElementById('rl-nombre').value || '').trim();
+  var email  = (document.getElementById('rl-email').value || '').trim();
+  var tel    = (document.getElementById('rl-tel').value || '').trim();
+  var estado = document.getElementById('rl-envio-estado');
+
+  if (!nombre) { estado.textContent = 'Falta el nombre'; return; }
+  if (!email && !tel) { estado.textContent = 'Pone el email o el WhatsApp'; return; }
+  if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { estado.textContent = 'Ese email no parece valido'; return; }
+
+  var btn = document.getElementById('rl-enviar-btn');
+  btn.disabled = true;
+  estado.textContent = 'Generando codigo...';
+
+  var codigo = genCodigoRuleta();
+  _rl.codigo = codigo;
+
+  // se guarda como cupon: aparece en el panel de Cupones para validarlo despues
+  db.collection('cupones').add({
+    code: codigo,
+    premio: p.txt,
+    desc: p.txt,
+    tipo: p.tipo,
+    source: 'ruleta',
+    nombre: nombre,
+    email: email,
+    tel: tel,
+    estado: 'activo',
+    fecha: new Date().toLocaleDateString('es-AR'),
+    createdAt: new Date().toISOString()
+  }).then(function() {
+    mostrarCodigoRuleta(codigo, nombre, tel, p);
+    if (email && emailConfigurado()) {
+      estado.textContent = 'Enviando el mail...';
+      enviarMailPremio(nombre, email, codigo, p, function(ok, msg) {
+        estado.innerHTML = ok
+          ? '<span style="color:#00c875;">&#10004; Enviado a ' + blogEsc(email) + '</span>'
+          : '<span style="color:#e03c3c;">No se pudo enviar el mail (' + blogEsc(msg||'') + '). Pasale el codigo por WhatsApp.</span>';
+      });
+    } else if (email) {
+      estado.innerHTML = '<span style="color:#ffc107;">Codigo guardado. El envio por mail no esta configurado todavia: pasaselo por WhatsApp.</span>';
+    } else {
+      estado.innerHTML = '<span style="color:#00c875;">&#10004; Codigo guardado</span>';
+    }
+  }).catch(function(e) {
+    console.error(e);
+    btn.disabled = false;
+    estado.textContent = 'Error al guardar el codigo. Proba de nuevo.';
+  });
+}
+
+function mostrarCodigoRuleta(codigo, nombre, tel, p) {
+  document.getElementById('rl-captura').style.display = 'none';
+  document.getElementById('rl-codigo-box').style.display = 'block';
+  document.getElementById('rl-codigo').textContent = codigo;
+  var msg = 'Hola ' + nombre + '! Ganaste en la ruleta de SunshineCars Detail:\n\n' +
+            '✨ ' + p.txt + '\n' +
+            'Codigo: ' + codigo + '\n\n' +
+            (p.tipo === 'aliado'
+              ? 'Presentalo en el comercio para usarlo.'
+              : 'Presentalo cuando vengas al taller. Calle 28 N 596, La Plata.');
+  var limpio = (tel || '').replace(/\D/g, '');
+  var url = limpio
+    ? 'https://wa.me/' + (limpio.length <= 10 ? '549' + limpio : limpio) + '?text=' + encodeURIComponent(msg)
+    : 'https://wa.me/?text=' + encodeURIComponent(msg);
+  document.getElementById('rl-wa').setAttribute('href', url);
+}
+
+function enviarMailPremio(nombre, email, codigo, p, cb) {
+  function mandar() {
+    try {
+      emailjs.init({ publicKey: _emailCfg.publicKey });
+      emailjs.send(_emailCfg.serviceId, _emailCfg.templateId, {
+        to_email: email,
+        to_name: nombre,
+        premio: p.txt,
+        codigo: codigo,
+        instrucciones: p.tipo === 'aliado'
+          ? 'Presentalo en el comercio para usarlo.'
+          : 'Presentalo cuando vengas al taller: Calle 28 N 596, La Plata.'
+      }).then(function(){ cb(true); }).catch(function(err){
+        console.error('emailjs:', err);
+        cb(false, (err && (err.text || err.message)) || 'error');
+      });
+    } catch(e) { console.error(e); cb(false, e.message); }
+  }
+  if (typeof emailjs !== 'undefined') { mandar(); return; }
+  var sc = document.createElement('script');
+  sc.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
+  sc.onload = mandar;
+  sc.onerror = function(){ cb(false, 'no se pudo cargar el servicio de mail'); };
+  document.head.appendChild(sc);
+}
+
+// ── ADMIN: configuracion del envio por mail ──
+function toggleEmailPanel() {
+  var p = document.getElementById('email-panel');
+  if (!p) return;
+  var abierto = p.style.display !== 'none';
+  p.style.display = abierto ? 'none' : 'block';
+  if (!abierto) loadEmailCfg();
+}
+
+function renderEmailCfg() {
+  var c = _emailCfg || {};
+  var set = function(id, v){ var e = document.getElementById(id); if (e) e.value = v || ''; };
+  set('em-public', c.publicKey); set('em-service', c.serviceId); set('em-template', c.templateId);
+  var ac = document.getElementById('em-activo');
+  if (ac) ac.checked = c.activo !== false;
+  var est = document.getElementById('em-estado');
+  if (est) est.innerHTML = emailConfigurado()
+    ? '<span style="color:#00c875;">&#10004; Configurado: los premios se env&iacute;an por mail</span>'
+    : '<span style="color:#ffc107;">Sin configurar: los premios se pasan por WhatsApp</span>';
+}
+
+function guardarEmailCfg() {
+  if (!isAdminLogged) { toast('Solo el admin'); return; }
+  var cfg = {
+    publicKey: (document.getElementById('em-public').value || '').trim(),
+    serviceId: (document.getElementById('em-service').value || '').trim(),
+    templateId: (document.getElementById('em-template').value || '').trim(),
+    activo: document.getElementById('em-activo').checked,
+    updatedAt: new Date().toISOString()
+  };
+  db.collection('config').doc('email').set(cfg).then(function(){
+    _emailCfg = cfg; renderEmailCfg(); toast('Configuracion guardada');
+  }).catch(function(e){ console.error(e); toast('Error al guardar'); });
+}
+
+function probarEmail() {
+  if (!emailConfigurado()) { toast('Primero completa los tres datos y guarda'); return; }
+  var dest = prompt('A que mail mando la prueba?');
+  if (!dest) return;
+  var est = document.getElementById('em-estado');
+  est.textContent = 'Enviando prueba...';
+  enviarMailPremio('Prueba', dest, 'SCR-PRUEBA', { txt: 'Premio de prueba', tipo: 'casa' }, function(ok, msg) {
+    est.innerHTML = ok
+      ? '<span style="color:#00c875;">&#10004; Prueba enviada a ' + blogEsc(dest) + '. Revisa la bandeja (y el spam).</span>'
+      : '<span style="color:#e03c3c;">Fallo: ' + blogEsc(msg||'') + '</span>';
+  });
 }
 
 // ── controles: mantener presionado (mouse y dedo) ──
@@ -11382,6 +11608,22 @@ loadAntesDespues();
       <div class="rl-res-lbl" id="rl-res-lbl">&#127881; Ganaste</div>
       <div class="rl-res-premio" id="rl-res-premio"></div>
       <div class="rl-res-nota" id="rl-res-nota"></div>
+
+      <div id="rl-captura" style="display:none;margin-top:1.1rem;padding-top:1.1rem;border-top:1px solid rgba(205,127,50,.25);text-align:left;">
+        <div style="font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:.6rem;text-align:center;">Datos para enviarle el c&oacute;digo</div>
+        <input type="text" class="finput" id="rl-nombre" placeholder="Nombre" maxlength="40" style="margin-bottom:.5rem;">
+        <input type="email" class="finput" id="rl-email" placeholder="Email" maxlength="80" style="margin-bottom:.5rem;">
+        <input type="tel" class="finput" id="rl-tel" placeholder="WhatsApp (opcional)" maxlength="20" style="margin-bottom:.8rem;">
+        <button class="btn" id="rl-enviar-btn" onclick="ruletaEnviarPremio()" style="width:100%;max-width:none;">Generar y enviar c&oacute;digo</button>
+        <div id="rl-envio-estado" style="font-size:.72rem;color:var(--muted);margin-top:.5rem;min-height:16px;text-align:center;"></div>
+      </div>
+
+      <div id="rl-codigo-box" style="display:none;margin-top:1rem;">
+        <div style="font-size:.6rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);">C&oacute;digo del premio</div>
+        <div id="rl-codigo" style="font-family:'JetBrains Mono',monospace;font-size:1.7rem;font-weight:800;color:var(--m);letter-spacing:3px;margin:.25rem 0 .7rem;"></div>
+        <a id="rl-wa" href="#" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:.5rem;background:#25D366;color:#fff;text-decoration:none;padding:.65rem 1.4rem;font-weight:700;font-size:.85rem;">&#128242; Mandar por WhatsApp</a>
+      </div>
+
       <button class="game-btn" onclick="ruletaReset()" style="margin-top:1rem;">&#128260; Otra persona</button>
     </div>
   </div>

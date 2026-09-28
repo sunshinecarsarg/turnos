@@ -92,7 +92,7 @@ service cloud.firestore {
     // Lo que el sitio necesita mostrar al visitante queda publico;
     // el resto (cuentas de la Caja, premios de la ruleta) es privado.
     match /config/{doc} {
-      allow read: if doc in ['vtv', 'herovideo'];
+      allow read: if doc in ['vtv', 'herovideo', 'email'];
       allow read, write: if esAdmin();
     }
 
@@ -141,3 +141,9 @@ puede leer tus estadisticas: eso queda solo para vos.
 
 CUENTAS DE LA CAJA: config/cuentas (los nombres de las personas) queda
 privado. Solo vos lo ves.
+
+ENVIO DE MAILS: config/email guarda los tres datos de EmailJS. Son
+publicos por diseno (el navegador los necesita para mandar el mail) y no
+dan acceso a tu casilla, por eso quedan en la lista de lectura publica.
+En tu cuenta de EmailJS activa el limite por dominio para que solo
+funcionen desde sunshinecarsdetail.com.
