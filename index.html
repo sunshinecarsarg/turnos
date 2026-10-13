@@ -1340,6 +1340,98 @@ body.light-mode .ba-cap-d { color:#3a4a5c; }
 .ba-drop:hover { border-color:var(--m); background:rgba(205,127,50,.1); }
 .ba-drop img { max-width:100%; max-height:120px; object-fit:contain; }
 
+/* ======== RESERVA EN UN CLICK + SERVICIOS COMPACTOS ======== */
+/* CTA principal del hero */
+.cta-wa {
+  display:inline-flex; align-items:center; justify-content:center; gap:.65rem;
+  background:linear-gradient(135deg,#25D366,#1da851); color:#fff; text-decoration:none;
+  padding:1.15rem 2.4rem; font-family:'Inter',sans-serif;
+  font-size:1rem; font-weight:800; letter-spacing:1.2px;
+  box-shadow:0 10px 30px rgba(37,211,102,.32);
+  transition:transform .25s, box-shadow .25s, filter .25s;
+  width:100%; max-width:380px;
+}
+.cta-wa:hover { transform:translateY(-3px); box-shadow:0 16px 40px rgba(37,211,102,.45); filter:brightness(1.06); }
+.cta-wa:active { transform:translateY(-1px); }
+.cta-nota { font-size:.72rem; color:var(--muted); margin-top:.6rem; letter-spacing:.5px; }
+.cta-sec {
+  display:inline-block; margin-top:.9rem; background:none; border:none;
+  color:var(--muted); font-size:.75rem; letter-spacing:1.2px; cursor:pointer;
+  text-decoration:underline; text-underline-offset:4px; font-family:'Inter',sans-serif;
+  transition:color .2s;
+}
+.cta-sec:hover { color:var(--m); }
+
+/* datos del taller en una sola linea */
+.hero-datos {
+  display:flex; align-items:center; justify-content:center; gap:.8rem 1.4rem;
+  flex-wrap:wrap; margin-top:1.6rem;
+  font-size:.74rem; color:var(--muted); letter-spacing:.6px;
+}
+.hero-datos b { color:var(--white); font-weight:600; }
+.hero-datos a { color:var(--m); text-decoration:none; border-bottom:1px solid rgba(205,127,50,.4); }
+.hero-datos .sep { color:rgba(205,127,50,.45); }
+body.light-mode .hero-datos b { color:#0d1b2a; }
+
+/* lista compacta de servicios */
+#svc-grid.svc-lista {
+  display:flex; flex-direction:column; gap:1px;
+  background:rgba(205,127,50,.12); border:1px solid rgba(205,127,50,.14);
+  grid-template-columns:none;
+}
+.svc-row {
+  display:flex; align-items:center; gap:.9rem;
+  background:var(--card-bg); padding:.8rem .9rem;
+  cursor:pointer; position:relative;
+  transition:background .25s, padding-left .25s;
+}
+.svc-row::before {
+  content:''; position:absolute; left:0; top:0; bottom:0; width:0;
+  background:var(--m); transition:width .25s;
+}
+.svc-row:hover { background:rgba(205,127,50,.06); padding-left:1.15rem; }
+.svc-row:hover::before { width:3px; }
+.svc-row-img {
+  width:62px; height:62px; flex-shrink:0; object-fit:cover; display:block;
+  background:var(--g2); border:1px solid rgba(205,127,50,.18);
+}
+.svc-row-img.sin-foto {
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.3rem; color:rgba(205,127,50,.5);
+}
+.svc-row-info { flex:1; min-width:0; }
+.svc-row-name {
+  font-family:'JetBrains Mono',monospace; font-size:.82rem; letter-spacing:.3px;
+  color:var(--white); line-height:1.3; margin-bottom:.22rem;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+.svc-row-meta { display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; }
+.svc-row-price { color:var(--m); font-weight:800; font-size:.82rem; }
+.svc-row-dur { font-size:.66rem; color:var(--muted); }
+.svc-row-badge {
+  font-size:.56rem; font-weight:800; letter-spacing:1px; text-transform:uppercase;
+  padding:.12rem .4rem; color:#0A1128; background:var(--m);
+}
+.svc-row-cta {
+  flex-shrink:0; display:inline-flex; align-items:center; gap:.35rem;
+  background:#25D366; color:#fff; border:none; text-decoration:none;
+  padding:.55rem .85rem; font-size:.72rem; font-weight:700;
+  font-family:'Inter',sans-serif; cursor:pointer; white-space:nowrap;
+  transition:filter .2s, transform .2s;
+}
+.svc-row-cta:hover { filter:brightness(1.1); transform:scale(1.04); }
+body.light-mode .svc-row { background:#fff; }
+body.light-mode .svc-row-name { color:#0d1b2a; }
+body.light-mode #svc-grid.svc-lista { background:rgba(0,0,0,.08); border-color:rgba(0,0,0,.1); }
+@media(max-width:420px) {
+  .svc-row { gap:.7rem; padding:.7rem .75rem; }
+  .svc-row-img { width:52px; height:52px; }
+  .svc-row-cta { padding:.5rem .6rem; font-size:.68rem; }
+  .svc-row-name { font-size:.78rem; }
+}
+/* la barra de pasos solo aparece dentro del wizard */
+.steps-bar.oculta { display:none; }
+
 /* ======== PITCH DEL HERO ======== */
 .hero-pitch {
   max-width:560px; margin:1.1rem auto 0;
@@ -1758,42 +1850,29 @@ body.light-mode .blog-close-btn:hover { color:#fff; }
       <p class="bk-sub">Detailing profesional en La Plata</p>
       <p class="hero-pitch">
         <span class="hero-pitch-lead">No es un lavado m&aacute;s. Es recuperar la esencia de tu veh&iacute;culo.</span>
-        Productos de grado profesional, t&eacute;cnica de taller y atenci&oacute;n al detalle en cada superficie.
+        Productos de grado profesional y atenci&oacute;n al detalle en cada superficie.
       </p>
 
-      <!-- BARRA DE UBICACION DESTACADA -->
-      <div style="
-        display:flex; align-items:center; justify-content:center; gap:2rem;
-        flex-wrap:wrap; margin-top:2.2rem;
-        background:rgba(28,37,65,.35); backdrop-filter:blur(10px);
-        border:1px solid rgba(205,127,50,.28);
-        padding:1.15rem 2rem;
-        max-width:620px; margin-left:auto; margin-right:auto;
-      ">
-        <div style="text-align:left;">
-          <div style="font-size:.6rem; letter-spacing:3px; text-transform:uppercase; color:var(--muted); margin-bottom:.3rem;">Nuestro taller</div>
-          <div style="font-family:'JetBrains Mono',monospace; font-size:1.02rem; font-weight:700; letter-spacing:.5px; color:var(--white); line-height:1.2;">Calle 28 N&deg; 596 <span style="color:var(--m);">&middot;</span> La Plata</div>
-          <div style="font-size:.75rem; color:var(--muted); margin-top:.25rem;">Entre Av. 44 y calle 43</div>
-        </div>
-        <a href="https://www.google.com/maps/dir/?api=1&destination=Sunshine+Cars+-+Detail+-+Est%C3%A9tica+Vehicular,+Calle+28+596,+La+Plata" target="_blank" style="
-          display:inline-flex; align-items:center; gap:.6rem;
-          background:none; border:1px solid rgba(205,127,50,.55);
-          color:var(--m); padding:.7rem 1.5rem;
-          text-decoration:none; font-size:.72rem; font-weight:600;
-          letter-spacing:2.5px; text-transform:uppercase;
-          white-space:nowrap; transition:all .3s;
-        " onmouseover="this.style.background='var(--m)';this.style.color='#0A1128'" onmouseout="this.style.background='none';this.style.color='var(--m)'">
-          C&oacute;mo llegar <span style="font-family:'Inter',sans-serif;">&rarr;</span>
+      <!-- RESERVA EN UN CLICK -->
+      <div style="margin-top:1.8rem;">
+        <a class="cta-wa" target="_blank" rel="noopener"
+           href="https://wa.me/5492214387138?text=Hola!%20Quiero%20reservar%20un%20turno%20en%20SunshineCars%20Detail.%20%C2%BFMe%20pas%C3%A1s%20disponibilidad%3F"
+           onclick="if(typeof fbq!=='undefined')fbq('track','Lead',{content_name:'CTA Hero WhatsApp'});">
+          &#128242; Reservar por WhatsApp
         </a>
+        <div class="cta-nota">Te respondemos al toque &middot; Sin formularios</div>
+        <button class="cta-sec" onclick="verServicios()">Ver servicios y precios &darr;</button>
       </div>
 
-      <!-- HORARIOS RAPIDOS -->
-      <div style="display:flex; justify-content:center; align-items:center; gap:1.2rem; flex-wrap:wrap; margin-top:1.2rem; font-size:.72rem; letter-spacing:1px; color:var(--muted);">
-        <span><strong style="color:var(--white); font-weight:600;">LUN &ndash; VIE</strong> &nbsp;08:00 / 11:30 / 15:00</span>
-        <span style="color:rgba(205,127,50,.5);">|</span>
-        <span><strong style="color:var(--white); font-weight:600;">S&Aacute;B</strong> &nbsp;15:30</span>
-        <span style="color:rgba(205,127,50,.5);">|</span>
-        <span><strong style="color:var(--white); font-weight:600;">DOM</strong> &nbsp;08:00 (premium)</span>
+      <!-- DATOS DEL TALLER EN UNA LINEA -->
+      <div class="hero-datos">
+        <span>&#128205; <b>Calle 28 N&deg; 596</b>, La Plata</span>
+        <span class="sep">|</span>
+        <span><b>Lun a Vie</b> 08:00 &middot; 11:30 &middot; 15:00</span>
+        <span class="sep">|</span>
+        <span><b>S&aacute;b</b> 15:30</span>
+        <span class="sep">|</span>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Sunshine+Cars+-+Detail+-+Est%C3%A9tica+Vehicular,+Calle+28+596,+La+Plata" target="_blank" rel="noopener">C&oacute;mo llegar</a>
       </div>
 
       <!-- MARQUEE DE SERVICIOS -->
@@ -1805,7 +1884,7 @@ body.light-mode .blog-close-btn:hover { color:#fff; }
       </div>
     </div>
 
-    <div class="steps-bar" id="steps-bar">
+    <div class="steps-bar oculta" id="steps-bar">
       <div class="sdot active" id="sd1"><div class="dot">1</div><span class="lbl">Servicio</span></div>
       <div class="sline" id="sl1"></div>
       <div class="sdot" id="sd2"><div class="dot">2</div><span class="lbl">Fecha</span></div>
@@ -1863,7 +1942,7 @@ body.light-mode .blog-close-btn:hover { color:#fff; }
         </div>
       </div>
 
-      <button class="btn" id="btn1" onclick="goStep(2)" disabled>Continuar &rarr;</button>
+      <div style="text-align:center;margin-top:1.4rem;"><button class="cta-sec" onclick="reservarOnline()" style="font-size:.78rem;">¿Preferís reservar online y dejar la seña? &rarr;</button></div><button class="btn" id="btn1" onclick="goStep(2)" disabled style="display:none;">Continuar &rarr;</button>
     </div>
 
     <!-- PASO 2 -->
@@ -4423,6 +4502,9 @@ function goStep(n) {
 
   S.step = n;
 
+  var sb = document.getElementById('steps-bar');
+  if (sb) sb.classList.toggle('oculta', n === 1);
+
   if (n === 2) renderCal();
   if (n === 4) updatePayDisplay();
   if (n === 5) renderConfirm();
@@ -4435,55 +4517,75 @@ function goStep(n) {
 // PASO 1 - SERVICIOS
 // ==========================================
 function renderSvcs() {
-  // Track ViewContent when services are viewed
   if (typeof fbq !== 'undefined') fbq('track', 'ViewContent', { content_name: 'Servicios', content_category: 'Detailing' });
+  var grid = document.getElementById('svc-grid');
+  if (!grid) return;
+  grid.className = 'svc-grid svc-lista';
   var html = '';
   for (var i = 0; i < SVCS.length; i++) {
     var s = SVCS[i];
-    if (s.activo === false) continue; // skip disabled services
-    var sel = S.svc && S.svc.id === s.id;
-    // Extra services open WhatsApp instead of booking
-    var cardOnclick = s.isExtra
-      ? 'onclick="window.open(\'https://wa.me/5492214387138?text=\' + encodeURIComponent(\'Hola! Me interesa consultar por el servicio: \' + s.name), \'_blank\')\"'
-      : 'onclick="pickSvc(\'' + s.id + '\')\"';
-    var extraBadge = s.isExtra ? '<div style="position:absolute;top:.5rem;right:.5rem;background:rgba(205,127,50,.15);border:1px solid rgba(205,127,50,.4);color:#CD7F32;font-size:.6rem;font-weight:700;letter-spacing:1.5px;padding:.15rem .5rem;border-radius:0;text-transform:uppercase;">Consultar</div>' : '';
-    var cls = 'svc-card' + (sel && !s.isExtra ? ' sel' : '') + (s.featured ? ' featured' : '');
-    html += '<div class="' + cls + '" ' + cardOnclick + ' style="' + (s.isExtra ? 'border-color:rgba(205,127,50,.25);' : '') + '">';
-    html += extraBadge;
-    if (s.badge) {
-      html += '<div class="svc-badge-x" style="background:' + (s.badgeColor || '#CD7F32') + ';">' + s.badge + '</div>';
-    }
-    html += s.img
-      ? '<div class="svc-card-bg" style="background-image:url(' + s.img + ')"></div>'
-      : '<div class="svc-card-bg svc-noimg"></div>';
-    html += '<div class="svc-name">' + s.name + '</div>';
-    var displayPrice = (S.tipo) 
-      ? '$' + (S.tipo === 'Camioneta / SUV' && s.rawSuv ? s.rawSuv : s.raw).toLocaleString('es-AR')
+    if (s.activo === false) continue;
+
+    // precio segun tipo de vehiculo si ya lo eligio
+    var displayPrice = (S.tipo && s.raw)
+      ? '$' + ((S.tipo === 'Camioneta / SUV' && s.rawSuv ? s.rawSuv : s.raw)).toLocaleString('es-AR')
       : s.price;
-    var priceHtml = '';
-    if (s.precioOld && !s.isExtra) {
-      var base = (S.tipo === 'Camioneta / SUV' && s.rawSuv) ? s.rawSuv : s.raw;
-      priceHtml += '<span class="svc-price-old">$' + s.precioOld.toLocaleString('es-AR') + '</span>';
-      var offPct = Math.round((1 - (base / s.precioOld)) * 100);
-      if (offPct > 0) priceHtml += '<span class="svc-off">-' + offPct + '%</span>';
-    }
-    html += '<div class="svc-price">' + (s.precioOld && !s.isExtra ? priceHtml + '<br>' : '') + displayPrice + '</div>';
-    if (s.allDay) {
-      html += '<div class="svc-allday">Todo el dia - Solo turno 08:00</div>';
-    }
-    html += '<div class="svc-desc">' + s.desc + '</div>';
 
-    html += '<div>';
-    for (var j = 0; j < s.tags.length; j++) {
-      html += '<span class="svc-tag">' + s.tags[j] + '</span>';
-    }
-    html += '</div>';
-    html += '<button class="svc-more" onclick="event.stopPropagation();openSvcDetail(\'' + s.id + '\')">&#8505; VER DETALLES</button>';
-    html += '</div>';
+    // mensaje de WhatsApp ya armado con el servicio
+    var msg = s.isExtra
+      ? 'Hola! Me interesa consultar por el servicio: ' + s.name
+      : 'Hola! Quiero reservar un turno para: ' + s.name + '. ¿Me pasás disponibilidad?';
+    var wa = 'https://wa.me/5492214387138?text=' + encodeURIComponent(msg);
+
+    var foto = s.img
+      ? '<img class="svc-row-img" src="' + s.img + '" alt="' + (s.name||'').replace(/"/g,'&quot;') + '" loading="lazy">'
+      : '<div class="svc-row-img sin-foto">&#128663;</div>';
+
+    var badge = s.badge
+      ? '<span class="svc-row-badge" style="background:' + (s.badgeColor || '#CD7F32') + ';">' + s.badge + '</span>'
+      : (s.isExtra ? '<span class="svc-row-badge" style="background:rgba(205,127,50,.2);color:#CD7F32;">Consultar</span>' : '');
+
+    var dur = s.duracion ? '<span class="svc-row-dur">' + String(s.duracion).replace(/^Tiempo estimado:?\s*/i,'') + '</span>' : '';
+
+    html += '<div class="svc-row" onclick="openSvcDetail(\'' + s.id + '\')">' +
+      foto +
+      '<div class="svc-row-info">' +
+        '<div class="svc-row-name">' + s.name + '</div>' +
+        '<div class="svc-row-meta">' +
+          '<span class="svc-row-price">' + displayPrice + '</span>' + dur + badge +
+        '</div>' +
+      '</div>' +
+      '<a class="svc-row-cta" href="' + wa + '" target="_blank" rel="noopener"' +
+         ' onclick="event.stopPropagation();if(typeof fbq!==\'undefined\')fbq(\'track\',\'Lead\',{content_name:\'' + (s.name||'').replace(/'/g,"") + '\'});">' +
+        '&#128242; ' + (s.isExtra ? 'Consultar' : 'Reservar') +
+      '</a>' +
+    '</div>';
   }
-  // Admin: panel is in admin section, nothing needed here
+  grid.innerHTML = html;
+}
 
-  document.getElementById('svc-grid').innerHTML = html;
+// Baja suave hasta la lista de servicios desde el boton del hero
+function verServicios() {
+  var g = document.getElementById('svc-grid');
+  if (!g) return;
+  var y = g.getBoundingClientRect().top + window.scrollY - 70;
+  window.scrollTo({ top: y, behavior: 'smooth' });
+}
+
+// Arranca el wizard de reserva online (seña) con un servicio ya elegido
+function reservarOnline(id) {
+  if (id) {
+    for (var i = 0; i < SVCS.length; i++) {
+      if (SVCS[i].id === id) { S.svc = SVCS[i]; break; }
+    }
+  }
+  if (!S.svc) { toast('Elegi primero un servicio'); return; }
+  var sb = document.getElementById('steps-bar');
+  if (sb) sb.classList.remove('oculta');
+  var b1 = document.getElementById('btn1');
+  if (b1) b1.disabled = false;
+  goStep(2);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 var editSvcId = null;
@@ -8565,13 +8667,10 @@ function openSvcDetail(id) {
 
   // CTA
   var cta = document.getElementById('sd-cta');
-  if (s.isExtra) {
-    cta.className = 'sd-cta wa';
-    cta.innerHTML = 'Consultar por WhatsApp';
-  } else {
-    cta.className = 'sd-cta';
-    cta.innerHTML = 'Reservar ' + s.name;
-  }
+  cta.className = 'sd-cta wa';
+  cta.innerHTML = s.isExtra ? '&#128242; Consultar por WhatsApp' : '&#128242; Reservar por WhatsApp';
+  var ctaOn = document.getElementById('sd-cta-online');
+  if (ctaOn) ctaOn.style.display = s.isExtra ? 'none' : 'inline-block';
 
   document.getElementById('sd-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -8587,13 +8686,20 @@ function reservarDesdeDetalle() {
   var s = null;
   for (var i = 0; i < SVCS.length; i++) { if (SVCS[i].id === _sdSvcId) { s = SVCS[i]; break; } }
   if (!s) return;
+  var msg = s.isExtra
+    ? 'Hola! Me interesa consultar por el servicio: ' + s.name
+    : 'Hola! Quiero reservar un turno para: ' + s.name + '. ¿Me pasás disponibilidad?';
+  if (typeof fbq !== 'undefined') fbq('track', 'Lead', { content_name: s.name });
   closeSvcDetail();
-  if (s.isExtra) {
-    window.open('https://wa.me/5492214387138?text=' + encodeURIComponent('Hola! Me interesa consultar por el servicio: ' + s.name), '_blank');
-    return;
-  }
+  window.open('https://wa.me/5492214387138?text=' + encodeURIComponent(msg), '_blank');
+}
+
+// desde el detalle, para quien prefiere dejar la seña online
+function reservarOnlineDesdeDetalle() {
+  var id = _sdSvcId;
+  closeSvcDetail();
   showView('booking');
-  setTimeout(function(){ pickSvc(s.id); }, 150);
+  setTimeout(function(){ reservarOnline(id); }, 150);
 }
 
 document.addEventListener('keydown', function(e) {
@@ -11581,6 +11687,9 @@ loadAntesDespues();
       </div>
       <div class="sd-warn" id="sd-warn" style="display:none;"><span>&#9888;&#65039;</span><span id="sd-warn-txt"></span></div>
       <button class="sd-cta" id="sd-cta" onclick="reservarDesdeDetalle()"></button>
+      <div style="text-align:center;margin-top:.8rem;">
+        <button class="cta-sec" id="sd-cta-online" onclick="reservarOnlineDesdeDetalle()">o reservar online y dejar la seña</button>
+      </div>
     </div>
   </div>
 </div>
