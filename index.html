@@ -11976,42 +11976,6 @@ loadAntesDespues();
 </script>
 
 
-<!-- ======== CHAT IA ======== -->
-<button class="chat-bubble" onclick="toggleChat()" id="chat-bubble" aria-label="Abrir chat">
-  &#128172;
-  <span class="chat-unread" id="chat-unread" style="display:none;">1</span>
-</button>
-
-<div class="chat-window" id="chat-window">
-  <div class="chat-header">
-    <div class="chat-header-info">
-      <div class="chat-avatar">&#128663;</div>
-      <div>
-        <div class="chat-name" id="chat-title">Sunshine AI</div>
-        <div class="chat-status" id="chat-subtitle">&#9679; En linea</div>
-      </div>
-    </div>
-    <button class="chat-close" onclick="toggleChat()">&#10005;</button>
-  </div>
-  <div class="chat-messages" id="chat-messages"></div>
-  <div class="chat-suggestions" id="chat-suggestions">
-    <button onclick="cbStart()">&#128197; Reservar turno</button>
-    <button onclick="cbConsultarPrecio()">&#128176; Consultar precio</button>
-    <button onclick="chatSug('¿En qué zonas trabajan?')">&#128205; Zonas</button>
-    <button onclick="chatSug('¿Cuáles son los horarios?')">&#128336; Horarios</button>
-  </div>
-  <div class="chat-footer">
-    <label class="chat-file-btn" id="chat-file-btn" title="Adjuntar comprobante">
-      &#128206;
-      <input type="file" accept="image/*,application/pdf" onchange="cbFileSelected(this.files[0])">
-    </label>
-    <input type="text" class="chat-input" id="chat-input"
-      placeholder="Ej: tengo un Toyota Hilux..."
-      onkeypress="if(event.key==='Enter')sendChat()">
-    <button class="chat-send" onclick="sendChat()">&#10148;</button>
-  </div>
-</div>
-
 <!-- FOOTER -->
 
 <!-- ======== RESENAS GOOGLE ======== -->
