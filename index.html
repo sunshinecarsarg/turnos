@@ -11380,6 +11380,16 @@ function mkLimpiarLogo(src, cb) {
   im.src = src;
 }
 
+// sitio oficial de cada marca en su pais de origen (si en el admin no se cargo otro link)
+function mkWebOficial(nombre) {
+  var n = (nombre || '').toLowerCase();
+  if (n.indexOf('fireball') !== -1) return 'https://www.fireballkorea.com';   // Corea
+  if (n.indexOf('gyeon') !== -1) return 'https://gyeon.co.kr';               // Corea
+  if (n.indexOf('koch') !== -1) return 'https://www.koch-chemie.com/de';     // Alemania
+  if (n.indexOf('menzerna') !== -1) return 'https://www.menzerna.com';       // Alemania
+  return '';
+}
+
 // mismo peso visual para todos: los logos largos van mas bajos, los compactos mas altos
 function mkTam(r) {
   if (!r) return '';
@@ -11406,8 +11416,9 @@ function renderMarcasPublic() {
     var cls = 'mk-item' + (m.color ? ' color' : '');
     var inner = '<img src="' + (m._limpio || m.logo) + '" alt="' + mkEsc(m.nombre) + '" loading="lazy"' + (m._limpio ? mkTam(m._ratio) : ' style="opacity:0"') + '>' +
                 '<span class="mk-name">' + mkEsc(m.nombre) + '</span>';
-    return m.link
-      ? '<a class="' + cls + '" href="' + mkEsc(m.link) + '" target="_blank" rel="noopener">' + inner + '</a>'
+    var link = m.link || mkWebOficial(m.nombre);
+    return link
+      ? '<a class="' + cls + '" href="' + mkEsc(link) + '" target="_blank" rel="noopener" title="' + mkEsc(m.nombre) + ' - sitio oficial">' + inner + '</a>'
       : '<div class="' + cls + '">' + inner + '</div>';
   }).join('');
   // Menzerna: hasta que se suba su logo en Admin > Marcas, se muestra como texto con el mismo estilo
@@ -12287,6 +12298,14 @@ body.light-mode .mk-item img { filter:brightness(0) !important; opacity:.7 !impo
 .mk-texto:hover { color:#e30613 !important; }
 body.light-mode .mk-texto { color:rgba(0,0,0,.7) !important; }
 @media(max-width:600px) { .mk-texto { font-size:1.2rem; } }
+
+/* al pasar el mouse: color original con un borde blanco fino alrededor de las letras */
+.mk-item:hover img {
+  filter:drop-shadow(1.2px 0 0 #fff) drop-shadow(-1.2px 0 0 #fff) drop-shadow(0 1.2px 0 #fff) drop-shadow(0 -1.2px 0 #fff) !important;
+}
+.mk-texto:hover { -webkit-text-stroke:1.6px #fff; paint-order:stroke fill; }
+body.light-mode .mk-item:hover img { filter:drop-shadow(1.2px 0 0 #0A1128) drop-shadow(-1.2px 0 0 #0A1128) drop-shadow(0 1.2px 0 #0A1128) drop-shadow(0 -1.2px 0 #0A1128) !important; }
+body.light-mode .mk-texto:hover { -webkit-text-stroke-color:#0A1128; }
 </style>
 </body>
 </html>
