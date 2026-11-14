@@ -4781,6 +4781,41 @@ function svcPortadaMatch(item) {
   return { svc: found[0], img: conFoto ? conFoto.img : null, count: found.length };
 }
 
+// Servicios marcados "En portada" desde el admin (los que se muestran en la pagina de inicio y usa el asistente)
+function svcsPortada() {
+  return SVCS.filter(function(s){ return s.portada === true && s.activo !== false; });
+}
+// Lista para el asistente y la reserva: los de portada si existen; si no, los activos de siempre
+function svcsPublicos() {
+  var p = svcsPortada();
+  if (p.length) return p;
+  // todavia no se crearon en el admin: mismos 6 de la portada, con precio y datos del servicio viejo que coincide
+  return SVC_PORTADA.map(function(item) {
+    var m = svcPortadaMatch(item), s = m ? m.svc : null, usar = s && !item.ppf;
+    return { id: s ? s.id : 'cat-' + item.key, name: item.ppf ? 'PPF \u00b7 Film de protecci\u00f3n' : item.name,
+             raw: usar ? (s.raw || 0) : 0, rawSuv: usar ? (s.rawSuv || s.raw || 0) : 0,
+             desc: item.desc, allDay: usar ? !!s.allDay : false, ppf: !!item.ppf };
+  });
+}
+function cbPrecioTxt(p) { return p ? '$' + p.toLocaleString('es-AR') : 'a consultar'; }
+function svcEsPpf(s) { return s.ppf === true || /\bppf\b/i.test(s.name || ''); }
+
+// Modelo de cada tarjeta: sale del admin si hay servicios "En portada"; si todavia no se crearon, usa la lista fija
+function svcTarjetas() {
+  var p = svcsPortada();
+  if (p.length) {
+    return p.map(function(s) {
+      return { s: s, name: s.name, desc: s.desc || '', img: s.img || null, ppf: svcEsPpf(s), key: s.id, tag: s.badge || '' };
+    });
+  }
+  return SVC_PORTADA.map(function(item) {
+    var m = svcPortadaMatch(item), s = m ? m.svc : null;
+    return { s: s, name: item.name, desc: (s && s.desc && s.desc.length > 20) ? s.desc : item.desc,
+             img: m ? m.img : null, ppf: !!item.ppf, key: item.key,
+             tag: item.ppf ? 'Nuevo' : ((m && m.count > 1) ? m.count + ' niveles' : '') };
+  });
+}
+
 var _svcsTracked = false;
 function renderSvcs() {
   if (!_svcsTracked && typeof fbq !== 'undefined') { _svcsTracked = true; fbq('track', 'ViewContent', { content_name: 'Servicios', content_category: 'Detailing' }); }
@@ -4788,46 +4823,78 @@ function renderSvcs() {
   if (!grid) return;
   grid.className = 'svc-grid svc-big';
   var html = '';
-  SVC_PORTADA.forEach(function(item, idx) {
-    var m = svcPortadaMatch(item);
-    var s = m ? m.svc : null;
+  svcTarjetas().forEach(function(c, idx) {
+    var s = c.s;
     var precio = '';
-    if (s && s.raw && !s.isExtra) {
+    if (c.ppf) precio = 'Armá tu protección';
+    else if (s && s.raw && !s.isExtra) {
       var p = (S.tipo === 'Camioneta / SUV' && s.rawSuv) ? s.rawSuv : s.raw;
       precio = 'Desde $' + p.toLocaleString('es-AR');
     }
-    if (item.ppf) precio = 'Armá tu protección';
-    var desc = (s && s.desc && s.desc.length > 20) ? s.desc : item.desc;
-    var msg = item.ppf
+    var msg = c.ppf
       ? 'Hola! Quiero consultar por PPF (film de protección de pintura).'
-      : 'Hola! Quiero consultar por ' + item.name.toLowerCase() + '. ¿Me pasás precio y disponibilidad?';
+      : 'Hola! Quiero consultar por ' + c.name.toLowerCase() + '. ¿Me pasás precio y disponibilidad?';
     var wa = 'https://wa.me/' + WA_NUM + '?text=' + encodeURIComponent(msg);
-    var bg = m && m.img
-      ? '<div class="svcb-bg" style="background-image:url(\'' + m.img + '\')"></div>'
-      : '<div class="svcb-bg svcb-sinfoto"><span>0' + (idx + 1) + '</span></div>';
-    var abrir = item.ppf
-      ? 'ppfScroll()'
-      : (s ? 'openSvcDetail(\'' + s.id + '\')' : 'window.open(\'' + wa + '\',\'_blank\')');
-    var nivel = (m && m.count > 1) ? '<span class="svcb-tag">' + m.count + ' niveles</span>' : '';
-    if (item.ppf) nivel = '<span class="svcb-tag">Nuevo</span>';
-    html += '<article class="svcb' + (item.ppf ? ' svcb-ppf' : '') + '" onclick="' + abrir + '" tabindex="0" ' +
+    var bg = c.img
+      ? '<div class="svcb-bg" style="background-image:url(\'' + c.img + '\')"></div>'
+      : '<div class="svcb-bg svcb-sinfoto"><span>' + (idx < 9 ? '0' : '') + (idx + 1) + '</span></div>';
+    var abrir = c.ppf ? 'ppfScroll()' : (s ? 'openSvcDetail(\'' + s.id + '\')' : 'window.open(\'' + wa + '\',\'_blank\')');
+    html += '<article class="svcb' + (c.ppf ? ' svcb-ppf' : '') + '" onclick="' + abrir + '" tabindex="0" ' +
         'onkeydown="if(event.key===\'Enter\'){' + abrir.replace(/"/g,'&quot;') + '}">' +
       bg + '<div class="svcb-grad"></div>' +
       '<div class="svcb-body">' +
-        '<div class="svcb-num">0' + (idx + 1) + nivel + '</div>' +
-        '<h3 class="svcb-name">' + item.name + '</h3>' +
-        '<p class="svcb-desc">' + desc + '</p>' +
+        '<div class="svcb-num">' + (idx < 9 ? '0' : '') + (idx + 1) + (c.tag ? '<span class="svcb-tag">' + c.tag + '</span>' : '') + '</div>' +
+        '<h3 class="svcb-name">' + c.name + '</h3>' +
+        '<p class="svcb-desc">' + c.desc + '</p>' +
         (precio ? '<div class="svcb-price">' + precio + '</div>' : '<div class="svcb-price svcb-consultar">Precio según vehículo</div>') +
         '<div class="svcb-actions">' +
-          (item.ppf
+          (c.ppf
             ? '<button class="svcb-btn" onclick="event.stopPropagation();ppfScroll()">Elegir partes &rarr;</button>'
             : (s ? '<button class="svcb-btn" onclick="event.stopPropagation();openSvcDetail(\'' + s.id + '\')">Ver detalle</button>' : '')) +
-          '<a class="svcb-wa" href="' + wa + '" target="_blank" rel="noopener" onclick="event.stopPropagation();if(typeof fbq!==\'undefined\')fbq(\'track\',\'Lead\',{content_name:\'' + item.key + '\'});">' + WA_ICO + ' Consultar</a>' +
+          '<a class="svcb-wa" href="' + wa + '" target="_blank" rel="noopener" onclick="event.stopPropagation();if(typeof fbq!==\'undefined\')fbq(\'track\',\'Lead\',{content_name:\'' + String(c.key).replace(/'/g, '') + '\'});">' + WA_ICO + ' Consultar</a>' +
         '</div>' +
       '</div>' +
     '</article>';
   });
   grid.innerHTML = html;
+}
+
+// ---- ADMIN: crear los 6 servicios de la portada (una sola vez) ----
+function crearServiciosPortada() {
+  if (svcsPortada().length) { toast('Ya hay servicios en portada'); return; }
+  if (!confirm('Se van a crear los 6 servicios de la portada (cuero, cristales, acrílico, cerámico, grafeno y PPF). Los servicios viejos no se borran: quedan en la lista pero fuera de la portada. ¿Seguimos?')) return;
+  var batch = db.batch(), base = Date.now();
+  SVC_PORTADA.forEach(function(item, i) {
+    var m = svcPortadaMatch(item), old = m ? m.svc : null;
+    var raw = (old && old.raw && !item.ppf) ? old.raw : 0;
+    var doc = {
+      name: item.name.replace(' · Film de protección', ''),
+      desc: item.desc,
+      raw: raw,
+      rawSuv: (old && old.rawSuv && !item.ppf) ? old.rawSuv : raw,
+      price: raw ? 'Desde $' + raw.toLocaleString('es-AR') : 'Consultar',
+      tags: [], allDay: false, isLavado: false, isExtra: false,
+      activo: true, portada: true, ppf: !!item.ppf,
+      img: m ? (m.img || null) : null,
+      detalle: (old && old.detalle) || '', incluye: (old && old.incluye) || [], duracion: (old && old.duracion) || '',
+      orden: base + i
+    };
+    if (item.ppf) doc.name = 'PPF · Film de protección';
+    batch.set(db.collection('servicios').doc(), doc);
+  });
+  batch.commit().then(function() {
+    toast('Listo! Los 6 servicios de la portada ya se pueden editar');
+    loadSVCS(function(){ renderSvcs(); renderSvcsAdminList(); });
+  }).catch(function(e){ console.error(e); toast('No se pudo crear. ¿Iniciaste sesión como admin?'); });
+}
+
+function togglePortadaSvc(btn) {
+  var id = btn.getAttribute('data-id');
+  var sv = SVCS.find(function(s){ return s.id === id; });
+  if (!sv) return;
+  db.collection('servicios').doc(id).update({ portada: !(sv.portada === true) }).then(function() {
+    loadSVCS(function(){ renderSvcs(); renderSvcsAdminList(); });
+  }).catch(function(e){ console.error(e); toast('Error al guardar'); });
 }
 
 // Baja suave hasta la lista de servicios desde el boton del hero
@@ -6731,18 +6798,26 @@ function renderSvcsAdminList() {
     return;
   }
   var html = '';
+  var enPortada = svcsPortada().length;
+  html += '<div style="padding:1rem;margin-bottom:1rem;border:1px solid rgba(205,127,50,.35);background:rgba(205,127,50,.06);font-size:.82rem;line-height:1.5;">' +
+    (enPortada
+      ? '<b style="color:#CD7F32;">Portada:</b> se muestran los servicios marcados <b>EN PORTADA</b> (' + enPortada + '). Tocá <b>Editar</b> para cambiar precio, descripción o foto. Con <b>Sacar de portada / Poner en portada</b> elegís cuáles aparecen en el inicio y en el asistente.'
+      : '<b style="color:#CD7F32;">Las tarjetas grandes de la portada todavía no están en esta lista.</b> Tocá el botón para crearlas como servicios (se copian las fotos y precios de los servicios viejos que coinciden) y después las editás desde acá.<br>' +
+        '<button class="btn" style="max-width:320px;margin-top:.7rem;" onclick="crearServiciosPortada()">Crear los 6 servicios de la portada</button>') +
+    '</div>';
   for (var i = 0; i < SVCS.length; i++) {
     var sv = SVCS[i];
     var activo = sv.activo !== false;
     html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:.8rem 1rem;margin-bottom:.5rem;background:var(--g1);border:1px solid rgba(205,127,50,.1);border-radius:0;gap:.5rem;flex-wrap:wrap;">';
     html += '<div>';
-    html += '<div style="font-weight:700;font-size:.9rem;">' + sv.name + '</div>';
+    html += '<div style="font-weight:700;font-size:.9rem;">' + sv.name + (sv.portada === true ? ' <span style="font-size:.6rem;letter-spacing:1px;background:#CD7F32;color:#0A1128;padding:.1rem .4rem;vertical-align:middle;">EN PORTADA</span>' : '') + '</div>';
     html += '<div style="font-size:.78rem;color:var(--muted);">Sedan: <span style="color:#CD7F32;">$' + (sv.raw||0).toLocaleString('es-AR') + '</span> &nbsp; SUV: <span style="color:#CD7F32;">$' + (sv.rawSuv||0).toLocaleString('es-AR') + '</span></div>';
     html += '</div>';
     html += '<div style="display:flex;gap:.4rem;flex-wrap:wrap;">';
     html += '<button class="abtn" style="font-size:.7rem;padding:.2rem .5rem;" data-id="' + sv.id + '" onclick="moveSvc(this,-1)" ' + (i===0?'disabled style="opacity:.3;font-size:.7rem;"':'') + '>↑</button>';
     html += '<button class="abtn" style="font-size:.7rem;padding:.2rem .5rem;" data-id="' + sv.id + '" onclick="moveSvc(this,1)" ' + (i===SVCS.length-1?'disabled style="opacity:.3;font-size:.7rem;"':'') + '>↓</button>';
     html += '<button class="abtn" style="font-size:.7rem;background:rgba(205,127,50,.1);color:#CD7F32;border:1px solid rgba(205,127,50,.2);" data-id="' + sv.id + '" onclick="editSvcEl(this)">Editar</button>';
+    if (enPortada) html += '<button class="abtn" style="font-size:.7rem;background:rgba(205,127,50,.1);color:#CD7F32;border:1px solid rgba(205,127,50,.3);" data-id="' + sv.id + '" onclick="togglePortadaSvc(this)">' + (sv.portada === true ? 'Sacar de portada' : 'Poner en portada') + '</button>';
     html += '<button class="abtn" style="font-size:.7rem;background:rgba(245,166,35,.1);color:#f5a623;border:1px solid rgba(245,166,35,.2);" data-id="' + sv.id + '" data-activo="' + activo + '" onclick="toggleSvcActivoEl(this)">' + (activo ? 'Desactivar' : 'Activar') + '</button>';
     html += '<button class="abtn no" style="font-size:.7rem;" data-id="' + sv.id + '" onclick="deleteSvcEl(this)">Eliminar</button>';
     html += '</div>';
@@ -7538,7 +7613,7 @@ function cbIdentifyCarOnly(text) {
     var tipo = r.includes('SUV') ? 'suv' : 'sedan';
     lastKnownCar = { type: tipo, model: text };
     var label = tipo==='suv' ? 'SUV / Camioneta' : 'Sedán / Hatchback';
-    var svcs = SVCS.filter(function(s){return !s.extra;});
+    var svcs = svcsPublicos();
     if (!svcs.length) {
       addChatMsg('bot', 'No pude cargar los precios en este momento 🙏 Escribinos por WhatsApp: +54 9 221 438-7138');
       CB.active = false;
@@ -7547,7 +7622,7 @@ function cbIdentifyCarOnly(text) {
     var msg = '**'+text+'** es un **'+label+'**. Estos son los precios para tu vehículo:\n\n';
     svcs.forEach(function(s){
       var p = tipo==='suv' ? (s.rawSuv||s.raw||0) : (s.raw||0);
-      msg += '• **'+s.name+'** — $'+p.toLocaleString('es-AR')+'\n';
+      msg += '• **'+s.name+'** — '+(p ? '$'+p.toLocaleString('es-AR') : 'a consultar')+'\n';
     });
     msg += '\n¿Querés reservar un turno?';
     addChatMsg('bot', msg);
@@ -7596,7 +7671,7 @@ function cbIdentifyCar(text) {
 }
 
 function cbShowServices() {
-  var list = SVCS.filter(function(s){return !s.extra;});
+  var list = svcsPublicos();
   if (!list.length) {
     addChatMsg('bot', 'No pude cargar los servicios en este momento. Probá de nuevo en unos minutos o escribinos por WhatsApp: +54 9 221 438-7138');
     return;
@@ -7604,7 +7679,7 @@ function cbShowServices() {
   var html = '<div class="cb-btn-list">';
   list.forEach(function(s){
     var p = CB.carType==='suv' ? (s.rawSuv||s.raw||0) : (s.raw||0);
-    var ps = p ? '$'+p.toLocaleString('es-AR') : (s.price||'');
+    var ps = cbPrecioTxt(p);
     html += '<button class="cb-btn" onclick="cbSelectService(\''+s.id+'\')"><b>'+s.name+'</b><span style="color:var(--m);"> — '+ps+'</span></button>';
   });
   html += '</div>';
@@ -7612,11 +7687,11 @@ function cbShowServices() {
 }
 
 function cbSelectService(id) {
-  var s = SVCS.find(function(x){return x.id===id;});
+  var s = svcsPublicos().find(function(x){return x.id===id;}) || SVCS.find(function(x){return x.id===id;});
   if (!s) return;
   CB.svc = s; CB.step = 'date';
   var p = CB.carType==='suv' ? (s.rawSuv||s.raw||0) : (s.raw||0);
-  addChatMsg('bot', '✅ **'+s.name+'** — **$'+p.toLocaleString('es-AR')+'**\n\nElegí la fecha:');
+  addChatMsg('bot', '✅ **'+s.name+'** — **'+(p ? '$'+p.toLocaleString('es-AR') : 'precio a consultar')+'**\n\nElegí la fecha:');
   cbShowDatePicker();
 }
 
@@ -7745,7 +7820,7 @@ function cbShowConfirm() {
   var senia=Math.round(p*0.1);
   var html='<div class="cb-summary">';
   html+='<div class="cb-summary-row">🚗 <b>'+(CB.carModel||'')+'</b> ('+(CB.carType==='suv'?'SUV/Camioneta':'Sedán')+')</div>';
-  html+='<div class="cb-summary-row">✨ <b>'+(CB.svc?CB.svc.name:'')+'</b> — $'+p.toLocaleString('es-AR')+'</div>';
+  html+='<div class="cb-summary-row">✨ <b>'+(CB.svc?CB.svc.name:'')+'</b> — '+cbPrecioTxt(p)+'</div>';
   html+='<div class="cb-summary-row">📅 <b>'+CB.dateStr+'</b> · <b>'+CB.slot+' hs</b></div>';
   html+='<div class="cb-summary-row">👤 <b>'+(CB.nombre||'')+'</b> · '+(CB.tel||'')+'</div>';
   html+='<div class="cb-summary-row">📍 <b>'+(CB.zona||'')+'</b> · '+(CB.dir||'')+'</div>';
@@ -7760,7 +7835,7 @@ function cbConfirmar() {
   var senia=Math.round(p*0.1);
   var id='SC'+Date.now();
   var np=(CB.nombre||'').trim().split(' ');
-  addTurno({id:id, svcId:CB.svc?CB.svc.id:'', svcName:CB.svc?CB.svc.name:'', svcPrice:'$'+p.toLocaleString('es-AR'),
+  addTurno({id:id, svcId:CB.svc?CB.svc.id:'', svcName:CB.svc?CB.svc.name:'', svcPrice:cbPrecioTxt(p),
     date:CB.date?dStr(CB.date):'', slot:CB.slot||'',
     nombre:np[0]||'', apellido:np.slice(1).join(' ')||'', tel:CB.tel||'',
     zona:CB.zona||'', dir:CB.dir||'',
@@ -7772,7 +7847,7 @@ function cbConfirmar() {
     '👤 *'+(CB.nombre||'')+'*\n📱 '+(CB.tel||'')+'\n'+
     '📍 '+(CB.zona||'')+' — '+(CB.dir||'')+'\n\n'+
     '🚘 '+(CB.carModel||'')+' ('+(CB.carType==='suv'?'SUV/Camioneta':'Sedán')+')\n'+
-    '✨ '+(CB.svc?CB.svc.name:'')+' — $'+p.toLocaleString('es-AR')+'\n'+
+    '✨ '+(CB.svc?CB.svc.name:'')+' — '+cbPrecioTxt(p)+'\n'+
     '📅 '+CB.dateStr+' · '+CB.slot+' hs\n'+
     '💳 Seña: $'+senia.toLocaleString('es-AR')+(CB.proofName?' ✅ adjunto':' ⏳ pendiente')+'\n\n'+
     'Ref: '+id;
@@ -7810,7 +7885,7 @@ var chatGreeted = false;
 function buildChatSystem() {
   var svcLines = '';
   try {
-    var activeList = (typeof SVCS !== 'undefined' && SVCS.length) ? SVCS.filter(function(s){ return !s.extra; }) : [];
+    var activeList = (typeof SVCS !== 'undefined' && SVCS.length) ? svcsPublicos() : [];
     if (activeList.length) {
       svcLines = activeList.map(function(s) {
         var sedan = s.raw ? '$' + s.raw.toLocaleString('es-AR') : 'consultar';
@@ -7821,7 +7896,7 @@ function buildChatSystem() {
   } catch(e) {}
   if (!svcLines) svcLines = 'Consultar servicios y precios actualizados en la web o por WhatsApp.';
 
-  return 'Sos el asistente virtual de SunshineCars Detail, taller profesional de detailing automotriz en La Plata, Argentina. IMPORTANTE: Atencion SOLO en nuestro taller ubicado en Calle 28 N° 596, entre Av. 44 y calle 43, La Plata. El cliente trae su vehiculo al taller. NO hacemos servicios a domicilio. SOLO atendemos La Plata y alrededores (Berisso, Ensenada, City Bell, Villa Elisa, Gonnet, Tolosa, Los Hornos, etc). NUNCA menciones CABA, GBA, Capital Federal ni otras provincias. SERVICIOS Y PRECIOS ACTUALES: ' + svcLines + '. FIDELIDAD: cada 4 lavados el 5to tiene 20% de descuento. SEÑA: 10% del servicio para confirmar turno, BruBank alias sergio2292. HORARIOS: Lun-Vie 08:00/11:30/15:00, Sabado solo 15:30, Domingo solo servicios premium a las 08:00. HOMOLOGACION VTV: Ing. Sergio Liendo habilitado por COPIME, 10 dias habiles. CONTACTO: www.sunshinecarsdetail.com | WhatsApp +54 9 221 438-7138. Responde en espanol argentino, amigable, directo y breve. Si no sabes algo, deriva al WhatsApp.';
+  return 'Sos el asistente virtual de SunshineCars Detail, taller profesional de detailing automotriz en La Plata, Argentina. IMPORTANTE: Atencion SOLO en nuestro taller ubicado en Calle 28 N° 596, entre Av. 44 y calle 43, La Plata. El cliente trae su vehiculo al taller. NO hacemos servicios a domicilio. SOLO atendemos La Plata y alrededores (Berisso, Ensenada, City Bell, Villa Elisa, Gonnet, Tolosa, Los Hornos, etc). NUNCA menciones CABA, GBA, Capital Federal ni otras provincias. SERVICIOS Y PRECIOS ACTUALES: ' + svcLines + '. Si un servicio dice consultar, el precio depende del vehiculo: pedi marca y modelo y deriva al WhatsApp. PPF (film de proteccion de pintura): Paquete Frontal (capo, paragolpe delantero y guardabarros delanteros), Paquete Full (toda la pintura, incluye cachas de espejos, puertas, techo, zocalos, paragolpe trasero) y Paquete Interior (pantallas, consola, piano black; siempre a consultar). En la web hay un configurador con un auto para ver que cubre cada paquete. FIDELIDAD: cada 4 lavados el 5to tiene 20% de descuento. SEÑA: 10% del servicio para confirmar turno, BruBank alias sergio2292. HORARIOS: Lun-Vie 08:00/11:30/15:00, Sabado solo 15:30, Domingo solo servicios premium a las 08:00. HOMOLOGACION VTV: Ing. Sergio Liendo habilitado por COPIME, 10 dias habiles. CONTACTO: www.sunshinecarsdetail.com | WhatsApp +54 9 221 438-7138. Responde en espanol argentino, amigable, directo y breve. Si no sabes algo, deriva al WhatsApp.';
 }
 
 function toggleChat() {
@@ -7831,6 +7906,7 @@ function toggleChat() {
   if (chatOpen) {
     win.classList.add('open');
     if (unread) unread.style.display = 'none';
+    if (typeof loadSVCS === 'function') loadSVCS(function(){ renderSvcs(); });
     if (!chatGreeted) {
       chatGreeted = true;
       setTimeout(function() {
