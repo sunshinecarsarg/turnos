@@ -3255,12 +3255,20 @@ body.light-mode .blog-close-btn:hover { color:#fff; }
             <label class="flabel">Nombre del servicio *</label>
             <input type="text" class="finput" id="sv-nombre" placeholder="✨ LAVADO PREMIUM">
           </div>
-          <div class="fi">
-            <label class="flabel">Precio Sedan/Hatchback *</label>
+          <div class="fi full">
+            <label class="flabel">Precio</label>
+            <select class="finput" id="sv-modo" onchange="svModoCambio('')">
+              <option value="ARS">Desde, en pesos ($)</option>
+              <option value="USD">Desde, en d&oacute;lares (US$)</option>
+              <option value="consultar">Consultar (no muestra precio, lleva a WhatsApp)</option>
+            </select>
+          </div>
+          <div class="fi sv-precio-campo">
+            <label class="flabel">Precio Sedan/Hatchback <span class="sv-mon">($)</span> *</label>
             <input type="number" class="finput" id="sv-precio-sedan" placeholder="65000">
           </div>
-          <div class="fi">
-            <label class="flabel">Precio SUV/Camioneta</label>
+          <div class="fi sv-precio-campo">
+            <label class="flabel">Precio SUV/Camioneta <span class="sv-mon">($)</span></label>
             <input type="number" class="finput" id="sv-precio-suv" placeholder="70000">
           </div>
           <div class="fi">
@@ -4115,12 +4123,20 @@ body.light-mode .blog-close-btn:hover { color:#fff; }
         <label class="flabel">Nombre *</label>
         <input type="text" class="finput" id="edit-sv-nombre">
       </div>
-      <div class="fi">
-        <label class="flabel">Precio Sedan *</label>
+      <div class="fi full">
+        <label class="flabel">Precio</label>
+        <select class="finput" id="edit-sv-modo" onchange="svModoCambio('edit-')">
+          <option value="ARS">Desde, en pesos ($)</option>
+          <option value="USD">Desde, en d&oacute;lares (US$)</option>
+          <option value="consultar">Consultar (no muestra precio, lleva a WhatsApp)</option>
+        </select>
+      </div>
+      <div class="fi edit-sv-precio-campo">
+        <label class="flabel">Precio Sedan <span class="edit-sv-mon">($)</span> *</label>
         <input type="number" class="finput" id="edit-sv-sedan">
       </div>
-      <div class="fi">
-        <label class="flabel">Precio SUV</label>
+      <div class="fi edit-sv-precio-campo">
+        <label class="flabel">Precio SUV <span class="edit-sv-mon">($)</span></label>
         <input type="number" class="finput" id="edit-sv-suv">
       </div>
       <div class="fi">
@@ -4603,7 +4619,8 @@ function publishServicio() {
   var isLavado = elLavado ? elLavado.checked : false;
 
   if (!nombre) { toast('Ingresa el nombre del servicio'); return; }
-  if (!rawSedan) { toast('Ingresa el precio Sedan'); return; }
+  var modo = svModo('');
+  if (!rawSedan && modo !== 'consultar') { toast('Ingresa el precio Sedan (o elegi Consultar)'); return; }
   if (!desc) { toast('Ingresa la descripcion'); return; }
 
   var isExtra = document.getElementById('sv-extra') ? document.getElementById('sv-extra').checked : false;
@@ -4611,7 +4628,9 @@ function publishServicio() {
     name: nombre,
     raw: rawSedan,
     rawSuv: rawSuv || rawSedan,
-    price: isExtra ? 'A coordinar' : 'Desde $' + rawSedan.toLocaleString('es-AR'),
+    price: isExtra ? 'A coordinar' : svPrecioTexto(modo, rawSedan),
+    moneda: modo === 'USD' ? 'USD' : 'ARS',
+    consultar: modo === 'consultar',
     desc: desc,
     tags: tags ? tags.split(',').map(function(t){ return t.trim(); }) : [],
     allDay: allDay,
@@ -4797,7 +4816,20 @@ function svcsPublicos() {
              desc: item.desc, allDay: usar ? !!s.allDay : false, ppf: !!item.ppf };
   });
 }
-function cbPrecioTxt(p) { return p ? '$' + p.toLocaleString('es-AR') : 'a consultar'; }
+function svcConsultar(s) { return !!(s && s.consultar === true); }
+function svcFmt(s, n) { return (s && s.moneda === 'USD' ? 'US$ ' : '$') + Number(n || 0).toLocaleString('es-AR'); }
+function cbPrecioTxt(p, s) { return (!p || svcConsultar(s)) ? 'a consultar' : svcFmt(s, p); }
+// admin: modo de precio del formulario
+function svModo(pre) { var el = document.getElementById(pre + 'sv-modo'); return el ? el.value : 'ARS'; }
+function svPrecioTexto(modo, n) {
+  if (modo === 'consultar' || !n) return 'Consultar';
+  return 'Desde ' + (modo === 'USD' ? 'US$ ' : '$') + n.toLocaleString('es-AR');
+}
+function svModoCambio(pre) {
+  var m = svModo(pre);
+  document.querySelectorAll('.' + pre + 'sv-precio-campo').forEach(function(el){ el.style.display = m === 'consultar' ? 'none' : ''; });
+  document.querySelectorAll('.' + pre + 'sv-mon').forEach(function(el){ el.textContent = m === 'USD' ? '(US$)' : '($)'; });
+}
 function svcEsPpf(s) { return s.ppf === true || /\bppf\b/i.test(s.name || ''); }
 
 // Modelo de cada tarjeta: sale del admin si hay servicios "En portada"; si todavia no se crearon, usa la lista fija
@@ -4826,10 +4858,11 @@ function renderSvcs() {
   svcTarjetas().forEach(function(c, idx) {
     var s = c.s;
     var precio = '';
+    var consultar = !c.ppf && svcConsultar(s);
     if (c.ppf) precio = 'Armá tu protección';
-    else if (s && s.raw && !s.isExtra) {
+    else if (s && s.raw && !s.isExtra && !consultar) {
       var p = (S.tipo === 'Camioneta / SUV' && s.rawSuv) ? s.rawSuv : s.raw;
-      precio = 'Desde $' + p.toLocaleString('es-AR');
+      precio = 'Desde ' + svcFmt(s, p);
     }
     var msg = c.ppf
       ? 'Hola! Quiero consultar por PPF (film de protección de pintura).'
@@ -4846,7 +4879,9 @@ function renderSvcs() {
         '<div class="svcb-num">' + (idx < 9 ? '0' : '') + (idx + 1) + (c.tag ? '<span class="svcb-tag">' + c.tag + '</span>' : '') + '</div>' +
         '<h3 class="svcb-name">' + c.name + '</h3>' +
         '<p class="svcb-desc">' + c.desc + '</p>' +
-        (precio ? '<div class="svcb-price">' + precio + '</div>' : '<div class="svcb-price svcb-consultar">Precio según vehículo</div>') +
+        (consultar
+          ? '<a class="svcb-price svcb-pedir" href="' + wa + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">Consultar precio &rarr;</a>'
+          : (precio ? '<div class="svcb-price">' + precio + '</div>' : '<div class="svcb-price svcb-consultar">Precio según vehículo</div>')) +
         '<div class="svcb-actions">' +
           (c.ppf
             ? '<button class="svcb-btn" onclick="event.stopPropagation();ppfScroll()">Elegir partes &rarr;</button>'
@@ -4936,6 +4971,8 @@ function editSvcEl(btn) {
   document.getElementById('edit-sv-nombre').value = svc.name || '';
   document.getElementById('edit-sv-sedan').value = svc.raw || '';
   document.getElementById('edit-sv-suv').value = svc.rawSuv || '';
+  document.getElementById('edit-sv-modo').value = svc.consultar ? 'consultar' : (svc.moneda === 'USD' ? 'USD' : 'ARS');
+  svModoCambio('edit-');
   document.getElementById('edit-sv-desc').value = svc.desc || '';
   document.getElementById('edit-sv-tags').value = svc.tags ? svc.tags.join(', ') : '';
   var _ed = document.getElementById('edit-sv-detalle'); if (_ed) _ed.value = svc.detalle || '';
@@ -4975,7 +5012,8 @@ function saveEditSvc() {
   var tags = document.getElementById('edit-sv-tags').value.trim();
 
   if (!nombre) { toast('Ingresa el nombre'); return; }
-  if (!rawSedan) { toast('Ingresa el precio Sedan'); return; }
+  var modoE = svModo('edit-');
+  if (!rawSedan && modoE !== 'consultar') { toast('Ingresa el precio Sedan (o elegi Consultar)'); return; }
   if (!desc) { toast('Ingresa la descripcion'); return; }
 
   var isExtraEdit = document.getElementById('edit-sv-extra').checked;
@@ -4983,7 +5021,9 @@ function saveEditSvc() {
     name: nombre,
     raw: rawSedan,
     rawSuv: rawSuv,
-    price: isExtraEdit ? 'A coordinar' : 'Desde $' + rawSedan.toLocaleString('es-AR'),
+    price: isExtraEdit ? 'A coordinar' : svPrecioTexto(modoE, rawSedan),
+    moneda: modoE === 'USD' ? 'USD' : 'ARS',
+    consultar: modoE === 'consultar',
     desc: desc,
     tags: tags ? tags.split(',').map(function(t){ return t.trim(); }) : [],
     allDay: document.getElementById('edit-sv-allday').checked,
@@ -6811,7 +6851,7 @@ function renderSvcsAdminList() {
     html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:.8rem 1rem;margin-bottom:.5rem;background:var(--g1);border:1px solid rgba(205,127,50,.1);border-radius:0;gap:.5rem;flex-wrap:wrap;">';
     html += '<div>';
     html += '<div style="font-weight:700;font-size:.9rem;">' + sv.name + (sv.portada === true ? ' <span style="font-size:.6rem;letter-spacing:1px;background:#CD7F32;color:#0A1128;padding:.1rem .4rem;vertical-align:middle;">EN PORTADA</span>' : '') + '</div>';
-    html += '<div style="font-size:.78rem;color:var(--muted);">Sedan: <span style="color:#CD7F32;">$' + (sv.raw||0).toLocaleString('es-AR') + '</span> &nbsp; SUV: <span style="color:#CD7F32;">$' + (sv.rawSuv||0).toLocaleString('es-AR') + '</span></div>';
+    html += svcConsultar(sv) ? '<div style="font-size:.78rem;color:var(--muted);">Precio: <span style="color:#CD7F32;">Consultar (WhatsApp)</span></div>' : '<div style="font-size:.78rem;color:var(--muted);">Sedan: <span style="color:#CD7F32;">' + svcFmt(sv, sv.raw) + '</span> &nbsp; SUV: <span style="color:#CD7F32;">' + (sv.moneda === 'USD' ? 'US$ ' : '$') + (sv.rawSuv||0).toLocaleString('es-AR') + '</span></div>';
     html += '</div>';
     html += '<div style="display:flex;gap:.4rem;flex-wrap:wrap;">';
     html += '<button class="abtn" style="font-size:.7rem;padding:.2rem .5rem;" data-id="' + sv.id + '" onclick="moveSvc(this,-1)" ' + (i===0?'disabled style="opacity:.3;font-size:.7rem;"':'') + '>↑</button>';
@@ -7622,7 +7662,7 @@ function cbIdentifyCarOnly(text) {
     var msg = '**'+text+'** es un **'+label+'**. Estos son los precios para tu vehículo:\n\n';
     svcs.forEach(function(s){
       var p = tipo==='suv' ? (s.rawSuv||s.raw||0) : (s.raw||0);
-      msg += '• **'+s.name+'** — '+(p ? '$'+p.toLocaleString('es-AR') : 'a consultar')+'\n';
+      msg += '• **'+s.name+'** — '+cbPrecioTxt(p, s)+'\n';
     });
     msg += '\n¿Querés reservar un turno?';
     addChatMsg('bot', msg);
@@ -7679,7 +7719,7 @@ function cbShowServices() {
   var html = '<div class="cb-btn-list">';
   list.forEach(function(s){
     var p = CB.carType==='suv' ? (s.rawSuv||s.raw||0) : (s.raw||0);
-    var ps = cbPrecioTxt(p);
+    var ps = cbPrecioTxt(p, s);
     html += '<button class="cb-btn" onclick="cbSelectService(\''+s.id+'\')"><b>'+s.name+'</b><span style="color:var(--m);"> — '+ps+'</span></button>';
   });
   html += '</div>';
@@ -7691,7 +7731,7 @@ function cbSelectService(id) {
   if (!s) return;
   CB.svc = s; CB.step = 'date';
   var p = CB.carType==='suv' ? (s.rawSuv||s.raw||0) : (s.raw||0);
-  addChatMsg('bot', '✅ **'+s.name+'** — **'+(p ? '$'+p.toLocaleString('es-AR') : 'precio a consultar')+'**\n\nElegí la fecha:');
+  addChatMsg('bot', '✅ **'+s.name+'** — **'+cbPrecioTxt(p, s)+'**\n\nElegí la fecha:');
   cbShowDatePicker();
 }
 
@@ -7820,7 +7860,7 @@ function cbShowConfirm() {
   var senia=Math.round(p*0.1);
   var html='<div class="cb-summary">';
   html+='<div class="cb-summary-row">🚗 <b>'+(CB.carModel||'')+'</b> ('+(CB.carType==='suv'?'SUV/Camioneta':'Sedán')+')</div>';
-  html+='<div class="cb-summary-row">✨ <b>'+(CB.svc?CB.svc.name:'')+'</b> — '+cbPrecioTxt(p)+'</div>';
+  html+='<div class="cb-summary-row">✨ <b>'+(CB.svc?CB.svc.name:'')+'</b> — '+cbPrecioTxt(p, CB.svc)+'</div>';
   html+='<div class="cb-summary-row">📅 <b>'+CB.dateStr+'</b> · <b>'+CB.slot+' hs</b></div>';
   html+='<div class="cb-summary-row">👤 <b>'+(CB.nombre||'')+'</b> · '+(CB.tel||'')+'</div>';
   html+='<div class="cb-summary-row">📍 <b>'+(CB.zona||'')+'</b> · '+(CB.dir||'')+'</div>';
@@ -7835,7 +7875,7 @@ function cbConfirmar() {
   var senia=Math.round(p*0.1);
   var id='SC'+Date.now();
   var np=(CB.nombre||'').trim().split(' ');
-  addTurno({id:id, svcId:CB.svc?CB.svc.id:'', svcName:CB.svc?CB.svc.name:'', svcPrice:cbPrecioTxt(p),
+  addTurno({id:id, svcId:CB.svc?CB.svc.id:'', svcName:CB.svc?CB.svc.name:'', svcPrice:cbPrecioTxt(p, CB.svc),
     date:CB.date?dStr(CB.date):'', slot:CB.slot||'',
     nombre:np[0]||'', apellido:np.slice(1).join(' ')||'', tel:CB.tel||'',
     zona:CB.zona||'', dir:CB.dir||'',
@@ -7847,7 +7887,7 @@ function cbConfirmar() {
     '👤 *'+(CB.nombre||'')+'*\n📱 '+(CB.tel||'')+'\n'+
     '📍 '+(CB.zona||'')+' — '+(CB.dir||'')+'\n\n'+
     '🚘 '+(CB.carModel||'')+' ('+(CB.carType==='suv'?'SUV/Camioneta':'Sedán')+')\n'+
-    '✨ '+(CB.svc?CB.svc.name:'')+' — '+cbPrecioTxt(p)+'\n'+
+    '✨ '+(CB.svc?CB.svc.name:'')+' — '+cbPrecioTxt(p, CB.svc)+'\n'+
     '📅 '+CB.dateStr+' · '+CB.slot+' hs\n'+
     '💳 Seña: $'+senia.toLocaleString('es-AR')+(CB.proofName?' ✅ adjunto':' ⏳ pendiente')+'\n\n'+
     'Ref: '+id;
@@ -7888,8 +7928,9 @@ function buildChatSystem() {
     var activeList = (typeof SVCS !== 'undefined' && SVCS.length) ? svcsPublicos() : [];
     if (activeList.length) {
       svcLines = activeList.map(function(s) {
-        var sedan = s.raw ? '$' + s.raw.toLocaleString('es-AR') : 'consultar';
-        var suv = s.rawSuv ? '$' + s.rawSuv.toLocaleString('es-AR') : sedan;
+        var sedan = cbPrecioTxt(s.raw, s).replace('a consultar', 'consultar');
+        var suv = s.rawSuv && !svcConsultar(s) ? svcFmt(s, s.rawSuv) : sedan;
+        if (s.moneda === 'USD' && !svcConsultar(s)) sedan += ' (dolares)';
         return s.name + ': Sedan ' + sedan + ' | SUV ' + suv + (s.allDay ? ' (todo el dia)' : '');
       }).join('. ');
     }
@@ -8953,12 +8994,12 @@ function openSvcDetail(id) {
 
   // Precios
   var pw = document.getElementById('sd-prices');
-  if (s.isExtra) {
-    pw.innerHTML = '<div class="sd-price-box" style="flex-basis:100%;"><div class="sd-price-lbl">Precio</div><div class="sd-price-val">A coordinar</div></div>';
+  if (s.isExtra || svcConsultar(s)) {
+    pw.innerHTML = '<div class="sd-price-box" style="flex-basis:100%;"><div class="sd-price-lbl">Precio</div><div class="sd-price-val">' + (s.isExtra ? 'A coordinar' : 'Consultar') + '</div></div>';
   } else {
     var oldTag = s.precioOld ? '<div class="svc-price-old" style="display:block;margin-bottom:.1rem;">$' + s.precioOld.toLocaleString('es-AR') + '</div>' : '';
-    var pv = '<div class="sd-price-box"><div class="sd-price-lbl">Sedan / Hatchback</div>' + oldTag + '<div class="sd-price-val">$' + (s.raw || 0).toLocaleString('es-AR') + '</div></div>';
-    pv += '<div class="sd-price-box"><div class="sd-price-lbl">SUV / Camioneta</div>' + oldTag + '<div class="sd-price-val">$' + (s.rawSuv || s.raw || 0).toLocaleString('es-AR') + '</div></div>';
+    var pv = '<div class="sd-price-box"><div class="sd-price-lbl">Sedan / Hatchback</div>' + oldTag + '<div class="sd-price-val">' + svcFmt(s, s.raw) + '</div></div>';
+    pv += '<div class="sd-price-box"><div class="sd-price-lbl">SUV / Camioneta</div>' + oldTag + '<div class="sd-price-val">' + svcFmt(s, s.rawSuv || s.raw) + '</div></div>';
     pw.innerHTML = pv;
   }
 
@@ -9010,9 +9051,10 @@ function openSvcDetail(id) {
   // CTA
   var cta = document.getElementById('sd-cta');
   cta.className = 'sd-cta wa';
-  cta.innerHTML = WA_ICO + (s.isExtra ? ' Consultar por WhatsApp' : ' Reservar por WhatsApp');
+  var sinSena = s.isExtra || svcConsultar(s) || s.moneda === 'USD';   // la se\u00f1a online es en pesos
+  cta.innerHTML = WA_ICO + ((s.isExtra || svcConsultar(s)) ? ' Consultar por WhatsApp' : ' Reservar por WhatsApp');
   var ctaOn = document.getElementById('sd-cta-online');
-  if (ctaOn) ctaOn.style.display = s.isExtra ? 'none' : 'inline-block';
+  if (ctaOn) ctaOn.style.display = sinSena ? 'none' : 'inline-block';
 
   document.getElementById('sd-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -9028,8 +9070,8 @@ function reservarDesdeDetalle() {
   var s = null;
   for (var i = 0; i < SVCS.length; i++) { if (SVCS[i].id === _sdSvcId) { s = SVCS[i]; break; } }
   if (!s) return;
-  var msg = s.isExtra
-    ? 'Hola! Me interesa consultar por el servicio: ' + s.name
+  var msg = (s.isExtra || svcConsultar(s))
+    ? 'Hola! Me interesa consultar por el servicio: ' + s.name + '. ¿Me pasás precio y disponibilidad?'
     : 'Hola! Quiero reservar un turno para: ' + s.name + '. ¿Me pasás disponibilidad?';
   if (typeof fbq !== 'undefined') fbq('track', 'Lead', { content_name: s.name });
   closeSvcDetail();
@@ -12178,9 +12220,6 @@ loadAntesDespues();
       </div>
       <div class="sd-warn" id="sd-warn" style="display:none;"><span>&#9888;&#65039;</span><span id="sd-warn-txt"></span></div>
       <button class="sd-cta" id="sd-cta" onclick="reservarDesdeDetalle()"></button>
-      <div style="text-align:center;margin-top:.8rem;">
-        <button class="cta-sec" id="sd-cta-online" onclick="reservarOnlineDesdeDetalle()">o reservar online y dejar la seña</button>
-      </div>
     </div>
   </div>
 </div>
@@ -12382,6 +12421,9 @@ body.light-mode .mk-texto { color:rgba(0,0,0,.7) !important; }
 .mk-texto:hover { -webkit-text-stroke:1.6px #fff; paint-order:stroke fill; }
 body.light-mode .mk-item:hover img { filter:drop-shadow(1.2px 0 0 #0A1128) drop-shadow(-1.2px 0 0 #0A1128) drop-shadow(0 1.2px 0 #0A1128) drop-shadow(0 -1.2px 0 #0A1128) !important; }
 body.light-mode .mk-texto:hover { -webkit-text-stroke-color:#0A1128; }
+
+.svcb-pedir { display:inline-block; text-decoration:none; border-bottom:1px solid rgba(205,127,50,.5); }
+.svcb-pedir:hover { color:#fff; border-color:#fff; }
 </style>
 </body>
 </html>
