@@ -7729,10 +7729,19 @@ function cbShowServices() {
 function cbSelectService(id) {
   var s = svcsPublicos().find(function(x){return x.id===id;}) || SVCS.find(function(x){return x.id===id;});
   if (!s) return;
-  CB.svc = s; CB.step = 'date';
+  CB.svc = s; CB.step = 'done';
   var p = CB.carType==='suv' ? (s.rawSuv||s.raw||0) : (s.raw||0);
-  addChatMsg('bot', '✅ **'+s.name+'** — **'+cbPrecioTxt(p, s)+'**\n\nElegí la fecha:');
-  cbShowDatePicker();
+  // la reserva se cierra por WhatsApp: sin fecha, sin datos y sin seña desde el chat
+  var consulta = svcConsultar(s) || s.isExtra;
+  var msg = (consulta ? 'Hola! Quiero consultar por ' : 'Hola! Quiero reservar un turno para ') + s.name +
+    (CB.carModel ? '. Mi auto es: ' + CB.carModel : '') +
+    (consulta ? '. ¿Me pasás precio y disponibilidad?' : '. ¿Me pasás disponibilidad?');
+  var wa = 'https://wa.me/' + WA_NUM + '?text=' + encodeURIComponent(msg);
+  addChatMsg('bot', '✅ **'+s.name+'** — **'+cbPrecioTxt(p, s)+'**\n\nTocá el botón y te respondemos por WhatsApp con los turnos disponibles. 👇');
+  cbRawMsg('<a class="cb-confirm-btn" href="' + wa + '" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:.5rem;text-decoration:none;" ' +
+    'onclick="if(typeof fbq!==\'undefined\')fbq(\'track\',\'Lead\',{content_name:\'Chat - \'+' + JSON.stringify(s.name).replace(/"/g, '&quot;') + '});">' +
+    WA_ICO + (consulta ? ' Consultar por WhatsApp' : ' Reservar por WhatsApp') + '</a>');
+  cbReset();
 }
 
 function cbIsAllDay() {
@@ -7937,7 +7946,7 @@ function buildChatSystem() {
   } catch(e) {}
   if (!svcLines) svcLines = 'Consultar servicios y precios actualizados en la web o por WhatsApp.';
 
-  return 'Sos el asistente virtual de SunshineCars Detail, taller profesional de detailing automotriz en La Plata, Argentina. IMPORTANTE: Atencion SOLO en nuestro taller ubicado en Calle 28 N° 596, entre Av. 44 y calle 43, La Plata. El cliente trae su vehiculo al taller. NO hacemos servicios a domicilio. SOLO atendemos La Plata y alrededores (Berisso, Ensenada, City Bell, Villa Elisa, Gonnet, Tolosa, Los Hornos, etc). NUNCA menciones CABA, GBA, Capital Federal ni otras provincias. SERVICIOS Y PRECIOS ACTUALES: ' + svcLines + '. Si un servicio dice consultar, el precio depende del vehiculo: pedi marca y modelo y deriva al WhatsApp. PPF (film de proteccion de pintura): Paquete Frontal (capo, paragolpe delantero y guardabarros delanteros), Paquete Full (toda la pintura, incluye cachas de espejos, puertas, techo, zocalos, paragolpe trasero) y Paquete Interior (pantallas, consola, piano black; siempre a consultar). En la web hay un configurador con un auto para ver que cubre cada paquete. FIDELIDAD: cada 4 lavados el 5to tiene 20% de descuento. SEÑA: 10% del servicio para confirmar turno, BruBank alias sergio2292. HORARIOS: Lun-Vie 08:00/11:30/15:00, Sabado solo 15:30, Domingo solo servicios premium a las 08:00. HOMOLOGACION VTV: Ing. Sergio Liendo habilitado por COPIME, 10 dias habiles. CONTACTO: www.sunshinecarsdetail.com | WhatsApp +54 9 221 438-7138. Responde en espanol argentino, amigable, directo y breve. Si no sabes algo, deriva al WhatsApp.';
+  return 'Sos el asistente virtual de SunshineCars Detail, taller profesional de detailing automotriz en La Plata, Argentina. IMPORTANTE: Atencion SOLO en nuestro taller ubicado en Calle 28 N° 596, entre Av. 44 y calle 43, La Plata. El cliente trae su vehiculo al taller. NO hacemos servicios a domicilio. SOLO atendemos La Plata y alrededores (Berisso, Ensenada, City Bell, Villa Elisa, Gonnet, Tolosa, Los Hornos, etc). NUNCA menciones CABA, GBA, Capital Federal ni otras provincias. SERVICIOS Y PRECIOS ACTUALES: ' + svcLines + '. Si un servicio dice consultar, el precio depende del vehiculo: pedi marca y modelo y deriva al WhatsApp. PPF (film de proteccion de pintura): Paquete Frontal (capo, paragolpe delantero y guardabarros delanteros), Paquete Full (toda la pintura, incluye cachas de espejos, puertas, techo, zocalos, paragolpe trasero) y Paquete Interior (pantallas, consola, piano black; siempre a consultar). En la web hay un configurador con un auto para ver que cubre cada paquete. FIDELIDAD: cada 4 lavados el 5to tiene 20% de descuento. RESERVAS: los turnos se reservan por WhatsApp, no se cobra seña online; si el cliente quiere reservar, pedile que toque Reservar turno o que escriba al WhatsApp. HORARIOS: Lun-Vie 08:00/11:30/15:00, Sabado solo 15:30, Domingo solo servicios premium a las 08:00. HOMOLOGACION VTV: Ing. Sergio Liendo habilitado por COPIME, 10 dias habiles. CONTACTO: www.sunshinecarsdetail.com | WhatsApp +54 9 221 438-7138. Responde en espanol argentino, amigable, directo y breve. Si no sabes algo, deriva al WhatsApp.';
 }
 
 function toggleChat() {
