@@ -20,8 +20,8 @@
 <!-- Open Graph (WhatsApp, Facebook, Instagram) -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://www.sunshinecarsdetail.com">
-<meta property="og:title" content="SunshineCars Detail - Detailing a Domicilio">
-<meta property="og:description" content="Detailing automotriz profesional en taller. Lavados premium, ceramicos, correccion de pintura. La Plata. Reserva tu turno online.">
+<meta property="og:title" content="SunshineCars Detail - Detailing puerta a puerta en La Plata">
+<meta property="og:description" content="Retiramos tu auto, lo trabajamos en nuestro taller y te lo devolvemos en tu casa. Lavados premium, cerámicos y corrección de pintura. Reservá tu turno online.">
 <meta property="og:image" content="https://www.sunshinecarsdetail.com/img/og.jpg">
 <meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:alt" content="Logo de SunshineCars Detail">
@@ -33,8 +33,8 @@
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@SunshineCarsArg">
-<meta name="twitter:title" content="SunshineCars Detail - Detailing a Domicilio">
-<meta name="twitter:description" content="Detailing automotriz profesional en nuestro taller en La Plata.">
+<meta name="twitter:title" content="SunshineCars Detail - Detailing puerta a puerta en La Plata">
+<meta name="twitter:description" content="Retiramos tu auto, lo trabajamos en nuestro taller y te lo devolvemos en tu casa.">
 <meta name="twitter:image" content="https://www.sunshinecarsdetail.com/img/og.jpg">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -1216,6 +1216,34 @@ body.light-mode .ba-cap-d { color:#3a4a5c; }
 .hero-datos .sep { color:rgba(205,127,50,.45); }
 body.light-mode .hero-datos b { color:#0d1b2a; }
 
+/* servicio puerta a puerta (portada) */
+.hero-pap {
+  max-width:520px; margin:1.6rem auto 0; padding:1.1rem 1.2rem 1.2rem;
+  border:1px solid rgba(205,127,50,.45); background:rgba(10,17,40,.55);
+  text-align:center;
+}
+.hero-pap-tit {
+  font-family:'Archivo',sans-serif; font-stretch:118%; font-weight:800;
+  font-size:1.05rem; letter-spacing:.04em; color:var(--white);
+}
+.hero-pap-tit span { color:var(--m); }
+.hero-pap-txt { margin:.45rem 0 0; font-size:.9rem; line-height:1.5; color:rgba(224,225,226,.78); }
+.hero-pap-datos {
+  display:flex; justify-content:center; flex-wrap:wrap; gap:.3rem .9rem;
+  margin-top:.6rem; font-size:.76rem; color:var(--muted); letter-spacing:.4px;
+}
+.hero-pap-datos b { color:var(--white); font-weight:600; }
+.hero-pap-datos .sep { color:rgba(205,127,50,.45); }
+.hero-pap-cta {
+  display:inline-block; margin-top:.8rem; color:var(--m); text-decoration:none;
+  font-weight:700; font-size:.85rem; border-bottom:1px solid rgba(205,127,50,.5);
+}
+.hero-pap-cta:hover { border-bottom-color:var(--m); }
+body.light-mode .hero-pap { background:rgba(255,255,255,.6); border-color:rgba(160,99,42,.45); }
+body.light-mode .hero-pap-tit, body.light-mode .hero-pap-datos b { color:#0d1b2a; }
+body.light-mode .hero-pap-txt { color:#3a4a5c; }
+body.light-mode .hero-pap-tit span, body.light-mode .hero-pap-cta { color:#A0632A; }
+
 /* ======== SERVICIOS GRANDES ======== */
 #svc-grid.svc-big {
   display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px;
@@ -1659,6 +1687,20 @@ body.light-mode .blog-close-btn:hover { color:#fff; }
         </a>
       </div>
 
+      <!-- SERVICIO PUERTA A PUERTA -->
+      <div class="hero-pap">
+        <div class="hero-pap-tit">SERVICIO <span>PUERTA A PUERTA</span></div>
+        <p class="hero-pap-txt">Retiramos tu auto, lo trabajamos en nuestro taller y te lo devolvemos en tu casa.</p>
+        <div class="hero-pap-datos">
+          <span><b>Cobertura:</b> La Plata, Gonnet y City Bell</span>
+          <span class="sep">|</span>
+          <span><b>Adicional:</b> $10.000</span>
+        </div>
+        <a class="hero-pap-cta" target="_blank" rel="noopener"
+           href="https://wa.me/5492214387138?text=Hola!%20Quiero%20el%20servicio%20puerta%20a%20puerta.%20%C2%BFMe%20pas%C3%A1s%20disponibilidad%3F"
+           onclick="if(typeof fbq!=='undefined')fbq('track','Lead',{content_name:'CTA Hero Puerta a Puerta'});">Coordinar retiro por WhatsApp &rarr;</a>
+      </div>
+
       <!-- DATOS DEL TALLER EN UNA LINEA -->
       <div class="hero-datos">
         <span><b>Calle 28 N&deg; 596</b>, La Plata</span>
@@ -1673,8 +1715,8 @@ body.light-mode .blog-close-btn:hover { color:#fff; }
       <!-- MARQUEE DE SERVICIOS -->
       <div class="svc-marquee" aria-hidden="true">
         <div class="svc-marquee-track">
-          <span>Tratamiento de cuero</span><span>Sellado de cristales</span><span>Tratamiento acr&iacute;lico</span><span>Tratamiento cer&aacute;mico</span><span>Tratamiento de grafeno</span><span>PPF</span><span>Homologaci&oacute;n VTV</span>
-          <span>Tratamiento de cuero</span><span>Sellado de cristales</span><span>Tratamiento acr&iacute;lico</span><span>Tratamiento cer&aacute;mico</span><span>Tratamiento de grafeno</span><span>PPF</span><span>Homologaci&oacute;n VTV</span>
+          <span>Puerta a puerta</span><span>Tratamiento de cuero</span><span>Sellado de cristales</span><span>Tratamiento acr&iacute;lico</span><span>Tratamiento cer&aacute;mico</span><span>Tratamiento de grafeno</span><span>PPF</span><span>Homologaci&oacute;n VTV</span>
+          <span>Puerta a puerta</span><span>Tratamiento de cuero</span><span>Sellado de cristales</span><span>Tratamiento acr&iacute;lico</span><span>Tratamiento cer&aacute;mico</span><span>Tratamiento de grafeno</span><span>PPF</span><span>Homologaci&oacute;n VTV</span>
         </div>
       </div>
       <button class="cta-sec hero-ver" onclick="verServicios()">Ver servicios y precios &darr;</button>
@@ -1874,7 +1916,6 @@ body.light-mode .blog-close-btn:hover { color:#fff; }
             <optgroup label="── LA PLATA ──">
               <option value="La Plata - Casco Urbano">Casco Urbano</option>
               <option value="La Plata - City Bell">City Bell</option>
-              <option value="La Plata - Villa Elisa">Villa Elisa</option>
               <option value="La Plata - Gonnet">Gonnet</option>
               <option value="La Plata - Tolosa">Tolosa</option>
               <option value="La Plata - Ringuelet">Ringuelet</option>
@@ -1887,8 +1928,11 @@ body.light-mode .blog-close-btn:hover { color:#fff; }
               <option value="La Plata - Lisandro Olmos">Lisandro Olmos</option>
               <option value="La Plata - Etcheverry">Etcheverry</option>
               <option value="La Plata - El Peligro">El Peligro</option>
-              <option value="Berisso">Berisso</option>
-              <option value="Ensenada">Ensenada</option>
+            </optgroup>
+            <optgroup label="── SOLO EN EL LOCAL (sin retiro) ──">
+              <option value="La Plata - Villa Elisa (solo en el local)">Villa Elisa · solo en el local</option>
+              <option value="Berisso (solo en el local)">Berisso · solo en el local</option>
+              <option value="Ensenada (solo en el local)">Ensenada · solo en el local</option>
             </optgroup>
           </select>
         </div>
