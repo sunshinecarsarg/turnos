@@ -74,6 +74,18 @@ service cloud.firestore {
       allow read, update, delete: if esAdmin();
     }
 
+    // Inscripciones al curso de SolidWorks (pagina /solidworks):
+    // el interesado deja sus datos, solo vos los ves
+    match /inscripciones_solidworks/{doc} {
+      allow create: if request.resource.data.keys().hasOnly(['nombre', 'whatsapp', 'email', 'ciudad',
+                         'perfil', 'nivel', 'pc', 'plan', 'origen', 'mensaje', 'estado', 'createdAt'])
+                    && request.resource.data.nombre is string
+                    && request.resource.data.nombre.size() <= 80
+                    && request.resource.data.mensaje.size() <= 500
+                    && request.resource.data.estado == 'nuevo';
+      allow read, update, delete: if esAdmin();
+    }
+
     // ---------- CONTADORES DE VISITAS ----------
     // El visitante suma 1 al abrir Blogs o leer un blog, pero no puede
     // ver las estadisticas: esas las lee solo el admin.
@@ -125,6 +137,11 @@ service cloud.firestore {
 
 NOTAS
 -----
+CURSO DE SOLIDWORKS: la pagina /solidworks guarda cada inscripcion en la
+coleccion inscripciones_solidworks. Sin esta regla el formulario igual
+funciona (abre WhatsApp con los datos), pero no queda registro en la base.
+Las ves en la consola de Firebase > Firestore Database.
+
 CUPONES: con estas reglas el jugador puede generar su cupon pero no
 leerlo de la base. El juego igual le muestra el codigo en pantalla al
 ganarlo, asi que funciona normal. Vos los ves y validas desde el panel.
