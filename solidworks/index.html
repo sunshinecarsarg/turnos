@@ -280,6 +280,18 @@ form .btn { grid-column: 1 / -1; }
 .success.show { display: block; }
 .success .ok-ico { width: 64px; height: 64px; border-radius: 50%; background: rgba(47,194,138,.15); color: var(--ok); display: grid; place-items: center; margin: 0 auto 16px; }
 .success .ok-ico svg { width: 32px; height: 32px; }
+.pay-box { display: none; border: 1px solid rgba(0,177,234,.35); border-radius: var(--r); padding: 20px; margin: 22px auto 0; max-width: 380px; background: rgba(0,177,234,.06); }
+.pay-box.show { display: block; }
+.pay-box h4 { font-family: var(--fd); margin: 0 0 4px; font-size: 1.05rem; }
+.pay-box p { color: var(--muted); font-size: .88rem; margin: 0 0 14px; }
+.qr { background: #fff; padding: 12px; border-radius: 12px; width: 204px; height: 204px; margin: 0 auto 14px; }
+.qr img, .qr canvas { width: 180px !important; height: 180px !important; }
+.timer { font-family: var(--fm); color: var(--acc); font-size: 1.4rem; font-weight: 600; }
+.timer-label { color: var(--muted); font-size: .8rem; }
+.pay-box.expired .qr, .pay-box.expired .btn-mp { opacity: .25; pointer-events: none; }
+.btn-mp { background: #00B1EA; color: #00222e; width: 100%; margin-bottom: 12px; }
+.btn-mp:hover { background: #28c3f4; }
+@media (max-width: 760px) { .qr { display: none; } }
 .success .actions { display: grid; gap: 12px; max-width: 380px; margin: 20px auto 0; }
 @media (max-width: 860px) { .form-box { grid-template-columns: 1fr; padding: 24px; } }
 @media (max-width: 520px) { form { grid-template-columns: 1fr; } }
@@ -307,6 +319,7 @@ footer a { color: var(--ink); }
 @media (max-width: 560px) { section { padding: 64px 0; } body { font-size: 16px; } }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
 </head>
 <body>
 
@@ -526,9 +539,9 @@ footer a { color: var(--ink); }
       <h2>Ing. Sergio Liendo</h2>
       <p class="lead">Soy ingeniero mecánico y fierrero de alma. Diseño en SolidWorks y además trabajo con autos todos los días en mi taller de detailing. En este curso te enseño lo que de verdad se usa para diseñar y fabricar, explicado simple y con ejemplos reales.</p>
       <div class="creds">
-        <span>Ingeniero Mecánico</span>
-        <span>Certificado firmado con matrícula</span>
-        <span>Diplomatura en SolidWorks</span>
+        <span>Ingeniero Mecánico matriculado</span>
+        <span>Formado en SolidWorks por la UTN</span>
+        <span>Diseño de piezas, ensambles y planos de fabricación</span>
       </div>
       <p style="margin-top:20px"><a id="ig-link" href="https://www.instagram.com/sergio.e11even/" target="_blank" rel="noopener">Seguime en Instagram: @sergio.e11even</a></p>
     </div>
@@ -697,13 +710,20 @@ footer a { color: var(--ink); }
         <div class="success" id="success" role="status" aria-live="polite">
           <div class="ok-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg></div>
           <h3>¡Listo, <span id="s-nombre"></span>!</h3>
-          <p class="lead" style="margin:0 auto">Recibí tu inscripción. Mandame el mensaje por WhatsApp así te confirmo el lugar y te paso el link de pago.</p>
+          <p class="lead" id="s-texto" style="margin:0 auto">Recibí tu inscripción. Mandame el mensaje por WhatsApp así te confirmo el lugar y te paso el link de pago.</p>
+          <div class="pay-box" id="pay-box">
+            <h4>Pagá y asegurá tu lugar</h4>
+            <p>Escaneá el QR con la app de Mercado Pago o tocá el botón.</p>
+            <div class="qr" id="qr"></div>
+            <a id="s-mp" class="btn btn-mp" target="_blank" rel="noopener">Pagar con Mercado Pago</a>
+            <div class="timer" id="timer">30:00</div>
+            <div class="timer-label" id="timer-label">Tu lugar queda reservado durante este tiempo</div>
+          </div>
           <div class="actions">
             <a id="s-wa" class="btn btn-wa" target="_blank" rel="noopener">
               <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6l.4-.5c.2-.2.2-.3.3-.5.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.2-.3-.2-.6-.4zM12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2z"/></svg>
               Enviar por WhatsApp
             </a>
-            <a id="s-mp" class="btn btn-ghost" target="_blank" rel="noopener" hidden>Pagar ahora con Mercado Pago</a>
           </div>
         </div>
       </div>
@@ -747,14 +767,15 @@ footer a { color: var(--ink); }
 // CONFIGURACION: cambiá estos valores cuando quieras
 // ==========================================
 var CURSO = {
-  whatsapp: '5492214387138',   // numero con 549 + area, sin 0 ni 15
+  whatsapp: '5491122968860',   // numero con 549 + area, sin 0 ni 15
   precioCuota: 55000,          // pesos por mes (3 cuotas)
   precioUnico: 150000,         // pesos, pago unico
   inicio: '',                  // ej: 'lunes 5 de enero'. Vacio = "Inscripciones abiertas"
   // Links de pago de Mercado Pago (se crean en la app: Cobrar > Link de pago).
   // Vacios = se pasa el link por WhatsApp.
   mpLinkCuota: '',
-  mpLinkUnico: ''
+  mpLinkUnico: '',
+  minutosReserva: 30           // tiempo que se muestra para pagar
 };
 
 // ==========================================
@@ -797,6 +818,38 @@ document.querySelectorAll('[data-plan]').forEach(function (btn) {
     document.getElementById('f-plan').value = btn.getAttribute('data-plan');
   });
 });
+
+// ==========================================
+// PAGO: QR + boton de Mercado Pago con cuenta regresiva
+// ==========================================
+var timerId = null;
+function mostrarPago(link) {
+  var box = document.getElementById('pay-box');
+  document.getElementById('s-mp').href = link;
+  var qr = document.getElementById('qr');
+  qr.innerHTML = '';
+  if (window.QRCode) {
+    new QRCode(qr, { text: link, width: 180, height: 180, correctLevel: QRCode.CorrectLevel.M });
+  } else {
+    qr.style.display = 'none';
+  }
+  box.classList.remove('expired');
+  box.classList.add('show');
+  var fin = Date.now() + CURSO.minutosReserva * 60000;
+  clearInterval(timerId);
+  function tick() {
+    var resto = Math.max(0, fin - Date.now());
+    var m = Math.floor(resto / 60000), sg = Math.floor(resto / 1000) % 60;
+    document.getElementById('timer').textContent = (m < 10 ? '0' : '') + m + ':' + (sg < 10 ? '0' : '') + sg;
+    if (!resto) {
+      clearInterval(timerId);
+      box.classList.add('expired');
+      document.getElementById('timer-label').textContent = 'Se venció el tiempo. Escribime por WhatsApp y te paso un link nuevo.';
+    }
+  }
+  tick();
+  timerId = setInterval(tick, 1000);
+}
 
 // ==========================================
 // FORMULARIO DE INSCRIPCION
@@ -877,8 +930,10 @@ form.addEventListener('submit', function (e) {
   document.getElementById('s-nombre').textContent = d.nombre.split(' ')[0];
   document.getElementById('s-wa').href = waUrl(texto);
   var mp = d.plan === 'Pago único' ? CURSO.mpLinkUnico : (d.plan === '3 cuotas' ? CURSO.mpLinkCuota : '');
-  var mpBtn = document.getElementById('s-mp');
-  if (mp) { mpBtn.href = mp; mpBtn.hidden = false; } else { mpBtn.hidden = true; }
+  if (mp) {
+    mostrarPago(mp);
+    document.getElementById('s-texto').textContent = 'Recibí tu inscripción. Pagá con el QR o el botón y después mandame el comprobante por WhatsApp para confirmar tu lugar.';
+  }
   form.style.display = 'none';
   document.getElementById('success').classList.add('show');
   document.getElementById('success').scrollIntoView({ behavior: 'smooth', block: 'center' });
