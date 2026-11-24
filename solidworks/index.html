@@ -215,10 +215,11 @@ section { padding: 84px 0; }
   aspect-ratio: 1; border-radius: 20px; border: 1px solid var(--line); background: var(--bg2);
   display: grid; place-items: center; position: relative; overflow: hidden;
 }
-.avatar span { font-family: var(--fd); font-size: 4.5rem; font-weight: 850; color: var(--acc); }
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
 .avatar::after {
-  content: "ING. MECÁNICO"; position: absolute; bottom: 14px; left: 0; right: 0; text-align: center;
-  font-family: var(--fm); font-size: .72rem; letter-spacing: .15em; color: var(--muted);
+  content: "ING. MECÁNICO"; position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
+  font-family: var(--fm); font-size: .72rem; letter-spacing: .15em; color: #1a1205; white-space: nowrap;
+  background: var(--acc); border-radius: 999px; padding: 5px 12px;
 }
 .creds { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
 .creds span { font-family: var(--fm); font-size: .78rem; border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; color: var(--ink); }
@@ -533,7 +534,7 @@ footer a { color: var(--ink); }
 <!-- ======================= INSTRUCTOR ======================= -->
 <section id="instructor">
   <div class="wrap instructor">
-    <div class="avatar"><span>SL</span></div>
+    <div class="avatar"><img src="/img/sergio-liendo.webp" alt="Ing. Sergio Liendo, ingeniero mecánico" width="560" height="560" loading="lazy"></div>
     <div>
       <span class="tag">Tu instructor</span>
       <h2>Ing. Sergio Liendo</h2>
